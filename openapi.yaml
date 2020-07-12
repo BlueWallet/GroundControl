@@ -1,0 +1,137 @@
+openapi: 3.0.0
+info:
+  title: GroundControl push server API
+  description: Push notifications server for BlueWallet
+  version: 0.0.3
+servers:
+  - url: http://localhost:3001
+paths:
+
+  /lightningInvoiceGotSettled:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LightningInvoiceSettledNotification'
+      responses:
+        '200':
+          description: OK
+
+  /majorTomToGroundControl:
+    post:
+      summary: "Associate bitcoin addressess / ln preimage hashes that you wish to be notified about to specific push token. Token serves as unique identifier of a device/user. Also, OS of the token"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                addresses:
+                  type: array
+                  items:
+                    type: string
+                hashes:
+                  type: array
+                  items:
+                    type: string
+                token:
+                  type: string
+                os:
+                  type: string
+      responses:
+        '201':
+          description: Created
+
+  /ping:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerInfo'
+components:
+  schemas:
+
+    ServerInfo:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        description:
+          type: "string"
+        version:
+          type: "string"
+        uptime:
+          type: "number"
+
+    LightningInvoiceSettledNotification:
+      description: object thats posted to GroundControl to notify end-user that his specific invoice was paid by someone
+      type: "object"
+      properties:
+        memo:
+          type: "string"
+          description: "text that was embedded in invoice paid"
+        preimage:
+          type: "string"
+          description: "hex string preimage"
+        hash:
+          type: "string"
+          description: "hex string preimage hash"
+        amt_paid_sat:
+          type: "number"
+          description: "exactly how much satoshis was paid to make this invoice settked (>= invoice amount)"
+
+
+    PushNotification:
+      description: payload for push notification delivered to phone
+      type: object
+      required:
+        - type
+        - os
+        - token
+      properties:
+        "type":
+          type: "integer"
+          enum:
+            - 1
+            - 2
+        "token":
+          type: "string"
+        "os":
+          type: "string"
+          enum:
+            - "android"
+          description: >
+            type:
+             * `1` - Your lightning invoice was paid
+             * `2` - New transaction to one of your addresses
+        badge:
+          type: "integer"
+
+
+    PushNotificationLightningInvoicePaid:
+      allOf:     # Combines PushNotification and the inline model
+        - $ref: '#/components/schemas/PushNotification'
+        - type: object
+          required:
+            - sat
+            - hash
+            - memo
+          properties:
+            type:
+              type: "integer"
+              enum: [1]
+            sat:
+              type: "integer"
+              description: amount of satoshis
+            hash:
+              type: "string"
+              description: hash of specific ln invoice preimage
+            memo:
+              type: "string"
+              description: text attached to bolt11
