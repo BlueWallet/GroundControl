@@ -42,7 +42,7 @@ export class GroundControlToMajorTom {
         },
         sound: "default",
       },
-      data: "",
+      data: {},
     };
 
     if (pushNotification.os === "android") return GroundControlToMajorTom._pushToFcm(serverKey, pushNotification.token, fcmPayload, pushNotification);
@@ -53,9 +53,13 @@ export class GroundControlToMajorTom {
     apnsPem: string,
     token: string,
     apnsPayload: object,
-    pushNotification: Components.Schemas.PushNotification
+    pushNotification: Components.Schemas.PushNotificationBase
   ): Promise<[object, object]> {
     return new Promise(function (resolve) {
+      for (let dataKey of Object.keys(pushNotification)) {
+        if (["token", "os", "badge"].includes(dataKey)) continue;
+        apnsPayload["data"][dataKey] = pushNotification[dataKey];
+      }
       const pemBuffer = Buffer.from(apnsPem, "hex");
       const client = http2.connect("https://api.push.apple.com", {
         key: pemBuffer,
@@ -107,7 +111,7 @@ export class GroundControlToMajorTom {
     serverKey: string,
     token: string,
     fcmPayload: object,
-    pushNotification: Components.Schemas.PushNotification
+    pushNotification: Components.Schemas.PushNotificationBase
   ): Promise<[object, object]> {
     const _api = new Frisbee({ baseURI: "https://fcm.googleapis.com" });
 

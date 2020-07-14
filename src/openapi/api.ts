@@ -24,15 +24,15 @@ declare namespace Components {
         /**
          * payload for push notification delivered to phone
          */
-        export interface PushNotification {
-            type: 1 | 2;
-            token: string;
+        export interface PushNotificationBase {
             /**
              * type:
              *  * `1` - Your lightning invoice was paid
              *  * `2` - New transaction to one of your addresses
              *
              */
+            type: 1 | 2;
+            token: string;
             os: "android" | "ios";
             badge?: number;
         }
@@ -42,12 +42,6 @@ declare namespace Components {
         export interface PushNotificationLightningInvoicePaid {
             type: 1;
             token: string;
-            /**
-             * type:
-             *  * `1` - Your lightning invoice was paid
-             *  * `2` - New transaction to one of your addresses
-             *
-             */
             os: "android" | "ios";
             badge?: number;
             /**
