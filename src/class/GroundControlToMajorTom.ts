@@ -45,20 +45,8 @@ export class GroundControlToMajorTom {
       data: "",
     };
 
-    if (pushNotification.os === "android")
-      return GroundControlToMajorTom._pushToFcm(
-        serverKey,
-        pushNotification.token,
-        fcmPayload,
-        pushNotification
-      );
-    if (pushNotification.os === "ios")
-      return GroundControlToMajorTom._pushToApns(
-        apnsPem,
-        pushNotification.token,
-        apnsPayload,
-        pushNotification
-      );
+    if (pushNotification.os === "android") return GroundControlToMajorTom._pushToFcm(serverKey, pushNotification.token, fcmPayload, pushNotification);
+    if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification);
   }
 
   protected static async _pushToApns(
@@ -103,6 +91,7 @@ export class GroundControlToMajorTom {
         const PushLogRepository = getRepository(PushLog);
         PushLogRepository.save({
           token: token,
+          os: "ios",
           payload: JSON.stringify(apnsPayload),
           response: JSON.stringify(responseJson),
           success: responseJson[":status"] === 200,
@@ -153,6 +142,7 @@ export class GroundControlToMajorTom {
     const PushLogRepository = getRepository(PushLog);
     await PushLogRepository.save({
       token: token,
+      os: "android",
       payload: JSON.stringify(fcmPayload),
       response: JSON.stringify(responseJson),
       success: !!responseJson["success"],

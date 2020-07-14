@@ -19,11 +19,7 @@ export class GroundControl {
    * @param response
    * @param next
    */
-  async majorTomToGroundControl(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
+  async majorTomToGroundControl(request: Request, response: Response, next: NextFunction) {
     const body: Paths.MajorTomToGroundControl.Post.RequestBody = request.body;
     // todo: checks that we are receiving data and that there are not too much records in it (probably 1000 addresses for a start is enough)
 
@@ -68,18 +64,17 @@ export class GroundControl {
     response.status(201).send("");
   }
 
-  async lightningInvoiceGotSettled(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
-    const body: Paths.LightningInvoiceGotSettled.Post.RequestBody =
-      request.body;
+  /**
+   * POST request handler that notifies us that specific ln invoice was paid
+   *
+   * @param request
+   * @param response
+   * @param next
+   */
+  async lightningInvoiceGotSettled(request: Request, response: Response, next: NextFunction) {
+    const body: Paths.LightningInvoiceGotSettled.Post.RequestBody = request.body;
 
-    const hashShouldBe = require("crypto")
-      .createHash("sha256")
-      .update(Buffer.from(body.preimage, "hex"))
-      .digest("hex");
+    const hashShouldBe = require("crypto").createHash("sha256").update(Buffer.from(body.preimage, "hex")).digest("hex");
     if (hashShouldBe !== body.hash) {
       response.status(500).send("preimage doesnt match hash");
       return;
@@ -90,9 +85,7 @@ export class GroundControl {
     });
     for (const tokenToHash of tokenToHashAll) {
       const serverKey = process.env.FCM_SERVER_KEY;
-      const apnsPem =
-        process.env.APNS_PEM ||
-        fs.readFileSync(__dirname + "/../../Certificates.pem").toString("hex");
+      const apnsPem = process.env.APNS_PEM || fs.readFileSync(__dirname + "/../../Certificates.pem").toString("hex");
       if (tokenToHash && serverKey && apnsPem) {
         console.warn("pushing to token", tokenToHash.token, tokenToHash.os);
         const pushNotification: Components.Schemas.PushNotificationLightningInvoicePaid = {
@@ -105,11 +98,7 @@ export class GroundControl {
           memo: body.memo,
         };
 
-        await GroundControlToMajorTom.pushLightningInvoicePaid(
-          serverKey,
-          apnsPem,
-          pushNotification
-        );
+        await GroundControlToMajorTom.pushLightningInvoicePaid(serverKey, apnsPem, pushNotification);
       }
     }
 

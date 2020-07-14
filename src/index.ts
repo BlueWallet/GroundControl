@@ -35,25 +35,14 @@ createConnection({
 
     // register express routes from defined application routes
     Routes.forEach((route) => {
-      (app as any)[route.method](
-        route.route,
-        (req: Request, res: Response, next: Function) => {
-          const result = new (route.controller as any)()[route.action](
-            req,
-            res,
-            next
-          );
-          if (result instanceof Promise) {
-            result.then((result) =>
-              result !== null && result !== undefined
-                ? res.send(result)
-                : undefined
-            );
-          } else if (result !== null && result !== undefined) {
-            res.json(result);
-          }
+      (app as any)[route.method](route.route, (req: Request, res: Response, next: Function) => {
+        const result = new (route.controller as any)()[route.action](req, res, next);
+        if (result instanceof Promise) {
+          result.then((result) => (result !== null && result !== undefined ? res.send(result) : undefined));
+        } else if (result !== null && result !== undefined) {
+          res.json(result);
         }
-      );
+      });
     });
 
     app.set("trust proxy", 1);
@@ -66,9 +55,6 @@ createConnection({
 
     app.listen(process.env.PORT || 3001);
 
-    console.log(
-      "Express server has started on port ",
-      process.env.PORT || 3001
-    );
+    console.log("Express server has started on port ", process.env.PORT || 3001);
   })
   .catch((error) => console.log(error));

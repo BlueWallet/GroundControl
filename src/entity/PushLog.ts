@@ -9,6 +9,9 @@ export class PushLog {
   @Column()
   token: string;
 
+  @Column()
+  os: string;
+
   @Column("text")
   payload: string;
 
