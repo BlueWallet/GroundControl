@@ -10,11 +10,16 @@ export class PushLog {
     @Column()
     token: string;
 
-    @Column()
+    @Column("text")
     payload: string;
+
+
+    @Column("text")
+    response: string;
 
     @Column()
     success: boolean;
+
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
     created: Date;

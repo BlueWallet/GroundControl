@@ -106,6 +106,7 @@ components:
           type: "string"
           enum:
             - "android"
+            - "ios"
           description: >
             type:
              * `1` - Your lightning invoice was paid

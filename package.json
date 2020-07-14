@@ -2,7 +2,9 @@
    "name": "groundcontrol",
    "version": "0.0.4",
    "description": "GroundControl push server API",
-   "devDependencies": {},
+   "devDependencies": {
+      "prettier": "2.0.5"
+   },
    "dependencies": {
       "@types/node": "^8.0.29",
       "body-parser": "^1.18.1",

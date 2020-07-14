@@ -4,7 +4,8 @@ import {NextFunction, Request, Response} from "express";
 import {User} from "../entity/User";
 import {TokenToAddress} from "../entity/TokenToAddress";
 import { TokenToHash } from "../entity/TokenToHash";
-import {Pusher} from "../class/pusher";
+import {GroundControlToMajorTom} from "../class/GroundControlToMajorTom";
+const fs = require('fs');
 const pck = require('../../package.json');
 
 export class GroundControl {
@@ -58,7 +59,6 @@ export class GroundControl {
 
     async lightningInvoiceGotSettled(request: Request, response: Response, next: NextFunction) {
         const body: Paths.LightningInvoiceGotSettled.Post.RequestBody = request.body;
-        // todo: check preimage and hash, lookup token in the db table, and actually send push request
 
         const hashShouldBe = require('crypto').createHash('sha256').update(Buffer.from(body.preimage, 'hex')).digest('hex');
         if (hashShouldBe !== body.hash) {
@@ -66,21 +66,24 @@ export class GroundControl {
             return;
         }
 
-        const tokenToHash = await this.tokenToHashRepository.findOne({ hash: hashShouldBe });
-        const serverKey = process.env.FCM_SERVER_KEY;
-        if (tokenToHash && serverKey) {
-            console.warn('pushing to token', tokenToHash.token);
-            const pushNotification: Components.Schemas.PushNotificationLightningInvoicePaid = {
-                sat: body.amt_paid_sat,
-                badge: 1,
-                type: 1,
-                os: 'android', // tokenToHash.os
-                token: tokenToHash.token,
-                hash: hashShouldBe,
-                memo: body.memo,
-            };
+        const tokenToHashAll = await this.tokenToHashRepository.find({ hash: hashShouldBe });
+        for (const tokenToHash of tokenToHashAll) {
+            const serverKey = process.env.FCM_SERVER_KEY;
+            const apnsPem = process.env.APNS_PEM || fs.readFileSync(__dirname + '/../../Certificates.pem').toString('hex');
+            if (tokenToHash && serverKey && apnsPem) {
+                console.warn('pushing to token', tokenToHash.token, tokenToHash.os);
+                const pushNotification: Components.Schemas.PushNotificationLightningInvoicePaid = {
+                    sat: body.amt_paid_sat,
+                    badge: 1,
+                    type: 1,
+                    os: tokenToHash.os === 'android' ? 'android' : 'ios', //hacky
+                    token: tokenToHash.token,
+                    hash: hashShouldBe,
+                    memo: body.memo,
+                };
 
-            await Pusher.pushLightningInvoicePaid(serverKey, pushNotification);
+                await GroundControlToMajorTom.pushLightningInvoicePaid(serverKey, apnsPem, pushNotification);
+            }
         }
 
         response.status(200).send('');

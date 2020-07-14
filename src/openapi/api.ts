@@ -33,7 +33,7 @@ declare namespace Components {
              *  * `2` - New transaction to one of your addresses
              *
              */
-            os: "android";
+            os: "android" | "ios";
             badge?: number;
         }
         /**
@@ -48,7 +48,7 @@ declare namespace Components {
              *  * `2` - New transaction to one of your addresses
              *
              */
-            os: "android";
+            os: "android" | "ios";
             badge?: number;
             /**
              * amount of satoshis
