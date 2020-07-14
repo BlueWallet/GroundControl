@@ -1,21 +1,20 @@
-import {Entity, PrimaryGeneratedColumn, Column, Index} from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Index } from "typeorm";
 
 @Entity()
 @Index(["token", "address"], { unique: true })
 export class TokenToAddress {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @PrimaryGeneratedColumn()
-    id: number;
+  @Column()
+  token: string;
 
-    @Column()
-    token: string;
+  @Column()
+  os: string;
 
-    @Column()
-    os: string;
+  @Column()
+  address: string;
 
-    @Column()
-    address: string;
-
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
-    created: Date;
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  created: Date;
 }

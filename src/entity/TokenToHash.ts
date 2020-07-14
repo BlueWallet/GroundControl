@@ -1,21 +1,20 @@
-import {Entity, PrimaryGeneratedColumn, Column, Index} from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Index } from "typeorm";
 
 @Entity()
 @Index(["token", "hash"], { unique: true })
 export class TokenToHash {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @PrimaryGeneratedColumn()
-    id: number;
+  @Column()
+  token: string;
 
-    @Column()
-    token: string;
+  @Column()
+  os: string;
 
-    @Column()
-    os: string;
+  @Column()
+  hash: string;
 
-    @Column()
-    hash: string;
-
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
-    created: Date;
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  created: Date;
 }

@@ -6,7 +6,6 @@ info:
 servers:
   - url: http://localhost:3001
 paths:
-
   /lightningInvoiceGotSettled:
     post:
       requestBody:
@@ -14,9 +13,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LightningInvoiceSettledNotification'
+              $ref: "#/components/schemas/LightningInvoiceSettledNotification"
       responses:
-        '200':
+        "200":
           description: OK
 
   /majorTomToGroundControl:
@@ -42,21 +41,20 @@ paths:
                 os:
                   type: string
       responses:
-        '201':
+        "201":
           description: Created
 
   /ping:
     get:
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServerInfo'
+                $ref: "#/components/schemas/ServerInfo"
 components:
   schemas:
-
     ServerInfo:
       type: "object"
       properties:
@@ -86,7 +84,6 @@ components:
           type: "number"
           description: "exactly how much satoshis was paid to make this invoice settked (>= invoice amount)"
 
-
     PushNotification:
       description: payload for push notification delivered to phone
       type: object
@@ -114,10 +111,9 @@ components:
         badge:
           type: "integer"
 
-
     PushNotificationLightningInvoicePaid:
-      allOf:     # Combines PushNotification and the inline model
-        - $ref: '#/components/schemas/PushNotification'
+      allOf: # Combines PushNotification and the inline model
+        - $ref: "#/components/schemas/PushNotification"
         - type: object
           required:
             - sat
