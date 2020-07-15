@@ -109,7 +109,7 @@ export class GroundControl {
     const serverInfo: Paths.Ping.Get.Responses.$200 = {
       description: pck.description,
       version: pck.version,
-      uptime: 666,
+      uptime: Math.floor(process.uptime()),
     };
 
     return serverInfo;
