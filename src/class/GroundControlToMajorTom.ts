@@ -1,10 +1,8 @@
 import "../openapi/api";
 import { getRepository } from "typeorm";
 import { PushLog } from "../entity/PushLog";
-import { TokenToAddress } from "../entity/TokenToAddress";
 const Frisbee = require("frisbee");
 const http2 = require("http2");
-const fs = require("fs");
 
 /**
  * Since we cant attach any code to openapi schema definition, this is a repository of transforming pushnotification object
@@ -28,8 +26,9 @@ export class GroundControlToMajorTom {
       data: {},
       notification: {
         title: "+" + pushNotification.sat + " sats",
-        body: "Your received new transfer on: " + pushNotification.address,
+        body: "Your received new transfer on " + pushNotification.address,
         badge: pushNotification.badge,
+        tag: pushNotification.txid,
       },
     };
 
@@ -38,7 +37,7 @@ export class GroundControlToMajorTom {
         badge: pushNotification.badge,
         alert: {
           title: "+" + pushNotification.sat + " sats",
-          body: "Your received new transfer on: " + pushNotification.address,
+          body: "Your received new transfer on " + pushNotification.address,
         },
         sound: "default",
       },
@@ -46,7 +45,8 @@ export class GroundControlToMajorTom {
     };
 
     if (pushNotification.os === "android") return GroundControlToMajorTom._pushToFcm(serverKey, pushNotification.token, fcmPayload, pushNotification);
-    if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification);
+    if (pushNotification.os === "ios")
+      return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
   }
 
   static async pushLightningInvoicePaid(
@@ -60,6 +60,7 @@ export class GroundControlToMajorTom {
         body: "Paid: " + (pushNotification.memo || "your invoice"),
         title: "+" + pushNotification.sat + " sats",
         badge: pushNotification.badge,
+        tag: pushNotification.hash,
       },
     };
 
@@ -76,14 +77,16 @@ export class GroundControlToMajorTom {
     };
 
     if (pushNotification.os === "android") return GroundControlToMajorTom._pushToFcm(serverKey, pushNotification.token, fcmPayload, pushNotification);
-    if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification);
+    if (pushNotification.os === "ios")
+      return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification, pushNotification.hash);
   }
 
   protected static async _pushToApns(
     apnsPem: string,
     token: string,
     apnsPayload: object,
-    pushNotification: Components.Schemas.PushNotificationBase
+    pushNotification: Components.Schemas.PushNotificationBase,
+    collapseId
   ): Promise<[object, object]> {
     return new Promise(function (resolve) {
       for (let dataKey of Object.keys(pushNotification)) {
@@ -99,6 +102,7 @@ export class GroundControlToMajorTom {
       const headers = {
         ":method": "POST",
         "apns-topic": "io.bluewallet.bluewallet",
+        "apns-collapse-id": collapseId,
         ":scheme": "https",
         ":path": "/3/device/" + token,
       };
