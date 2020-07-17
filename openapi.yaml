@@ -132,3 +132,25 @@ components:
             memo:
               type: "string"
               description: text attached to bolt11
+
+    PushNotificationOnchainAddressGotPaid:
+      allOf: # Combines PushNotificationBase and the inline model
+        - $ref: "#/components/schemas/PushNotificationBase"
+        - type: object
+          required:
+            - address
+            - sat
+            - txid
+          properties:
+            type:
+              type: "integer"
+              enum: [2]
+            sat:
+              type: "integer"
+              description: amount of satoshis
+            address:
+              type: "string"
+              description: user's onchain address that has incoming transaction
+            txid:
+              type: "string"
+              description: txid of the transaction where this address is one of the outputs

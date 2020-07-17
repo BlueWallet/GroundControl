@@ -19,6 +19,36 @@ const fs = require("fs");
  * @see https://firebase.google.com/docs/cloud-messaging/http-server-ref
  */
 export class GroundControlToMajorTom {
+  static async pushOnchainAddressWasPaid(
+    serverKey: string,
+    apnsPem: string,
+    pushNotification: Components.Schemas.PushNotificationOnchainAddressGotPaid
+  ): Promise<[object, object]> {
+    const fcmPayload = {
+      data: {},
+      notification: {
+        title: "+" + pushNotification.sat + " sats",
+        body: "Your received new transfer on: " + pushNotification.address,
+        badge: pushNotification.badge,
+      },
+    };
+
+    const apnsPayload = {
+      aps: {
+        badge: pushNotification.badge,
+        alert: {
+          title: "+" + pushNotification.sat + " sats",
+          body: "Your received new transfer on: " + pushNotification.address,
+        },
+        sound: "default",
+      },
+      data: {},
+    };
+
+    if (pushNotification.os === "android") return GroundControlToMajorTom._pushToFcm(serverKey, pushNotification.token, fcmPayload, pushNotification);
+    if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification);
+  }
+
   static async pushLightningInvoicePaid(
     serverKey: string,
     apnsPem: string,

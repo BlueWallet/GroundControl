@@ -1,12 +1,16 @@
 import "../openapi/api";
 import { getRepository } from "typeorm";
 import { NextFunction, Request, Response } from "express";
-import { User } from "../entity/User";
 import { TokenToAddress } from "../entity/TokenToAddress";
 import { TokenToHash } from "../entity/TokenToHash";
 import { GroundControlToMajorTom } from "../class/GroundControlToMajorTom";
-const fs = require("fs");
 const pck = require("../../package.json");
+const serverKey = process.env.FCM_SERVER_KEY;
+const apnsPem = process.env.APNS_PEM;
+if (!process.env.JAWSDB_MARIA_URL || !process.env.FCM_SERVER_KEY || !process.env.APNS_PEM) {
+  console.error("not all env variables set");
+  process.exit();
+}
 
 export class GroundControl {
   private tokenToAddressRepository = getRepository(TokenToAddress);
@@ -84,22 +88,18 @@ export class GroundControl {
       hash: hashShouldBe,
     });
     for (const tokenToHash of tokenToHashAll) {
-      const serverKey = process.env.FCM_SERVER_KEY;
-      const apnsPem = process.env.APNS_PEM || fs.readFileSync(__dirname + "/../../Certificates.pem").toString("hex");
-      if (tokenToHash && serverKey && apnsPem) {
-        console.warn("pushing to token", tokenToHash.token, tokenToHash.os);
-        const pushNotification: Components.Schemas.PushNotificationLightningInvoicePaid = {
-          sat: body.amt_paid_sat,
-          badge: 1,
-          type: 1,
-          os: tokenToHash.os === "android" ? "android" : "ios", //hacky
-          token: tokenToHash.token,
-          hash: hashShouldBe,
-          memo: body.memo,
-        };
+      console.warn("pushing to token", tokenToHash.token, tokenToHash.os);
+      const pushNotification: Components.Schemas.PushNotificationLightningInvoicePaid = {
+        sat: body.amt_paid_sat,
+        badge: 1,
+        type: 1,
+        os: tokenToHash.os === "android" ? "android" : "ios", //hacky
+        token: tokenToHash.token,
+        hash: hashShouldBe,
+        memo: body.memo,
+      };
 
-        await GroundControlToMajorTom.pushLightningInvoicePaid(serverKey, apnsPem, pushNotification);
-      }
+      await GroundControlToMajorTom.pushLightningInvoicePaid(serverKey, apnsPem, pushNotification);
     }
 
     response.status(200).send("");

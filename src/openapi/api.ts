@@ -57,6 +57,27 @@ declare namespace Components {
              */
             memo: string;
         }
+        /**
+         * payload for push notification delivered to phone
+         */
+        export interface PushNotificationOnchainAddressGotPaid {
+            type: 2;
+            token: string;
+            os: "android" | "ios";
+            badge?: number;
+            /**
+             * amount of satoshis
+             */
+            sat: number;
+            /**
+             * user's onchain address that has incoming transaction
+             */
+            address: string;
+            /**
+             * txid of the transaction where this address is one of the outputs
+             */
+            txid: string;
+        }
         export interface ServerInfo {
             name?: string;
             description?: string;
