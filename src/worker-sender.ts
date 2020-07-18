@@ -66,6 +66,13 @@ createConnection({
           await GroundControlToMajorTom.pushOnchainAddressWasPaid(serverKey, apnsPem, payload);
           await sendQueueRepository.remove(record);
           break;
+        case 3:
+          payload = <Components.Schemas.PushNotificationOnchainAddressGotUnconfirmedTransaction>payload;
+          console.warn("pushing to token", payload.token, payload.os);
+          payload.badge = 1;
+          await GroundControlToMajorTom.pushOnchainAddressGotUnconfirmedTransaction(serverKey, apnsPem, payload);
+          await sendQueueRepository.remove(record);
+          break;
         case 1:
           // TODO, currently handled in web request
           break;

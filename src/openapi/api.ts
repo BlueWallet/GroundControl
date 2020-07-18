@@ -29,9 +29,10 @@ declare namespace Components {
              * type:
              *  * `1` - Your lightning invoice was paid
              *  * `2` - New transaction to one of your addresses
+             *  * `3` - New unconfirmed transaction to one of your addresses
              *
              */
-            type: 1 | 2;
+            type: 1 | 2 | 3;
             token: string;
             os: "android" | "ios";
             badge?: number;
@@ -62,6 +63,27 @@ declare namespace Components {
          */
         export interface PushNotificationOnchainAddressGotPaid {
             type: 2;
+            token: string;
+            os: "android" | "ios";
+            badge?: number;
+            /**
+             * amount of satoshis
+             */
+            sat: number;
+            /**
+             * user's onchain address that has incoming transaction
+             */
+            address: string;
+            /**
+             * txid of the transaction where this address is one of the outputs
+             */
+            txid: string;
+        }
+        /**
+         * payload for push notification delivered to phone
+         */
+        export interface PushNotificationOnchainAddressGotUnconfirmedTransaction {
+            type: 3;
             token: string;
             os: "android" | "ios";
             badge?: number;

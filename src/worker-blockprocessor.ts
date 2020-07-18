@@ -56,8 +56,8 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
   }
 
   console.warn(addresses.length, "addresses paid in block");
-  allPotentialPushPayloadsArray.push({ address: "bc1qaemfnglf928kd9ma2jzdypk333au6ctu7h7led", txid: "666", sat: 1488, type: 2, token: "", os: "ios" }); // debug fixme
-  addresses.push("bc1qaemfnglf928kd9ma2jzdypk333au6ctu7h7led"); // debug fixme
+  // allPotentialPushPayloadsArray.push({ address: "bc1qaemfnglf928kd9ma2jzdypk333au6ctu7h7led", txid: "666", sat: 1488, type: 2, token: "", os: "ios" }); // debug fixme
+  // addresses.push("bc1qaemfnglf928kd9ma2jzdypk333au6ctu7h7led"); // debug fixme
 
   const query = getRepository(TokenToAddress).createQueryBuilder().where("address IN (:...address)", { address: addresses });
 

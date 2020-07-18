@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: GroundControl push server API
   description: Push notifications server for BlueWallet
-  version: 0.0.5
+  version: 0.0.6
 servers:
   - url: http://localhost:3001
 paths:
@@ -97,10 +97,12 @@ components:
           enum:
             - 1
             - 2
+            - 3
           description: >
             type:
              * `1` - Your lightning invoice was paid
              * `2` - New transaction to one of your addresses
+             * `3` - New unconfirmed transaction to one of your addresses
         "token":
           type: "string"
         "os":
@@ -145,6 +147,28 @@ components:
             type:
               type: "integer"
               enum: [2]
+            sat:
+              type: "integer"
+              description: amount of satoshis
+            address:
+              type: "string"
+              description: user's onchain address that has incoming transaction
+            txid:
+              type: "string"
+              description: txid of the transaction where this address is one of the outputs
+
+    PushNotificationOnchainAddressGotUnconfirmedTransaction:
+      allOf: # Combines PushNotificationBase and the inline model
+        - $ref: "#/components/schemas/PushNotificationBase"
+        - type: object
+          required:
+            - address
+            - sat
+            - txid
+          properties:
+            type:
+              type: "integer"
+              enum: [3]
             sat:
               type: "integer"
               description: amount of satoshis

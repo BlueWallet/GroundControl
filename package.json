@@ -1,6 +1,6 @@
 {
   "name": "groundcontrol",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "GroundControl push server API",
   "devDependencies": {
     "prettier": "2.0.5"
@@ -24,6 +24,7 @@
     "lint": "npx prettier --write .",
     "start": "ts-node src/index.ts",
     "worker-blockprocessor": "ts-node src/worker-blockprocessor.ts",
+    "worker-processmempool": "ts-node src/worker-processmempool.ts",
     "worker-sender": "ts-node src/worker-sender.ts"
   }
 }
