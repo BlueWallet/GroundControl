@@ -53,6 +53,8 @@ createConnection({
         await new Promise((resolve) => setTimeout(resolve, 5000));
         continue;
       }
+      // TODO: we could atomically lock this record via mariadb's GET_LOCK and typeorm's raw query, and that would
+      //       allow us to run multiple sender workers in parallel
       let payload;
       try {
         payload = JSON.parse(record.data);
@@ -62,14 +64,12 @@ createConnection({
         case 2:
           payload = <Components.Schemas.PushNotificationOnchainAddressGotPaid>payload;
           console.warn("pushing to token", payload.token, payload.os);
-          payload.badge = 1;
           await GroundControlToMajorTom.pushOnchainAddressWasPaid(serverKey, apnsPem, payload);
           await sendQueueRepository.remove(record);
           break;
         case 3:
           payload = <Components.Schemas.PushNotificationOnchainAddressGotUnconfirmedTransaction>payload;
           console.warn("pushing to token", payload.token, payload.os);
-          payload.badge = 1;
           await GroundControlToMajorTom.pushOnchainAddressGotUnconfirmedTransaction(serverKey, apnsPem, payload);
           await sendQueueRepository.remove(record);
           break;

@@ -30,9 +30,9 @@ process
 let sendQueueRepository: Repository<SendQueue>;
 
 async function processMempool() {
-  console.log("cached txids=", Object.keys(processedTxids).length);
+  process.env.VERBOSE && console.log("cached txids=", Object.keys(processedTxids).length);
   const responseGetrawmempool = await client.request("getrawmempool", []);
-  console.log(responseGetrawmempool.result.length, "txs in mempool");
+  process.env.VERBOSE && console.log(responseGetrawmempool.result.length, "txs in mempool");
 
   let addresses: string[] = [];
   let allPotentialPushPayloadsArray: Components.Schemas.PushNotificationOnchainAddressGotUnconfirmedTransaction[] = [];
@@ -94,6 +94,7 @@ async function processMempool() {
             payload.os = t2a.os === "android" ? "android" : "ios"; // hacky
             payload.token = t2a.token;
             payload.type = 3;
+            payload.badge = 1;
             await sendQueueRepository.save({
               data: JSON.stringify(payload),
             });
@@ -107,7 +108,7 @@ async function processMempool() {
 
       const endBatch = +new Date();
       // process.stdout.write('.');
-      console.log("batch took", (endBatch - startBatch) / 1000, "sec");
+      process.env.VERBOSE && console.log("batch took", (endBatch - startBatch) / 1000, "sec");
     }
   }
 }
@@ -144,8 +145,9 @@ createConnection({
         console.log(error);
       }
       const end = +new Date();
-      console.log("processing mempool took", (end - start) / 1000, "sec");
-      console.log("-----------------------");
+      process.env.VERBOSE && console.log("processing mempool took", (end - start) / 1000, "sec");
+      process.env.VERBOSE && console.log("-----------------------");
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   })
   .catch((error) => console.log(error));

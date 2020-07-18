@@ -73,6 +73,7 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
         payload.os = t2a.os === "android" ? "android" : "ios"; // hacky
         payload.token = t2a.token;
         payload.type = 2;
+        payload.badge = 1;
         await sendQueueRepository.save({
           data: JSON.stringify(payload),
         });
