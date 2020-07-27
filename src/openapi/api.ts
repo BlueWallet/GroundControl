@@ -30,9 +30,10 @@ declare namespace Components {
              *  * `1` - Your lightning invoice was paid
              *  * `2` - New transaction to one of your addresses
              *  * `3` - New unconfirmed transaction to one of your addresses
+             *  * `4` - Transaction confirmed
              *
              */
-            type: 1 | 2 | 3;
+            type: 1 | 2 | 3 | 4;
             token: string;
             os: "android" | "ios";
             badge?: number;
@@ -100,6 +101,19 @@ declare namespace Components {
              */
             txid: string;
         }
+        /**
+         * payload for push notification delivered to phone
+         */
+        export interface PushNotificationTxidGotConfirmed {
+            type: 4;
+            token: string;
+            os: "android" | "ios";
+            badge?: number;
+            /**
+             * txid of the transaction that got confirmed
+             */
+            txid: string;
+        }
         export interface ServerInfo {
             name?: string;
             description?: string;
@@ -123,6 +137,7 @@ declare namespace Paths {
             export interface RequestBody {
                 addresses?: string[];
                 hashes?: string[];
+                txids?: string[];
                 token?: string;
                 os?: string;
             }

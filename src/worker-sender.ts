@@ -76,6 +76,12 @@ createConnection({
         case 1:
           // TODO, currently handled in web request
           break;
+        case 4:
+          payload = <Components.Schemas.PushNotificationTxidGotConfirmed>payload;
+          console.warn("pushing to token", payload.token, payload.os);
+          await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(serverKey, apnsPem, payload);
+          await sendQueueRepository.remove(record);
+          break;
       }
     }
   })

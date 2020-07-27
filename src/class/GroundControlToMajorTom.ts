@@ -49,6 +49,38 @@ export class GroundControlToMajorTom {
       return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
   }
 
+  static async pushOnchainTxidGotConfirmed(
+    serverKey: string,
+    apnsPem: string,
+    pushNotification: Components.Schemas.PushNotificationTxidGotConfirmed
+  ): Promise<[object, object]> {
+    const fcmPayload = {
+      data: {},
+      notification: {
+        title: "Your transaction confirmed",
+        body: "Your transaction " + pushNotification.txid + " got confirmed",
+        badge: pushNotification.badge,
+        tag: pushNotification.txid,
+      },
+    };
+
+    const apnsPayload = {
+      aps: {
+        badge: pushNotification.badge,
+        alert: {
+          title: "Your transaction confirmed",
+          body: "Your transaction " + pushNotification.txid + " got confirmed",
+        },
+        sound: "default",
+      },
+      data: {},
+    };
+
+    if (pushNotification.os === "android") return GroundControlToMajorTom._pushToFcm(serverKey, pushNotification.token, fcmPayload, pushNotification);
+    if (pushNotification.os === "ios")
+      return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
+  }
+
   static async pushOnchainAddressWasPaid(
     serverKey: string,
     apnsPem: string,
@@ -135,6 +167,7 @@ export class GroundControlToMajorTom {
         ":method": "POST",
         "apns-topic": "io.bluewallet.bluewallet",
         "apns-collapse-id": collapseId,
+        "apns-expiration": Math.floor(+new Date() / 1000 + 3600 * 24),
         ":scheme": "https",
         ":path": "/3/device/" + token,
       };

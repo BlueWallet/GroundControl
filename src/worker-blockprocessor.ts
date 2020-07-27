@@ -4,6 +4,7 @@ import { createConnection, getRepository, Repository } from "typeorm";
 import { TokenToAddress } from "./entity/TokenToAddress";
 import { SendQueue } from "./entity/SendQueue";
 import { KeyValue } from "./entity/KeyValue";
+import { TokenToTxid } from "./entity/TokenToTxid";
 require("dotenv").config();
 const url = require("url");
 const parsed = url.parse(process.env.JAWSDB_MARIA_URL);
@@ -34,7 +35,9 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
   const responseGetblock = await client.request("getblock", [responseGetblockhash.result, 2]);
   const addresses: string[] = [];
   const allPotentialPushPayloadsArray: Components.Schemas.PushNotificationOnchainAddressGotPaid[] = [];
+  const txids: string[] = [];
   for (const tx of responseGetblock.result.tx) {
+    txids.push(tx.txid);
     if (tx.vout) {
       for (const output of tx.vout) {
         if (output.scriptPubKey && output.scriptPubKey.addresses) {
@@ -79,6 +82,23 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
         });
       }
     }
+  }
+
+  // now, checking if there is a subscription to one of the mined txids:
+  const query2 = getRepository(TokenToTxid).createQueryBuilder().where("txid IN (:...txids)", { txids });
+  for (const t2txid of await query2.getMany()) {
+    const payload: Components.Schemas.PushNotificationTxidGotConfirmed = {
+      txid: t2txid.txid,
+      type: 4,
+      token: t2txid.token,
+      os: t2txid.os === "ios" ? "ios" : "android",
+      badge: 1,
+    };
+
+    console.log("enqueueing", payload);
+    await sendQueueRepository.save({
+      data: JSON.stringify(payload),
+    });
   }
 }
 

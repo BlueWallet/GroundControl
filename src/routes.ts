@@ -1,5 +1,5 @@
 import { UserController } from "./controller/UserController";
-import { GroundControl } from "./controller/GroundControl";
+import { GroundController } from "./controller/GroundController";
 
 export const Routes = [
   {
@@ -30,19 +30,19 @@ export const Routes = [
   {
     method: "post",
     route: "/majorTomToGroundControl",
-    controller: GroundControl,
+    controller: GroundController,
     action: "majorTomToGroundControl",
   },
   {
     method: "post",
     route: "/lightningInvoiceGotSettled",
-    controller: GroundControl,
+    controller: GroundController,
     action: "lightningInvoiceGotSettled",
   },
   {
     method: "get",
     route: "/ping",
-    controller: GroundControl,
+    controller: GroundController,
     action: "ping",
   },
 ];

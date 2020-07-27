@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: GroundControl push server API
   description: Push notifications server for BlueWallet
-  version: 0.0.6
+  version: 0.0.7
 servers:
   - url: http://localhost:3001
 paths:
@@ -20,7 +20,7 @@ paths:
 
   /majorTomToGroundControl:
     post:
-      summary: "Associate bitcoin addressess / ln preimage hashes that you wish to be notified about to specific push token. Token serves as unique identifier of a device/user. Also, OS of the token"
+      summary: "Associate bitcoin addressess / ln preimage hashes / txids that you wish to be notified about to specific push token. Token serves as unique identifier of a device/user. Also, OS of the token"
       requestBody:
         required: true
         content:
@@ -33,6 +33,10 @@ paths:
                   items:
                     type: string
                 hashes:
+                  type: array
+                  items:
+                    type: string
+                txids:
                   type: array
                   items:
                     type: string
@@ -98,11 +102,13 @@ components:
             - 1
             - 2
             - 3
+            - 4
           description: >
             type:
              * `1` - Your lightning invoice was paid
              * `2` - New transaction to one of your addresses
              * `3` - New unconfirmed transaction to one of your addresses
+             * `4` - Transaction confirmed
         "token":
           type: "string"
         "os":
@@ -178,3 +184,17 @@ components:
             txid:
               type: "string"
               description: txid of the transaction where this address is one of the outputs
+
+    PushNotificationTxidGotConfirmed:
+      allOf: # Combines PushNotificationBase and the inline model
+        - $ref: "#/components/schemas/PushNotificationBase"
+        - type: object
+          required:
+            - txid
+          properties:
+            type:
+              type: "integer"
+              enum: [4]
+            txid:
+              type: "string"
+              description: txid of the transaction that got confirmed

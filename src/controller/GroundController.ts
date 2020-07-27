@@ -3,7 +3,9 @@ import { getRepository } from "typeorm";
 import { NextFunction, Request, Response } from "express";
 import { TokenToAddress } from "../entity/TokenToAddress";
 import { TokenToHash } from "../entity/TokenToHash";
+import { TokenToTxid } from "../entity/TokenToTxid";
 import { GroundControlToMajorTom } from "../class/GroundControlToMajorTom";
+require("dotenv").config();
 const pck = require("../../package.json");
 const serverKey = process.env.FCM_SERVER_KEY;
 const apnsPem = process.env.APNS_PEM;
@@ -12,9 +14,10 @@ if (!process.env.JAWSDB_MARIA_URL || !process.env.FCM_SERVER_KEY || !process.env
   process.exit();
 }
 
-export class GroundControl {
+export class GroundController {
   private tokenToAddressRepository = getRepository(TokenToAddress);
   private tokenToHashRepository = getRepository(TokenToHash);
+  private tokenToTxidRepository = getRepository(TokenToTxid);
 
   /**
    * Submit bitcoin addressess that you wish to be notified about to specific push token. Token serves as unique identifier of a device/user. Also, OS of the token
@@ -28,13 +31,15 @@ export class GroundControl {
     // todo: checks that we are receiving data and that there are not too much records in it (probably 1000 addresses for a start is enough)
 
     if (!body.addresses || !Array.isArray(body.addresses)) {
-      response.status(500).send("addresses not provided");
-      return;
+      body.addresses = [];
     }
     if (!body.hashes || !Array.isArray(body.hashes)) {
-      response.status(500).send("hashes not provided");
-      return;
+      body.hashes = [];
     }
+    if (!body.txids || !Array.isArray(body.txids)) {
+      body.txids = [];
+    }
+
     if (!body.token || !body.os) {
       response.status(500).send("token not provided");
       return;
@@ -60,6 +65,19 @@ export class GroundControl {
       try {
         await this.tokenToHashRepository.save({
           hash,
+          token: body.token,
+          os: body.os,
+        });
+      } catch (_) {}
+    }
+
+    // todo: refactor into single batch save
+    for (const txid of body.txids) {
+      // todo: validate txid
+      console.log(body.token, "->", txid);
+      try {
+        await this.tokenToTxidRepository.save({
+          txid,
           token: body.token,
           os: body.os,
         });
