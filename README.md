@@ -66,6 +66,7 @@
 ## Can you hear me, Major Tom?
 
 Push notifications server for bitcoin wallets. Processes blocks & mempool in search of subscribed onchain addresses.
+Built with typescript, expressjs, mariadb & openapi.
 
 In memory of David Bowie
 
@@ -81,14 +82,16 @@ npm run worker-processmempool
 npm run worker-sender
 ```
 
-Works well on Heroku
+Works well on Heroku (you'll need `JawsDB Maria` addon)
 
 ### Environment variables
 
-- `JAWSDB_MARIA_URL`
-- `FCM_SERVER_KEY`
-- `APNS_PEM`
-- `BITCOIN_RPC`
+Set them as env variables or put them into `.env` file in project root dir.
+
+- `JAWSDB_MARIA_URL` for example `mysql://username:password@host:port/database`
+- `FCM_SERVER_KEY` hex encoded
+- `APNS_PEM` hex encoded
+- `BITCOIN_RPC` for example `http://username:password@host:8332`
 
 ### License
 
