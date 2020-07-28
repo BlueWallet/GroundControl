@@ -154,5 +154,20 @@ declare namespace Paths {
             }
         }
     }
+    namespace Unsubscribe {
+        namespace Post {
+            export interface RequestBody {
+                addresses?: string[];
+                hashes?: string[];
+                txids?: string[];
+                token?: string;
+                os?: string;
+            }
+            namespace Responses {
+                export interface $201 {
+                }
+            }
+        }
+    }
 }
 

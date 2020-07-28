@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: GroundControl push server API
   description: Push notifications server for BlueWallet
-  version: 0.0.7
+  version: 0.0.8
 servers:
   - url: http://localhost:3001
 paths:
@@ -21,6 +21,36 @@ paths:
   /majorTomToGroundControl:
     post:
       summary: "Associate bitcoin addressess / ln preimage hashes / txids that you wish to be notified about to specific push token. Token serves as unique identifier of a device/user. Also, OS of the token"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                addresses:
+                  type: array
+                  items:
+                    type: string
+                hashes:
+                  type: array
+                  items:
+                    type: string
+                txids:
+                  type: array
+                  items:
+                    type: string
+                token:
+                  type: string
+                os:
+                  type: string
+      responses:
+        "201":
+          description: Created
+
+  /unsubscribe:
+    post:
+      summary: "This call is a reverse call for /majorTomToGroundControl. In case user doesnt want to track addresses/txids/ln invoice hashes, he makes this call along with his token/os so GroundControl can remove them from the database"
       requestBody:
         required: true
         content:

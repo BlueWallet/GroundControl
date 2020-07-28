@@ -35,6 +35,12 @@ export const Routes = [
   },
   {
     method: "post",
+    route: "/unsubscribe",
+    controller: GroundController,
+    action: "unsubscribe",
+  },
+  {
+    method: "post",
     route: "/lightningInvoiceGotSettled",
     controller: GroundController,
     action: "lightningInvoiceGotSettled",

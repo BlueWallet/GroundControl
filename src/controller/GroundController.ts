@@ -86,6 +86,49 @@ export class GroundController {
     response.status(201).send("");
   }
 
+  async unsubscribe(request: Request, response: Response, next: NextFunction) {
+    const body: Paths.Unsubscribe.Post.RequestBody = request.body;
+    // todo: checks that we are receiving data and that there are not too much records in it (probably 1000 addresses for a start is enough)
+
+    if (!body.addresses || !Array.isArray(body.addresses)) {
+      body.addresses = [];
+    }
+    if (!body.hashes || !Array.isArray(body.hashes)) {
+      body.hashes = [];
+    }
+    if (!body.txids || !Array.isArray(body.txids)) {
+      body.txids = [];
+    }
+
+    if (!body.token || !body.os) {
+      response.status(500).send("token not provided");
+      return;
+    }
+
+    for (const address of body.addresses) {
+      try {
+        const addressRecord = await this.tokenToAddressRepository.findOne({ os: body.os, token: body.token, address });
+        await this.tokenToAddressRepository.remove(addressRecord);
+      } catch (_) {}
+    }
+
+    for (const hash of body.hashes) {
+      try {
+        const hashRecord = await this.tokenToHashRepository.findOne({ os: body.os, token: body.token, hash });
+        await this.tokenToHashRepository.remove(hashRecord);
+      } catch (_) {}
+    }
+
+    for (const txid of body.txids) {
+      try {
+        const txidRecord = await this.tokenToTxidRepository.findOne({ os: body.os, token: body.token, txid });
+        await this.tokenToTxidRepository.remove(txidRecord);
+      } catch (_) {}
+    }
+
+    response.status(201).send("");
+  }
+
   /**
    * POST request handler that notifies us that specific ln invoice was paid
    *
