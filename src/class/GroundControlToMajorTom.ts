@@ -32,8 +32,8 @@ export class GroundControlToMajorTom {
       aps: {
         badge: pushNotification.badge,
         alert: {
-          title: "New unconfirmed transaction",
-          body: "You received new transfer on " + pushNotification.address,
+          title: "New Transaction - Pending",
+          body: "Received transaction on " + pushNotification.address,
         },
         sound: "default",
       },
@@ -48,7 +48,7 @@ export class GroundControlToMajorTom {
     const fcmPayload = {
       data: {},
       notification: {
-        title: "Your transaction confirmed",
+        title: "Transaction - Confirmed",
         body: "Your transaction " + pushNotification.txid + " got confirmed",
         badge: pushNotification.badge,
         tag: pushNotification.txid,
@@ -59,7 +59,7 @@ export class GroundControlToMajorTom {
       aps: {
         badge: pushNotification.badge,
         alert: {
-          title: "Your transaction confirmed",
+          title: "Transaction - Confirmed",
           body: "Your transaction " + pushNotification.txid + " got confirmed",
         },
         sound: "default",
@@ -76,7 +76,7 @@ export class GroundControlToMajorTom {
       data: {},
       notification: {
         title: "+" + pushNotification.sat + " sats",
-        body: "You received new transfer on " + pushNotification.address,
+        body: "Received on " + pushNotification.address,
         badge: pushNotification.badge,
         tag: pushNotification.txid,
       },
@@ -87,7 +87,7 @@ export class GroundControlToMajorTom {
         badge: pushNotification.badge,
         alert: {
           title: "+" + pushNotification.sat + " sats",
-          body: "You received new transfer on " + pushNotification.address,
+          body: "Received on " + pushNotification.address,
         },
         sound: "default",
       },
