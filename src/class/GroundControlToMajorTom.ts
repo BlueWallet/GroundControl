@@ -17,11 +17,7 @@ const http2 = require("http2");
  * @see https://firebase.google.com/docs/cloud-messaging/http-server-ref
  */
 export class GroundControlToMajorTom {
-  static async pushOnchainAddressGotUnconfirmedTransaction(
-    serverKey: string,
-    apnsPem: string,
-    pushNotification: Components.Schemas.PushNotificationOnchainAddressGotUnconfirmedTransaction
-  ): Promise<[object, object]> {
+  static async pushOnchainAddressGotUnconfirmedTransaction(serverKey: string, apnsPem: string, pushNotification: Components.Schemas.PushNotificationOnchainAddressGotUnconfirmedTransaction): Promise<[object, object]> {
     const fcmPayload = {
       data: {},
       notification: {
@@ -45,15 +41,10 @@ export class GroundControlToMajorTom {
     };
 
     if (pushNotification.os === "android") return GroundControlToMajorTom._pushToFcm(serverKey, pushNotification.token, fcmPayload, pushNotification);
-    if (pushNotification.os === "ios")
-      return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
+    if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
   }
 
-  static async pushOnchainTxidGotConfirmed(
-    serverKey: string,
-    apnsPem: string,
-    pushNotification: Components.Schemas.PushNotificationTxidGotConfirmed
-  ): Promise<[object, object]> {
+  static async pushOnchainTxidGotConfirmed(serverKey: string, apnsPem: string, pushNotification: Components.Schemas.PushNotificationTxidGotConfirmed): Promise<[object, object]> {
     const fcmPayload = {
       data: {},
       notification: {
@@ -77,15 +68,10 @@ export class GroundControlToMajorTom {
     };
 
     if (pushNotification.os === "android") return GroundControlToMajorTom._pushToFcm(serverKey, pushNotification.token, fcmPayload, pushNotification);
-    if (pushNotification.os === "ios")
-      return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
+    if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
   }
 
-  static async pushOnchainAddressWasPaid(
-    serverKey: string,
-    apnsPem: string,
-    pushNotification: Components.Schemas.PushNotificationOnchainAddressGotPaid
-  ): Promise<[object, object]> {
+  static async pushOnchainAddressWasPaid(serverKey: string, apnsPem: string, pushNotification: Components.Schemas.PushNotificationOnchainAddressGotPaid): Promise<[object, object]> {
     const fcmPayload = {
       data: {},
       notification: {
@@ -109,15 +95,10 @@ export class GroundControlToMajorTom {
     };
 
     if (pushNotification.os === "android") return GroundControlToMajorTom._pushToFcm(serverKey, pushNotification.token, fcmPayload, pushNotification);
-    if (pushNotification.os === "ios")
-      return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
+    if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
   }
 
-  static async pushLightningInvoicePaid(
-    serverKey: string,
-    apnsPem: string,
-    pushNotification: Components.Schemas.PushNotificationLightningInvoicePaid
-  ): Promise<[object, object]> {
+  static async pushLightningInvoicePaid(serverKey: string, apnsPem: string, pushNotification: Components.Schemas.PushNotificationLightningInvoicePaid): Promise<[object, object]> {
     const fcmPayload = {
       data: {},
       notification: {
@@ -141,18 +122,12 @@ export class GroundControlToMajorTom {
     };
 
     if (pushNotification.os === "android") return GroundControlToMajorTom._pushToFcm(serverKey, pushNotification.token, fcmPayload, pushNotification);
-    if (pushNotification.os === "ios")
-      return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification, pushNotification.hash);
+    if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(apnsPem, pushNotification.token, apnsPayload, pushNotification, pushNotification.hash);
   }
 
-  protected static async _pushToApns(
-    apnsPem: string,
-    token: string,
-    apnsPayload: object,
-    pushNotification: Components.Schemas.PushNotificationBase,
-    collapseId
-  ): Promise<[object, object]> {
+  protected static async _pushToApns(apnsPem: string, token: string, apnsPayload: object, pushNotification: Components.Schemas.PushNotificationBase, collapseId): Promise<[object, object]> {
     return new Promise(function (resolve) {
+      // we pass some of the notification properties as data properties to FCM payload:
       for (let dataKey of Object.keys(pushNotification)) {
         if (["token", "os", "badge"].includes(dataKey)) continue;
         apnsPayload["data"][dataKey] = pushNotification[dataKey];
@@ -165,7 +140,7 @@ export class GroundControlToMajorTom {
       client.on("error", (err) => console.error(err));
       const headers = {
         ":method": "POST",
-        "apns-topic": "io.bluewallet.bluewallet",
+        "apns-topic": process.env.APNS_TOPIC,
         "apns-collapse-id": collapseId,
         "apns-expiration": Math.floor(+new Date() / 1000 + 3600 * 24),
         ":scheme": "https",
@@ -206,12 +181,7 @@ export class GroundControlToMajorTom {
     });
   }
 
-  protected static async _pushToFcm(
-    serverKey: string,
-    token: string,
-    fcmPayload: object,
-    pushNotification: Components.Schemas.PushNotificationBase
-  ): Promise<[object, object]> {
+  protected static async _pushToFcm(serverKey: string, token: string, fcmPayload: object, pushNotification: Components.Schemas.PushNotificationBase): Promise<[object, object]> {
     const _api = new Frisbee({ baseURI: "https://fcm.googleapis.com" });
 
     fcmPayload["to"] = token;

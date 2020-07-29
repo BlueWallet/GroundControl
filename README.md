@@ -66,7 +66,7 @@
 ## Can you hear me, Major Tom?
 
 Push notifications server for bitcoin wallets. Processes blocks & mempool in search of subscribed onchain addresses.
-Built with typescript, expressjs, mariadb & openapi.
+Built with typescript, expressjs, mariadb & [openapi](https://editor.swagger.io/?url=https://raw.githubusercontent.com/BlueWallet/GroundControl/master/openapi.yaml).
 
 In memory of David Bowie
 
@@ -92,6 +92,7 @@ Set them as env variables or put them into `.env` file in project root dir.
 - `FCM_SERVER_KEY` hex encoded
 - `APNS_PEM` hex encoded
 - `BITCOIN_RPC` for example `http://username:password@host:8332`
+- `APNS_TOPIC` for example `io.bluewallet.bluewallet`
 
 ### License
 

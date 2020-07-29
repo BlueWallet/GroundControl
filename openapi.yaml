@@ -5,6 +5,8 @@ info:
   version: 0.0.8
 servers:
   - url: http://localhost:3001
+  - url: https://groundcontrol-bluewallet-stg.herokuapp.com
+  - url: https://groundcontrol-bluewallet.herokuapp.com
 paths:
   /lightningInvoiceGotSettled:
     post:
