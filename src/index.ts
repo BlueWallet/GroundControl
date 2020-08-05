@@ -9,8 +9,8 @@ const cors = require("cors");
 const url = require("url");
 const parsed = url.parse(process.env.JAWSDB_MARIA_URL);
 if (!process.env.JAWSDB_MARIA_URL || !process.env.FCM_SERVER_KEY || !process.env.APNS_PEM || !process.env.APNS_TOPIC) {
-    console.error("not all env variables set");
-    process.exit();
+  console.error("not all env variables set");
+  process.exit();
 }
 
 createConnection({

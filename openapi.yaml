@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: GroundControl push server API
   description: Push notifications server for BlueWallet
-  version: 0.0.8
+  version: 0.0.9
 servers:
   - url: http://localhost:3001
   - url: https://groundcontrol-bluewallet-stg.herokuapp.com
@@ -89,6 +89,52 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServerInfo"
+
+  /getTokenConfiguration:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                os:
+                  type: string
+      summary: "Returns levels of notifications user currently subscribed to"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenConfiguration"
+
+  /setTokenConfiguration:
+    post:
+      summary: "Sets levels of notifications user is subscribed to"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/TokenConfiguration"
+                - type: object
+                  required:
+                    - token
+                    - os
+                  properties:
+                    token:
+                      type: "string"
+                    os:
+                      type: "string"
+      responses:
+        "200":
+          description: OK
+
 components:
   schemas:
     ServerInfo:
@@ -102,6 +148,30 @@ components:
           type: "string"
         uptime:
           type: "number"
+
+    NotificationLevel:
+      type: string
+      enum:
+        - transactions
+        - news
+        - price
+        - tips
+
+    TokenConfiguration:
+      type: "object"
+      properties:
+        level_all:
+          type: "boolean"
+        level_transactions:
+          type: "boolean"
+        level_news:
+          type: "boolean"
+        level_price:
+          type: "boolean"
+        level_tips:
+          type: "boolean"
+        lang:
+          type: "string"
 
     LightningInvoiceSettledNotification:
       description: object thats posted to GroundControl to notify end-user that his specific invoice was paid by someone
@@ -125,6 +195,7 @@ components:
       type: object
       required:
         - type
+        - level
         - os
         - token
       properties:
@@ -150,6 +221,8 @@ components:
             - "ios"
         badge:
           type: "integer"
+        level:
+          $ref: "#/components/schemas/NotificationLevel"
 
     PushNotificationLightningInvoicePaid:
       allOf: # Combines PushNotificationBase and the inline model
@@ -163,6 +236,9 @@ components:
             type:
               type: "integer"
               enum: [1]
+            level:
+              type: "string"
+              enum: ["transactions"]
             sat:
               type: "integer"
               description: amount of satoshis
@@ -185,6 +261,9 @@ components:
             type:
               type: "integer"
               enum: [2]
+            level:
+              type: "string"
+              enum: ["transactions"]
             sat:
               type: "integer"
               description: amount of satoshis
@@ -207,6 +286,9 @@ components:
             type:
               type: "integer"
               enum: [3]
+            level:
+              type: "string"
+              enum: ["transactions"]
             sat:
               type: "integer"
               description: amount of satoshis
@@ -227,6 +309,9 @@ components:
             type:
               type: "integer"
               enum: [4]
+            level:
+              type: "string"
+              enum: ["transactions"]
             txid:
               type: "string"
               description: txid of the transaction that got confirmed

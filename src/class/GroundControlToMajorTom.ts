@@ -129,7 +129,7 @@ export class GroundControlToMajorTom {
     return new Promise(function (resolve) {
       // we pass some of the notification properties as data properties to FCM payload:
       for (let dataKey of Object.keys(pushNotification)) {
-        if (["token", "os", "badge"].includes(dataKey)) continue;
+        if (["token", "os", "badge", "level"].includes(dataKey)) continue;
         apnsPayload["data"][dataKey] = pushNotification[dataKey];
       }
       const pemBuffer = Buffer.from(apnsPem, "hex");

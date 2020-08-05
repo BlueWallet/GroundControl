@@ -1,32 +1,6 @@
-import { UserController } from "./controller/UserController";
 import { GroundController } from "./controller/GroundController";
 
 export const Routes = [
-  {
-    method: "get",
-    route: "/users",
-    controller: UserController,
-    action: "all",
-  },
-  {
-    method: "get",
-    route: "/users/:id",
-    controller: UserController,
-    action: "one",
-  },
-  {
-    method: "post",
-    route: "/users",
-    controller: UserController,
-    action: "save",
-  },
-  {
-    method: "delete",
-    route: "/users/:id",
-    controller: UserController,
-    action: "remove",
-  },
-
   {
     method: "post",
     route: "/majorTomToGroundControl",
@@ -38,6 +12,18 @@ export const Routes = [
     route: "/unsubscribe",
     controller: GroundController,
     action: "unsubscribe",
+  },
+  {
+    method: "post",
+    route: "/getTokenConfiguration",
+    controller: GroundController,
+    action: "getTokenConfiguration",
+  },
+  {
+    method: "post",
+    route: "/setTokenConfiguration",
+    controller: GroundController,
+    action: "setTokenConfiguration",
   },
   {
     method: "post",

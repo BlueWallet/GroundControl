@@ -21,6 +21,7 @@ declare namespace Components {
              */
             amt_paid_sat?: number;
         }
+        export type NotificationLevel = "transactions" | "news" | "price" | "tips";
         /**
          * payload for push notification delivered to phone
          */
@@ -37,6 +38,7 @@ declare namespace Components {
             token: string;
             os: "android" | "ios";
             badge?: number;
+            level: NotificationLevel;
         }
         /**
          * payload for push notification delivered to phone
@@ -46,6 +48,7 @@ declare namespace Components {
             token: string;
             os: "android" | "ios";
             badge?: number;
+            level: "transactions";
             /**
              * amount of satoshis
              */
@@ -67,6 +70,7 @@ declare namespace Components {
             token: string;
             os: "android" | "ios";
             badge?: number;
+            level: "transactions";
             /**
              * amount of satoshis
              */
@@ -88,6 +92,7 @@ declare namespace Components {
             token: string;
             os: "android" | "ios";
             badge?: number;
+            level: "transactions";
             /**
              * amount of satoshis
              */
@@ -109,6 +114,7 @@ declare namespace Components {
             token: string;
             os: "android" | "ios";
             badge?: number;
+            level: "transactions";
             /**
              * txid of the transaction that got confirmed
              */
@@ -120,9 +126,28 @@ declare namespace Components {
             version?: string;
             uptime?: number;
         }
+        export interface TokenConfiguration {
+            level_all?: boolean;
+            level_transactions?: boolean;
+            level_news?: boolean;
+            level_price?: boolean;
+            level_tips?: boolean;
+            lang?: string;
+        }
     }
 }
 declare namespace Paths {
+    namespace GetTokenConfiguration {
+        namespace Post {
+            export interface RequestBody {
+                token?: string;
+                os?: string;
+            }
+            namespace Responses {
+                export type $200 = Components.Schemas.TokenConfiguration;
+            }
+        }
+    }
     namespace LightningInvoiceGotSettled {
         namespace Post {
             export type RequestBody = /* object thats posted to GroundControl to notify end-user that his specific invoice was paid by someone */ Components.Schemas.LightningInvoiceSettledNotification;
@@ -151,6 +176,24 @@ declare namespace Paths {
         namespace Get {
             namespace Responses {
                 export type $200 = Components.Schemas.ServerInfo;
+            }
+        }
+    }
+    namespace SetTokenConfiguration {
+        namespace Post {
+            export interface RequestBody {
+                level_all?: boolean;
+                level_transactions?: boolean;
+                level_news?: boolean;
+                level_price?: boolean;
+                level_tips?: boolean;
+                lang?: string;
+                token: string;
+                os: string;
+            }
+            namespace Responses {
+                export interface $200 {
+                }
             }
         }
     }

@@ -3,6 +3,8 @@ import "reflect-metadata";
 import { createConnection, getRepository } from "typeorm";
 import { SendQueue } from "./entity/SendQueue";
 import { GroundControlToMajorTom } from "./class/GroundControlToMajorTom";
+import { TokenConfiguration } from "./entity/TokenConfiguration";
+import { NOTIFICATION_LEVEL_NEWS, NOTIFICATION_LEVEL_PRICE, NOTIFICATION_LEVEL_TIPS, NOTIFICATION_LEVEL_TRANSACTIONS } from "./openapi/constants";
 require("dotenv").config();
 const url = require("url");
 const parsed = url.parse(process.env.JAWSDB_MARIA_URL);
@@ -46,6 +48,7 @@ createConnection({
     console.log("running");
 
     const sendQueueRepository = getRepository(SendQueue);
+    const tokenConfigurationRepository = getRepository(TokenConfiguration);
 
     while (1) {
       const record = await sendQueueRepository.findOne();
@@ -59,6 +62,37 @@ createConnection({
       try {
         payload = JSON.parse(record.data);
       } catch (_) {}
+
+      let tokenConfig = await tokenConfigurationRepository.findOne({ os: payload.os, token: payload.token });
+      if (!tokenConfig) {
+        tokenConfig = new TokenConfiguration();
+        tokenConfig.os = payload.os;
+        tokenConfig.token = payload.token;
+        await tokenConfigurationRepository.save(tokenConfig);
+      }
+
+      let unsubscribed = false;
+
+      if (!tokenConfig.level_all) unsubscribed = true; // user unsubscribed from all
+      switch (payload.level) {
+        case NOTIFICATION_LEVEL_TRANSACTIONS:
+          if (!tokenConfig.level_transactions) unsubscribed = true;
+          break;
+        case NOTIFICATION_LEVEL_NEWS:
+          if (!tokenConfig.level_news) unsubscribed = true;
+          break;
+        case NOTIFICATION_LEVEL_PRICE:
+          if (!tokenConfig.level_price) unsubscribed = true;
+          break;
+        case NOTIFICATION_LEVEL_TIPS:
+          if (!tokenConfig.level_tips) unsubscribed = true;
+          break;
+      }
+
+      if (unsubscribed) {
+        await sendQueueRepository.remove(record);
+        continue;
+      }
 
       switch (payload.type) {
         case 2:
@@ -74,7 +108,10 @@ createConnection({
           await sendQueueRepository.remove(record);
           break;
         case 1:
-          // TODO, currently handled in web request
+          payload = <Components.Schemas.PushNotificationLightningInvoicePaid>payload;
+          console.warn("pushing to token", payload.token, payload.os);
+          await GroundControlToMajorTom.pushLightningInvoicePaid(serverKey, apnsPem, payload);
+          await sendQueueRepository.remove(record);
           break;
         case 4:
           payload = <Components.Schemas.PushNotificationTxidGotConfirmed>payload;

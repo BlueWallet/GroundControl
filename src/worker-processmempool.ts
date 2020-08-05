@@ -3,7 +3,6 @@ import "reflect-metadata";
 import { createConnection, getRepository, Repository } from "typeorm";
 import { TokenToAddress } from "./entity/TokenToAddress";
 import { SendQueue } from "./entity/SendQueue";
-import { KeyValue } from "./entity/KeyValue";
 require("dotenv").config();
 const url = require("url");
 let jayson = require("jayson/promise");
@@ -60,6 +59,7 @@ async function processMempool() {
                   txid: response.result.txid,
                   sat: Math.floor(output.value * 100000000),
                   type: 3,
+                  level: "transactions",
                   token: "",
                   os: "ios",
                 };
@@ -69,9 +69,6 @@ async function processMempool() {
           }
         }
       }
-
-      // allPotentialPushPayloadsArray.push({ address: "bc1qaemfnglf928kd9ma2jzdypk333au6ctu7h7led", txid: "666", sat: 1488, type: 3, token: "", os: "ios" }); // debug fixme
-      // addresses.push("bc1qaemfnglf928kd9ma2jzdypk333au6ctu7h7led"); // debug fixme
 
       if (addresses.length === 0) {
         allPotentialPushPayloadsArray = [];
@@ -94,6 +91,7 @@ async function processMempool() {
             payload.os = t2a.os === "android" ? "android" : "ios"; // hacky
             payload.token = t2a.token;
             payload.type = 3;
+            payload.level = "transactions";
             payload.badge = 1;
             await sendQueueRepository.save({
               data: JSON.stringify(payload),

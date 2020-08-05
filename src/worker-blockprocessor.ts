@@ -48,6 +48,7 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
               txid: tx.txid,
               sat: Math.floor(output.value * 100000000),
               type: 2,
+              level: "transactions",
               token: "",
               os: "ios",
             };
@@ -90,6 +91,7 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
     const payload: Components.Schemas.PushNotificationTxidGotConfirmed = {
       txid: t2txid.txid,
       type: 4,
+      level: "transactions",
       token: t2txid.token,
       os: t2txid.os === "ios" ? "ios" : "android",
       badge: 1,

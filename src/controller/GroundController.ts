@@ -4,11 +4,10 @@ import { NextFunction, Request, Response } from "express";
 import { TokenToAddress } from "../entity/TokenToAddress";
 import { TokenToHash } from "../entity/TokenToHash";
 import { TokenToTxid } from "../entity/TokenToTxid";
-import { GroundControlToMajorTom } from "../class/GroundControlToMajorTom";
+import { TokenConfiguration } from "../entity/TokenConfiguration";
+import { SendQueue } from "../entity/SendQueue";
 require("dotenv").config();
 const pck = require("../../package.json");
-const serverKey = process.env.FCM_SERVER_KEY;
-const apnsPem = process.env.APNS_PEM;
 if (!process.env.JAWSDB_MARIA_URL || !process.env.FCM_SERVER_KEY || !process.env.APNS_PEM) {
   console.error("not all env variables set");
   process.exit();
@@ -18,6 +17,8 @@ export class GroundController {
   private tokenToAddressRepository = getRepository(TokenToAddress);
   private tokenToHashRepository = getRepository(TokenToHash);
   private tokenToTxidRepository = getRepository(TokenToTxid);
+  private tokenConfigurationRepository = getRepository(TokenConfiguration);
+  private sendQueueRepository = getRepository(SendQueue);
 
   /**
    * Submit bitcoin addressess that you wish to be notified about to specific push token. Token serves as unique identifier of a device/user. Also, OS of the token
@@ -149,18 +150,21 @@ export class GroundController {
       hash: hashShouldBe,
     });
     for (const tokenToHash of tokenToHashAll) {
-      console.warn("pushing to token", tokenToHash.token, tokenToHash.os);
+      console.warn("enqueueing to token", tokenToHash.token, tokenToHash.os);
       const pushNotification: Components.Schemas.PushNotificationLightningInvoicePaid = {
         sat: body.amt_paid_sat,
         badge: 1,
         type: 1,
+        level: "transactions",
         os: tokenToHash.os === "android" ? "android" : "ios", //hacky
         token: tokenToHash.token,
         hash: hashShouldBe,
         memo: body.memo,
       };
 
-      await GroundControlToMajorTom.pushLightningInvoicePaid(serverKey, apnsPem, pushNotification);
+      await this.sendQueueRepository.save({
+        data: JSON.stringify(pushNotification),
+      });
     }
 
     response.status(200).send("");
@@ -174,5 +178,48 @@ export class GroundController {
     };
 
     return serverInfo;
+  }
+
+  async setTokenConfiguration(request: Request, response: Response, next: NextFunction) {
+    const body: Paths.SetTokenConfiguration.Post.RequestBody = request.body;
+    let tokenConfig = await this.tokenConfigurationRepository.findOne({ token: body.token, os: body.os });
+    if (!tokenConfig) {
+      tokenConfig = new TokenConfiguration();
+      tokenConfig.token = body.token;
+      tokenConfig.os = body.os;
+    } else {
+      if (typeof body.level_all !== "undefined") tokenConfig.level_all = !!body.level_all;
+      if (typeof body.level_transactions !== "undefined") tokenConfig.level_transactions = !!body.level_transactions;
+      if (typeof body.level_price !== "undefined") tokenConfig.level_price = !!body.level_price;
+      if (typeof body.level_news !== "undefined") tokenConfig.level_news = !!body.level_news;
+      if (typeof body.level_tips !== "undefined") tokenConfig.level_tips = !!body.level_tips;
+      if (typeof body.lang !== "undefined") tokenConfig.lang = String(body.lang);
+      tokenConfig.last_online = new Date();
+    }
+
+    await this.tokenConfigurationRepository.save(tokenConfig);
+    response.status(200).send("");
+  }
+
+  async getTokenConfiguration(request: Request, response: Response, next: NextFunction) {
+    const body: Paths.GetTokenConfiguration.Post.RequestBody = request.body;
+    let tokenConfig = await this.tokenConfigurationRepository.findOne({ token: body.token, os: body.os });
+    if (!tokenConfig) {
+      tokenConfig = new TokenConfiguration();
+      tokenConfig.token = body.token;
+      tokenConfig.os = body.os;
+      await this.tokenConfigurationRepository.save(tokenConfig);
+    }
+
+    const config: Paths.GetTokenConfiguration.Post.Responses.$200 = {
+      level_all: tokenConfig.level_all,
+      level_news: tokenConfig.level_news,
+      level_price: tokenConfig.level_price,
+      level_transactions: tokenConfig.level_transactions,
+      level_tips: tokenConfig.level_tips,
+      lang: tokenConfig.lang,
+    };
+
+    return config;
   }
 }
