@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: GroundControl push server API
   description: Push notifications server for BlueWallet
-  version: 0.0.9
+  version: 0.0.10
 servers:
   - url: http://localhost:3001
   - url: https://groundcontrol-bluewallet-stg.herokuapp.com
@@ -114,7 +114,7 @@ paths:
 
   /setTokenConfiguration:
     post:
-      summary: "Sets levels of notifications user is subscribed to"
+      summary: "Sets levels of notifications user is subscribed to; also saves some user info, like lang or app version"
       requestBody:
         required: true
         content:
@@ -171,6 +171,8 @@ components:
         level_tips:
           type: "boolean"
         lang:
+          type: "string"
+        app_version:
           type: "string"
 
     LightningInvoiceSettledNotification:

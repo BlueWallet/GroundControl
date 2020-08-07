@@ -133,6 +133,7 @@ declare namespace Components {
             level_price?: boolean;
             level_tips?: boolean;
             lang?: string;
+            app_version?: string;
         }
     }
 }
@@ -188,6 +189,7 @@ declare namespace Paths {
                 level_price?: boolean;
                 level_tips?: boolean;
                 lang?: string;
+                app_version?: string;
                 token: string;
                 os: string;
             }

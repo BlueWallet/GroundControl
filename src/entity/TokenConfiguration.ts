@@ -30,6 +30,9 @@ export class TokenConfiguration {
   @Column({ default: "en" })
   lang: string;
 
+  @Column()
+  app_version: string;
+
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created: Date;
 

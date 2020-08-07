@@ -194,6 +194,7 @@ export class GroundController {
       if (typeof body.level_news !== "undefined") tokenConfig.level_news = !!body.level_news;
       if (typeof body.level_tips !== "undefined") tokenConfig.level_tips = !!body.level_tips;
       if (typeof body.lang !== "undefined") tokenConfig.lang = String(body.lang);
+      if (typeof body.app_version !== "undefined") tokenConfig.app_version = String(body.app_version);
       tokenConfig.last_online = new Date();
     }
 
@@ -218,6 +219,7 @@ export class GroundController {
       level_transactions: tokenConfig.level_transactions,
       level_tips: tokenConfig.level_tips,
       lang: tokenConfig.lang,
+      app_version: tokenConfig.app_version,
     };
 
     return config;
