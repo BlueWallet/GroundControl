@@ -49,7 +49,7 @@ export class GroundControlToMajorTom {
       data: {},
       notification: {
         title: "Transaction - Confirmed",
-        body: "Your transaction " + pushNotification.txid + " got confirmed",
+        body: "Your transaction " + pushNotification.txid + " has been confirmed",
         badge: pushNotification.badge,
         tag: pushNotification.txid,
       },
@@ -60,7 +60,7 @@ export class GroundControlToMajorTom {
         badge: pushNotification.badge,
         alert: {
           title: "Transaction - Confirmed",
-          body: "Your transaction " + pushNotification.txid + " got confirmed",
+          body: "Your transaction " + pushNotification.txid + " has been confirmed",
         },
         sound: "default",
       },
