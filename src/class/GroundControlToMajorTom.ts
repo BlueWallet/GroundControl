@@ -1,6 +1,9 @@
 import "../openapi/api";
-import { getRepository } from "typeorm";
+import { getRepository, getConnection } from "typeorm";
 import { PushLog } from "../entity/PushLog";
+import { TokenToAddress } from "../entity/TokenToAddress";
+import { TokenToHash } from "../entity/TokenToHash";
+import { TokenToTxid } from "../entity/TokenToTxid";
 const Frisbee = require("frisbee");
 const http2 = require("http2");
 
@@ -22,7 +25,7 @@ export class GroundControlToMajorTom {
       data: {},
       notification: {
         title: "New unconfirmed transaction",
-        body: "You received new transfer on " + pushNotification.address,
+        body: "You received new transfer on " + GroundControlToMajorTom.shortenAddress(pushNotification.address),
         badge: pushNotification.badge,
         tag: pushNotification.txid,
       },
@@ -33,7 +36,7 @@ export class GroundControlToMajorTom {
         badge: pushNotification.badge,
         alert: {
           title: "New Transaction - Pending",
-          body: "Received transaction on " + pushNotification.address,
+          body: "Received transaction on " + GroundControlToMajorTom.shortenAddress(pushNotification.address),
         },
         sound: "default",
       },
@@ -49,7 +52,7 @@ export class GroundControlToMajorTom {
       data: {},
       notification: {
         title: "Transaction - Confirmed",
-        body: "Your transaction " + pushNotification.txid + " got confirmed",
+        body: "Your transaction " + GroundControlToMajorTom.shortenTxid(pushNotification.txid) + " got confirmed",
         badge: pushNotification.badge,
         tag: pushNotification.txid,
       },
@@ -60,7 +63,7 @@ export class GroundControlToMajorTom {
         badge: pushNotification.badge,
         alert: {
           title: "Transaction - Confirmed",
-          body: "Your transaction " + pushNotification.txid + " got confirmed",
+          body: "Your transaction " + GroundControlToMajorTom.shortenTxid(pushNotification.txid) + " got confirmed",
         },
         sound: "default",
       },
@@ -76,7 +79,7 @@ export class GroundControlToMajorTom {
       data: {},
       notification: {
         title: "+" + pushNotification.sat + " sats",
-        body: "Received on " + pushNotification.address,
+        body: "Received on " + GroundControlToMajorTom.shortenAddress(pushNotification.address),
         badge: pushNotification.badge,
         tag: pushNotification.txid,
       },
@@ -87,7 +90,7 @@ export class GroundControlToMajorTom {
         badge: pushNotification.badge,
         alert: {
           title: "+" + pushNotification.sat + " sats",
-          body: "Received on " + pushNotification.address,
+          body: "Received on " + GroundControlToMajorTom.shortenAddress(pushNotification.address),
         },
         sound: "default",
       },
@@ -166,6 +169,8 @@ export class GroundControlToMajorTom {
         responseJson["data"] = data;
         client.close();
 
+        GroundControlToMajorTom.processApnsResponse(responseJson, token);
+
         const PushLogRepository = getRepository(PushLog);
         PushLogRepository.save({
           token: token,
@@ -212,6 +217,8 @@ export class GroundControlToMajorTom {
     if (typeof apiResponse.body === "object") responseJson = apiResponse.body;
     delete fcmPayload["to"]; // compacting a bit, we dont need token in payload as well
 
+    GroundControlToMajorTom.processFcmResponse(responseJson, token);
+
     const PushLogRepository = getRepository(PushLog);
     await PushLogRepository.save({
       token: token,
@@ -222,5 +229,40 @@ export class GroundControlToMajorTom {
     });
 
     return [fcmPayload, responseJson];
+  }
+
+  static async killDeadToken(token: string) {
+    console.log("deleting dead token", token);
+    await getRepository(TokenToAddress).createQueryBuilder().delete().where("token = :token", { token }).execute();
+    await getRepository(TokenToTxid).createQueryBuilder().delete().where("token = :token", { token }).execute();
+    await getRepository(TokenToHash).createQueryBuilder().delete().where("token = :token", { token }).execute();
+  }
+
+  static processFcmResponse(response, token: string) {
+    if (response && response.results && Array.isArray(response.results) && response.results.length === 1) {
+      if (response.results[0] && response.results[0].error && ["NotRegistered"].includes(response.results[0].error)) {
+        return GroundControlToMajorTom.killDeadToken(token);
+      }
+    } else if (response && response.results && Array.isArray(response.results) && response.results.length !== 1) {
+      console.error("Expected only single result in FCM response, cant handle batch responses yet (zero response also means smth is wrong):", response);
+    }
+  }
+
+  static processApnsResponse(response, token: string) {
+    if (response && response.data) {
+      try {
+        const data = JSON.parse(response.data);
+        if (data && data.reason && ["Unregistered", "BadDeviceToken"].includes(data.reason)) return GroundControlToMajorTom.killDeadToken(token);
+      } catch (_) {}
+    }
+  }
+
+  static shortenAddress(address) {
+    if (address.length < 10) return address;
+    return address.substring(0, 5) + "...." + address.substring(address.length - 4);
+  }
+
+  static shortenTxid(txid) {
+    return GroundControlToMajorTom.shortenAddress(txid);
   }
 }
