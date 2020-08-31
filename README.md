@@ -94,6 +94,10 @@ Set them as env variables or put them into `.env` file in project root dir.
 - `BITCOIN_RPC` for example `http://username:password@host:8332`
 - `APNS_TOPIC` for example `io.bluewallet.bluewallet`
 
+### Getting certificates
+
+https://dev.to/jakubkoci/react-native-push-notifications-313i
+
 ### License
 
 MIT
