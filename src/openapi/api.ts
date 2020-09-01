@@ -125,6 +125,8 @@ declare namespace Components {
             description?: string;
             version?: string;
             uptime?: number;
+            last_processed_block?: number;
+            send_queue_size?: number;
         }
         export interface TokenConfiguration {
             level_all?: boolean;

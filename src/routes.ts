@@ -37,4 +37,10 @@ export const Routes = [
     controller: GroundController,
     action: "ping",
   },
+  {
+    method: "get",
+    route: "/",
+    controller: GroundController,
+    action: "ping",
+  },
 ];
