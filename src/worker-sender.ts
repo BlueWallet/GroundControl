@@ -99,25 +99,33 @@ createConnection({
           payload = <Components.Schemas.PushNotificationOnchainAddressGotPaid>payload;
           console.warn("pushing to token", payload.token, payload.os);
           await GroundControlToMajorTom.pushOnchainAddressWasPaid(serverKey, apnsPem, payload);
+          console.warn("pushed");
           await sendQueueRepository.remove(record);
+          console.warn("removed record");
           break;
         case 3:
           payload = <Components.Schemas.PushNotificationOnchainAddressGotUnconfirmedTransaction>payload;
           console.warn("pushing to token", payload.token, payload.os);
           await GroundControlToMajorTom.pushOnchainAddressGotUnconfirmedTransaction(serverKey, apnsPem, payload);
+          console.warn("pushed");
           await sendQueueRepository.remove(record);
+          console.warn("removed record");
           break;
         case 1:
           payload = <Components.Schemas.PushNotificationLightningInvoicePaid>payload;
           console.warn("pushing to token", payload.token, payload.os);
           await GroundControlToMajorTom.pushLightningInvoicePaid(serverKey, apnsPem, payload);
+          console.warn("pushed");
           await sendQueueRepository.remove(record);
+          console.warn("removed record");
           break;
         case 4:
           payload = <Components.Schemas.PushNotificationTxidGotConfirmed>payload;
           console.warn("pushing to token", payload.token, payload.os);
           await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(serverKey, apnsPem, payload);
+          console.warn("pushed");
           await sendQueueRepository.remove(record);
+          console.warn("removed record");
           break;
       }
     }
