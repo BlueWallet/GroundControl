@@ -141,7 +141,7 @@ createConnection({
       const responseGetblockcount = await client.request("getblockcount", []);
 
       if (+responseGetblockcount.result <= +keyVal.value) {
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 60000));
         continue;
       }
 
@@ -158,4 +158,7 @@ createConnection({
       await KeyValueRepository.save(keyVal);
     }
   })
-  .catch((error) => console.log(error));
+  .catch((error) => {
+    console.error("exception in blockprocessor:", error, "comitting suicide");
+    process.exit(1);
+  });

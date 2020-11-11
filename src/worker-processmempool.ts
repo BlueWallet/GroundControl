@@ -145,7 +145,10 @@ createConnection({
       const end = +new Date();
       process.env.VERBOSE && console.log("processing mempool took", (end - start) / 1000, "sec");
       process.env.VERBOSE && console.log("-----------------------");
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
     }
   })
-  .catch((error) => console.log(error));
+  .catch((error) => {
+    console.error("exception in mempool processor:", error, "comitting suicide");
+    process.exit(1);
+  });

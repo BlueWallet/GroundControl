@@ -53,7 +53,7 @@ createConnection({
     while (1) {
       const record = await sendQueueRepository.findOne();
       if (!record) {
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 7000));
         continue;
       }
       // TODO: we could atomically lock this record via mariadb's GET_LOCK and typeorm's raw query, and that would
@@ -130,4 +130,7 @@ createConnection({
       }
     }
   })
-  .catch((error) => console.log(error));
+  .catch((error) => {
+    console.error("exception in sender:", error, "comitting suicide");
+    process.exit(1);
+  });
