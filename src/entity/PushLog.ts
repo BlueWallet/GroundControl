@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, Index } from "typeorm";
 
 @Entity()
 @Index(["token"], { unique: false })
+@Index(["created"], { unique: false })
 export class PushLog {
   @PrimaryGeneratedColumn()
   id: number;
