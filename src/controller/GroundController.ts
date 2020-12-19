@@ -153,7 +153,7 @@ export class GroundController {
       hash: hashShouldBe,
     });
     for (const tokenToHash of tokenToHashAll) {
-      console.warn("enqueueing to token", tokenToHash.token, tokenToHash.os);
+      process.env.VERBOSE && console.log("enqueueing to token", tokenToHash.token, tokenToHash.os);
       const pushNotification: Components.Schemas.PushNotificationLightningInvoicePaid = {
         sat: body.amt_paid_sat,
         badge: 1,

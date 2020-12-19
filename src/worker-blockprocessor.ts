@@ -73,7 +73,7 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
     // cycle in cycle is less than optimal, but we can live with that for now
     for (let payload of allPotentialPushPayloadsArray) {
       if (t2a.address === payload.address) {
-        console.log("enqueueing", payload);
+        process.env.VERBOSE && console.log("enqueueing", payload);
         payload.os = t2a.os === "android" ? "android" : "ios"; // hacky
         payload.token = t2a.token;
         payload.type = 2;
@@ -97,7 +97,7 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
       badge: 1,
     };
 
-    console.log("enqueueing", payload);
+    process.env.VERBOSE && console.log("enqueueing", payload);
     await sendQueueRepository.save({
       data: JSON.stringify(payload),
     });
