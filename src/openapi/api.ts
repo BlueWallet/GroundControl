@@ -140,6 +140,32 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace Enqueue {
+        namespace Post {
+            /**
+             * payload for push notification delivered to phone
+             */
+            export interface RequestBody {
+                /**
+                 * type:
+                 *  * `1` - Your lightning invoice was paid
+                 *  * `2` - New transaction to one of your addresses
+                 *  * `3` - New unconfirmed transaction to one of your addresses
+                 *  * `4` - Transaction confirmed
+                 *
+                 */
+                type: 1 | 2 | 3 | 4;
+                token: string;
+                os: "android" | "ios";
+                badge?: number;
+                level: Components.Schemas.NotificationLevel;
+            }
+            namespace Responses {
+                export interface $200 {
+                }
+            }
+        }
+    }
     namespace GetTokenConfiguration {
         namespace Post {
             export interface RequestBody {

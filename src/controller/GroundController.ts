@@ -213,6 +213,16 @@ export class GroundController {
     response.status(200).send("");
   }
 
+  async enqueue(request: Request, response: Response, next: NextFunction) {
+    const body: Paths.Enqueue.Post.RequestBody = request.body;
+
+    process.env.VERBOSE && console.log("enqueueing", body);
+    await this.sendQueueRepository.save({
+      data: JSON.stringify(body),
+    });
+    response.status(200).send("");
+  }
+
   async getTokenConfiguration(request: Request, response: Response, next: NextFunction) {
     const body: Paths.GetTokenConfiguration.Post.RequestBody = request.body;
     let tokenConfig = await this.tokenConfigurationRepository.findOne({ token: body.token, os: body.os });

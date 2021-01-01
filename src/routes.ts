@@ -43,4 +43,10 @@ export const Routes = [
     controller: GroundController,
     action: "ping",
   },
+  {
+    method: "post",
+    route: "/enqueue",
+    controller: GroundController,
+    action: "enqueue",
+  },
 ];
