@@ -94,6 +94,10 @@ createConnection({
         continue;
       }
 
+      const timeoutId = setTimeout(() => {
+        console.error('timeout pushing to token, comitting suicide');
+        process.exit(2);
+      }, 21000);
       switch (payload.type) {
         case 2:
           payload = <Components.Schemas.PushNotificationOnchainAddressGotPaid>payload;
@@ -120,6 +124,7 @@ createConnection({
           await sendQueueRepository.remove(record);
           break;
       }
+      clearTimeout(timeoutId);
     }
   })
   .catch((error) => {
