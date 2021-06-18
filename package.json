@@ -1,6 +1,6 @@
 {
   "name": "groundcontrol",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "GroundControl push server API",
   "devDependencies": {
     "prettier": "2.0.5"
