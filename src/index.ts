@@ -5,6 +5,7 @@ import * as bodyParser from "body-parser";
 import { Request, Response } from "express";
 import { Routes } from "./routes";
 require("dotenv").config();
+const helmet = require("helmet");
 const cors = require("cors");
 const url = require("url");
 const parsed = url.parse(process.env.JAWSDB_MARIA_URL);
@@ -36,6 +37,8 @@ createConnection({
     const app = express();
     app.use(bodyParser.json());
     app.use(cors());
+    app.use(helmet.hidePoweredBy());
+    app.use(helmet.hsts());
 
     // register express routes from defined application routes
     Routes.forEach((route) => {
