@@ -45,7 +45,8 @@ createConnection({
 })
   .then(async (connection) => {
     // start worker
-    console.log("running");
+    console.log("running groundcontrol worker-sender");
+    console.log(require("fs").readFileSync("./bowie.txt").toString("ascii"));
 
     const sendQueueRepository = getRepository(SendQueue);
     const tokenConfigurationRepository = getRepository(TokenConfiguration);
@@ -53,7 +54,7 @@ createConnection({
     while (1) {
       const record = await sendQueueRepository.findOne();
       if (!record) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000, false));
         continue;
       }
       // TODO: we could atomically lock this record via mariadb's GET_LOCK and typeorm's raw query, and that would
@@ -104,7 +105,7 @@ createConnection({
       }
 
       const timeoutId = setTimeout(() => {
-        console.error('timeout pushing to token, comitting suicide');
+        console.error("timeout pushing to token, comitting suicide");
         process.exit(2);
       }, 21000);
       switch (payload.type) {
