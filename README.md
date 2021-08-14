@@ -98,6 +98,14 @@ Set them as env variables or put them into `.env` file in project root dir.
 
 https://dev.to/jakubkoci/react-native-push-notifications-313i
 
+### Re-issue Apple certificate when it expires (yearly)
+
+- create certificate signing request https://help.apple.com/developer-account/#/devbfa00fef7
+- create certificate & export to p12 https://help.apple.com/developer-account/#/dev82a71386a
+- convert .p12 to .pem `openssl pkcs12 -in push_certificates.p12 -out push_certificates.pem -nodes`
+- get pem hex `xxd -p  push_certificates.pem  | tr -d '\n'`
+- replace `APNS_PEM` environment variable on production (don't forget to restart)
+
 ### License
 
 MIT
