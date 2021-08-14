@@ -131,7 +131,8 @@ createConnection({
 })
   .then(async (connection) => {
     // start worker
-    console.log("running");
+    console.log("running groundcontrol worker-processmempool");
+    console.log(require("fs").readFileSync("./bowie.txt").toString("ascii"));
 
     sendQueueRepository = getRepository(SendQueue);
 
@@ -145,7 +146,7 @@ createConnection({
       const end = +new Date();
       process.env.VERBOSE && console.log("processing mempool took", (end - start) / 1000, "sec");
       process.env.VERBOSE && console.log("-----------------------");
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000, false));
     }
   })
   .catch((error) => {

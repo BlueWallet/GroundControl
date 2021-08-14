@@ -124,7 +124,8 @@ createConnection({
 })
   .then(async (connection) => {
     // start worker
-    console.log("running");
+    console.log("running groundcontrol worker-blockprocessor");
+    console.log(require("fs").readFileSync("./bowie.txt").toString("ascii"));
 
     const KeyValueRepository = getRepository(KeyValue);
     const sendQueueRepository = getRepository(SendQueue);
@@ -141,7 +142,7 @@ createConnection({
       const responseGetblockcount = await client.request("getblockcount", []);
 
       if (+responseGetblockcount.result <= +keyVal.value) {
-        await new Promise((resolve) => setTimeout(resolve, 60000));
+        await new Promise((resolve) => setTimeout(resolve, 60000, false));
         continue;
       }
 

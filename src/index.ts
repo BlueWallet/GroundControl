@@ -62,6 +62,7 @@ createConnection({
 
     app.listen(process.env.PORT || 3001);
 
-    console.log("Express server has started on port ", process.env.PORT || 3001);
+    console.log("GroundControl server has started on port ", process.env.PORT || 3001);
+    console.log(require("fs").readFileSync("./bowie.txt").toString("ascii"));
   })
   .catch((error) => console.log(error));
