@@ -13,7 +13,7 @@
     "express": "^4.17.2",
     "express-rate-limit": "^5.5.1",
     "frisbee": "^3.1.4",
-    "helmet": "^4.6.0",
+    "helmet": "^5.0.1",
     "jayson": "^3.6.6",
     "mysql2": "^2.3.3",
     "reflect-metadata": "^0.1.10",
