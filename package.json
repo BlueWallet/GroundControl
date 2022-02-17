@@ -9,7 +9,7 @@
     "@types/node": "16.9.1",
     "body-parser": "^1.19.1",
     "cors": "^2.8.5",
-    "dotenv": "^11.0.0",
+    "dotenv": "^14.3.2",
     "express": "^4.17.2",
     "express-rate-limit": "^5.5.1",
     "frisbee": "^3.1.4",
