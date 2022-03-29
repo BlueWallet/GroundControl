@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, Index } from "typeorm";
 
 @Entity()
 @Index(["token", "address"], { unique: true })
+@Index(["address"], { unique: false })
 export class TokenToAddress {
   @PrimaryGeneratedColumn()
   id: number;
