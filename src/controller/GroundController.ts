@@ -209,7 +209,11 @@ export class GroundController {
       tokenConfig.last_online = new Date();
     }
 
-    await this.tokenConfigurationRepository.save(tokenConfig);
+    try {
+      await this.tokenConfigurationRepository.save(tokenConfig);
+    } catch (error) {
+      console.warn(error.message);
+    }
     response.status(200).send("");
   }
 
