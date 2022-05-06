@@ -24,6 +24,14 @@ const ADDRESS_IGNORE_LIST = [
   "1BrasiLb2KMbdtuhb1chAVnS2FvcNGfV9J",
   "1GQdrgqAbkeEPUef1UpiTc4X1mUHMcyuGW",
   "1KHwtS5mn7NMUm7Ls7Y1XwxLqMriLdaGbX",
+  "bc1q7cyrfmck2ffu2ud3rn5l5a8yv6f0chkp0zpemf",
+  "bc1qwfgdjyy95aay2686fn74h6a4nu9eev6np7q4fn204dkj3274frlqrskvx0",
+  "bc1qm34lsc65zpw79lxes69zkqmk6ee3ewf0j77s3h",
+  "bc1qrnn4wfhgz2e0etek66sh3n9l6k99alxk044mhr",
+  "13nCMaHDNRGM29UfMMkhUQjHkVYY1ZyrpU",
+  "bc1qel7tps3wu6zqztaanczvt76hffwh7k06jd8r9xh2v3ztpa5ty5dsz358ys",
+  "bc1qyzxdu4px4jy8gwhcj82zpv7qzhvc0fvumgnh0r",
+  "bc1qyemk24czaa6a2nr89nrz775ewvptxg7yfe750u",
 ];
 
 export class GroundController {
