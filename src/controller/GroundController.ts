@@ -16,6 +16,16 @@ if (!process.env.JAWSDB_MARIA_URL || !process.env.FCM_SERVER_KEY || !process.env
 
 const LAST_PROCESSED_BLOCK = "LAST_PROCESSED_BLOCK";
 
+const ADDRESS_IGNORE_LIST = [
+  "bc1qltxjty7xfrnkzlrhmxpcekknr3uncne8sht7rn",
+  "bc1qwqdg6squsna38e46795at95yu9atm8azzmyvckulcc7kytlcckxswvvzej",
+  "bc1qw8wrek2m7nlqldll66ajnwr9mh64syvkt67zlu",
+  "1111111111111111111114oLvT2",
+  "1BrasiLb2KMbdtuhb1chAVnS2FvcNGfV9J",
+  "1GQdrgqAbkeEPUef1UpiTc4X1mUHMcyuGW",
+  "1KHwtS5mn7NMUm7Ls7Y1XwxLqMriLdaGbX",
+];
+
 export class GroundController {
   private tokenToAddressRepository = getRepository(TokenToAddress);
   private tokenToHashRepository = getRepository(TokenToHash);
@@ -51,6 +61,10 @@ export class GroundController {
 
     // todo: refactor into single batch save
     for (const address of body.addresses) {
+      if (ADDRESS_IGNORE_LIST.includes(address)) {
+        continue;
+      }
+
       // todo: validate bitcoin address
       console.log(body.token, "->", address);
       try {
