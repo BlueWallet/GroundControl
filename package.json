@@ -17,7 +17,7 @@
     "jayson": "^3.6.6",
     "mysql2": "^2.3.3",
     "reflect-metadata": "^0.1.10",
-    "ts-node": "10.8.1",
+    "ts-node": "10.8.2",
     "typeorm": "0.3.7",
     "typescript": "4.7.4"
   },
