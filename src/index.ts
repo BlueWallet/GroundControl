@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { createConnection } from "typeorm";
+import { DataSource } from "typeorm";
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import { Request, Response } from "express";
@@ -14,7 +14,7 @@ if (!process.env.JAWSDB_MARIA_URL || !process.env.FCM_SERVER_KEY || !process.env
   process.exit();
 }
 
-createConnection({
+const dataSource = new DataSource({
   type: "mariadb",
   host: parsed.hostname,
   port: parsed.port,
@@ -25,14 +25,10 @@ createConnection({
   logging: false,
   entities: ["src/entity/**/*.ts"],
   migrations: ["src/migration/**/*.ts"],
-  subscribers: ["src/subscriber/**/*.ts"],
-  cli: {
-    entitiesDir: "src/entity",
-    migrationsDir: "src/migration",
-    subscribersDir: "src/subscriber",
-  },
-})
-  .then(async (connection) => {
+  subscribers: ["src/subscriber/**/*.ts"]
+});
+
+dataSource.connect().then(async (connection) => {
     // create express app
     const app = express();
     app.use(bodyParser.json());

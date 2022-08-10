@@ -133,21 +133,21 @@ export class GroundController {
 
     for (const address of body.addresses) {
       try {
-        const addressRecord = await this.tokenToAddressRepository.findOne({ os: body.os, token: body.token, address });
+        const addressRecord = await this.tokenToAddressRepository.findOneBy({ os: body.os, token: body.token, address });
         await this.tokenToAddressRepository.remove(addressRecord);
       } catch (_) {}
     }
 
     for (const hash of body.hashes) {
       try {
-        const hashRecord = await this.tokenToHashRepository.findOne({ os: body.os, token: body.token, hash });
+        const hashRecord = await this.tokenToHashRepository.findOneBy({ os: body.os, token: body.token, hash });
         await this.tokenToHashRepository.remove(hashRecord);
       } catch (_) {}
     }
 
     for (const txid of body.txids) {
       try {
-        const txidRecord = await this.tokenToTxidRepository.findOne({ os: body.os, token: body.token, txid });
+        const txidRecord = await this.tokenToTxidRepository.findOneBy({ os: body.os, token: body.token, txid });
         await this.tokenToTxidRepository.remove(txidRecord);
       } catch (_) {}
     }
@@ -172,7 +172,9 @@ export class GroundController {
     }
 
     const tokenToHashAll = await this.tokenToHashRepository.find({
-      hash: hashShouldBe,
+      where: {
+        hash: hashShouldBe,
+      }
     });
     for (const tokenToHash of tokenToHashAll) {
       process.env.VERBOSE && console.log("enqueueing to token", tokenToHash.token, tokenToHash.os);
@@ -198,7 +200,7 @@ export class GroundController {
   async ping(request: Request, response: Response, next: NextFunction) {
     const keyValueRepository = getRepository(KeyValue);
     const sendQueueRepository = getRepository(SendQueue);
-    const keyVal = await keyValueRepository.findOne({ key: LAST_PROCESSED_BLOCK });
+    const keyVal = await keyValueRepository.findOneBy({ key: LAST_PROCESSED_BLOCK });
     const send_queue_size = await sendQueueRepository.count();
 
     const serverInfo: Paths.Ping.Get.Responses.$200 = {
@@ -215,7 +217,7 @@ export class GroundController {
 
   async setTokenConfiguration(request: Request, response: Response, next: NextFunction) {
     const body: Paths.SetTokenConfiguration.Post.RequestBody = request.body;
-    let tokenConfig = await this.tokenConfigurationRepository.findOne({ token: body.token, os: body.os });
+    let tokenConfig = await this.tokenConfigurationRepository.findOneBy({ token: body.token, os: body.os });
     if (!tokenConfig) {
       tokenConfig = new TokenConfiguration();
       tokenConfig.token = body.token;
@@ -251,7 +253,7 @@ export class GroundController {
 
   async getTokenConfiguration(request: Request, response: Response, next: NextFunction) {
     const body: Paths.GetTokenConfiguration.Post.RequestBody = request.body;
-    let tokenConfig = await this.tokenConfigurationRepository.findOne({ token: body.token, os: body.os });
+    let tokenConfig = await this.tokenConfigurationRepository.findOneBy({ token: body.token, os: body.os });
     if (!tokenConfig) {
       tokenConfig = new TokenConfiguration();
       tokenConfig.token = body.token;
