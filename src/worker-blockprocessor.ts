@@ -1,6 +1,6 @@
 import "./openapi/api";
 import "reflect-metadata";
-import { createConnection, getRepository, Repository } from "typeorm";
+import { DataSource, getRepository, Repository } from "typeorm";
 import { TokenToAddress } from "./entity/TokenToAddress";
 import { SendQueue } from "./entity/SendQueue";
 import { KeyValue } from "./entity/KeyValue";
@@ -104,7 +104,7 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
   }
 }
 
-createConnection({
+const dataSource = new DataSource({
   type: "mariadb",
   host: parsed.hostname,
   port: parsed.port,
@@ -115,14 +115,10 @@ createConnection({
   logging: false,
   entities: ["src/entity/**/*.ts"],
   migrations: ["src/migration/**/*.ts"],
-  subscribers: ["src/subscriber/**/*.ts"],
-  cli: {
-    entitiesDir: "src/entity",
-    migrationsDir: "src/migration",
-    subscribersDir: "src/subscriber",
-  },
-})
-  .then(async (connection) => {
+  subscribers: ["src/subscriber/**/*.ts"]
+});
+
+dataSource.connect().then(async (connection) => {
     // start worker
     console.log("running groundcontrol worker-blockprocessor");
     console.log(require("fs").readFileSync("./bowie.txt").toString("ascii"));
@@ -131,7 +127,7 @@ createConnection({
     const sendQueueRepository = getRepository(SendQueue);
 
     while (1) {
-      const keyVal = await KeyValueRepository.findOne({ key: LAST_PROCESSED_BLOCK });
+      const keyVal = await KeyValueRepository.findOneBy({ key: LAST_PROCESSED_BLOCK });
       if (!keyVal) {
         // if no info saved in database we assume we are all caught up and wait for the next block
         const responseGetblockcount = await client.request("getblockcount", []);

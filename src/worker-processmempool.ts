@@ -1,6 +1,6 @@
 import "./openapi/api";
 import "reflect-metadata";
-import { createConnection, getRepository, Repository } from "typeorm";
+import { DataSource, getRepository, Repository } from "typeorm";
 import { TokenToAddress } from "./entity/TokenToAddress";
 import { SendQueue } from "./entity/SendQueue";
 require("dotenv").config();
@@ -111,7 +111,7 @@ async function processMempool() {
   }
 }
 
-createConnection({
+const dataSource = new DataSource({
   type: "mariadb",
   host: parsed.hostname,
   port: parsed.port,
@@ -122,14 +122,10 @@ createConnection({
   logging: false,
   entities: ["src/entity/**/*.ts"],
   migrations: ["src/migration/**/*.ts"],
-  subscribers: ["src/subscriber/**/*.ts"],
-  cli: {
-    entitiesDir: "src/entity",
-    migrationsDir: "src/migration",
-    subscribersDir: "src/subscriber",
-  },
-})
-  .then(async (connection) => {
+  subscribers: ["src/subscriber/**/*.ts"]
+});
+
+dataSource.connect().then(async (connection) => {
     // start worker
     console.log("running groundcontrol worker-processmempool");
     console.log(require("fs").readFileSync("./bowie.txt").toString("ascii"));

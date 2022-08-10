@@ -26,6 +26,12 @@
     "start": "ts-node src/index.ts",
     "worker-blockprocessor": "ts-node src/worker-blockprocessor.ts",
     "worker-processmempool": "ts-node src/worker-processmempool.ts",
-    "worker-sender": "ts-node src/worker-sender.ts"
+    "worker-sender": "ts-node src/worker-sender.ts",
+    "typeorm": "typeorm-ts-node-esm -d ./src/db/ormconfig.ts",
+    "migration:create": "typeorm-ts-node-esm migration:create",
+    "migration:generate": "npm run typeorm migration:generate",
+    "migration:show": "npm run typeorm migration:show",
+    "migration:run": "npm run typeorm migration:run",
+    "migration:revert": "npm run typeorm migration:revert"
   }
 }

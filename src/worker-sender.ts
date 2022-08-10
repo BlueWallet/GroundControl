@@ -1,6 +1,6 @@
 import "./openapi/api";
 import "reflect-metadata";
-import { createConnection, getRepository } from "typeorm";
+import { DataSource, getRepository } from "typeorm";
 import { SendQueue } from "./entity/SendQueue";
 import { GroundControlToMajorTom } from "./class/GroundControlToMajorTom";
 import { TokenConfiguration } from "./entity/TokenConfiguration";
@@ -25,7 +25,7 @@ process
     process.exit(1);
   });
 
-createConnection({
+const dataSource = new DataSource({
   type: "mariadb",
   host: parsed.hostname,
   port: parsed.port,
@@ -36,14 +36,10 @@ createConnection({
   logging: false,
   entities: ["src/entity/**/*.ts"],
   migrations: ["src/migration/**/*.ts"],
-  subscribers: ["src/subscriber/**/*.ts"],
-  cli: {
-    entitiesDir: "src/entity",
-    migrationsDir: "src/migration",
-    subscribersDir: "src/subscriber",
-  },
-})
-  .then(async (connection) => {
+  subscribers: ["src/subscriber/**/*.ts"]
+});
+
+dataSource.connect().then(async (connection) => {
     // start worker
     console.log("running groundcontrol worker-sender");
     console.log(require("fs").readFileSync("./bowie.txt").toString("ascii"));
@@ -52,7 +48,7 @@ createConnection({
     const tokenConfigurationRepository = getRepository(TokenConfiguration);
 
     while (1) {
-      const record = await sendQueueRepository.findOne();
+      const [record] = await sendQueueRepository.find();
       if (!record) {
         await new Promise((resolve) => setTimeout(resolve, 1000, false));
         continue;
@@ -68,7 +64,7 @@ createConnection({
         continue;
       }
 
-      let tokenConfig = await tokenConfigurationRepository.findOne({ os: payload.os, token: payload.token });
+      let tokenConfig = await tokenConfigurationRepository.findOneBy({ os: payload.os, token: payload.token });
       if (!tokenConfig) {
         if (!payload.os || !payload.token) {
           process.env.VERBOSE && console.warn("no os or token in payload:", payload);
