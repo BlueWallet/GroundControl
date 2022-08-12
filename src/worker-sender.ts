@@ -1,6 +1,6 @@
 import "./openapi/api";
 import "reflect-metadata";
-import { DataSource, getRepository } from "typeorm";
+import { DataSource } from "typeorm";
 import { SendQueue } from "./entity/SendQueue";
 import { GroundControlToMajorTom } from "./class/GroundControlToMajorTom";
 import { TokenConfiguration } from "./entity/TokenConfiguration";
@@ -44,8 +44,8 @@ dataSource.connect().then(async (connection) => {
     console.log("running groundcontrol worker-sender");
     console.log(require("fs").readFileSync("./bowie.txt").toString("ascii"));
 
-    const sendQueueRepository = getRepository(SendQueue);
-    const tokenConfigurationRepository = getRepository(TokenConfiguration);
+    const sendQueueRepository = dataSource.getRepository(SendQueue);
+    const tokenConfigurationRepository = dataSource.getRepository(TokenConfiguration);
 
     while (1) {
       const [record] = await sendQueueRepository.find();
