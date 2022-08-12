@@ -1,6 +1,6 @@
 import "./openapi/api";
 import "reflect-metadata";
-import { DataSource, getRepository, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { TokenToAddress } from "./entity/TokenToAddress";
 import { SendQueue } from "./entity/SendQueue";
 require("dotenv").config();
@@ -78,7 +78,7 @@ async function processMempool() {
       }
 
       // fetching found addresses from db:
-      const query = getRepository(TokenToAddress).createQueryBuilder().where("address IN (:...address)", { address: addresses });
+      const query = dataSource.getRepository(TokenToAddress).createQueryBuilder().where("address IN (:...address)", { address: addresses });
       for (const t2a of await query.getMany()) {
         // found all addresses that we are tracking on behalf of our users. now,
         // iterating all addresses in a block to see if there is a match.
@@ -130,7 +130,7 @@ dataSource.connect().then(async (connection) => {
     console.log("running groundcontrol worker-processmempool");
     console.log(require("fs").readFileSync("./bowie.txt").toString("ascii"));
 
-    sendQueueRepository = getRepository(SendQueue);
+    sendQueueRepository = dataSource.getRepository(SendQueue);
 
     while (1) {
       const start = +new Date();

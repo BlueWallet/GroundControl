@@ -1,6 +1,6 @@
 import "./openapi/api";
 import "reflect-metadata";
-import { DataSource, getRepository, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { TokenToAddress } from "./entity/TokenToAddress";
 import { SendQueue } from "./entity/SendQueue";
 import { KeyValue } from "./entity/KeyValue";
@@ -63,7 +63,7 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
   // allPotentialPushPayloadsArray.push({ address: "bc1qaemfnglf928kd9ma2jzdypk333au6ctu7h7led", txid: "666", sat: 1488, type: 2, token: "", os: "ios" }); // debug fixme
   // addresses.push("bc1qaemfnglf928kd9ma2jzdypk333au6ctu7h7led"); // debug fixme
 
-  const query = getRepository(TokenToAddress).createQueryBuilder().where("address IN (:...address)", { address: addresses });
+  const query = dataSource.getRepository(TokenToAddress).createQueryBuilder().where("address IN (:...address)", { address: addresses });
 
   for (const t2a of await query.getMany()) {
     // found all addresses that we are tracking on behalf of our users. now,
@@ -86,7 +86,7 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
   }
 
   // now, checking if there is a subscription to one of the mined txids:
-  const query2 = getRepository(TokenToTxid).createQueryBuilder().where("txid IN (:...txids)", { txids });
+  const query2 = dataSource.getRepository(TokenToTxid).createQueryBuilder().where("txid IN (:...txids)", { txids });
   for (const t2txid of await query2.getMany()) {
     const payload: Components.Schemas.PushNotificationTxidGotConfirmed = {
       txid: t2txid.txid,
@@ -123,8 +123,8 @@ dataSource.connect().then(async (connection) => {
     console.log("running groundcontrol worker-blockprocessor");
     console.log(require("fs").readFileSync("./bowie.txt").toString("ascii"));
 
-    const KeyValueRepository = getRepository(KeyValue);
-    const sendQueueRepository = getRepository(SendQueue);
+    const KeyValueRepository = dataSource.getRepository(KeyValue);
+    const sendQueueRepository = dataSource.getRepository(SendQueue);
 
     while (1) {
       const keyVal = await KeyValueRepository.findOneBy({ key: LAST_PROCESSED_BLOCK });
