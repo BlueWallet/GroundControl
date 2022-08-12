@@ -12,19 +12,19 @@ export class TokenConfiguration {
   @Column()
   os: string;
 
-  @Column({ default: () => true })
+  @Column({ default: true })
   level_all: boolean;
 
-  @Column({ default: () => true })
+  @Column({ default: true })
   level_transactions: boolean;
 
-  @Column({ default: () => true })
+  @Column({ default: true })
   level_news: boolean;
 
-  @Column({ default: () => true })
+  @Column({ default: true })
   level_price: boolean;
 
-  @Column({ default: () => true })
+  @Column({ default: true })
   level_tips: boolean;
 
   @Column({ default: "en" })
