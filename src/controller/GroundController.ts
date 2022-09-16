@@ -1,5 +1,5 @@
 import "../openapi/api";
-import { getRepository } from "typeorm";
+import { DataSource } from "typeorm";
 import { NextFunction, Request, Response } from "express";
 import { TokenToAddress } from "../entity/TokenToAddress";
 import { TokenToHash } from "../entity/TokenToHash";
@@ -7,9 +7,10 @@ import { TokenToTxid } from "../entity/TokenToTxid";
 import { TokenConfiguration } from "../entity/TokenConfiguration";
 import { SendQueue } from "../entity/SendQueue";
 import { KeyValue } from "../entity/KeyValue";
+import dataSource from "../data-source";
 require("dotenv").config();
 const pck = require("../../package.json");
-if (!process.env.JAWSDB_MARIA_URL || !process.env.FCM_SERVER_KEY || !process.env.APNS_PEM) {
+if (!process.env.JAWSDB_MARIA_URL || !process.env.FCM_SERVER_KEY || !process.env.APNS_P8 || !process.env.APNS_TOPIC || !process.env.APPLE_TEAM_ID || !process.env.APNS_P8_KID) {
   console.error("not all env variables set");
   process.exit();
 }
@@ -34,12 +35,62 @@ const ADDRESS_IGNORE_LIST = [
   "bc1qyemk24czaa6a2nr89nrz775ewvptxg7yfe750u",
 ];
 
+let connection: DataSource;
+dataSource.initialize().then((c) => {
+  console.log("db connected");
+  connection = c;
+});
+
 export class GroundController {
-  private tokenToAddressRepository = getRepository(TokenToAddress);
-  private tokenToHashRepository = getRepository(TokenToHash);
-  private tokenToTxidRepository = getRepository(TokenToTxid);
-  private tokenConfigurationRepository = getRepository(TokenConfiguration);
-  private sendQueueRepository = getRepository(SendQueue);
+  private _tokenToAddressRepository;
+  private _tokenToHashRepository;
+  private _tokenToTxidRepository;
+  private _tokenConfigurationRepository;
+  private _sendQueueRepository;
+
+  get tokenToAddressRepository() {
+    if (this._tokenToAddressRepository) {
+      return this._tokenToAddressRepository;
+    }
+
+    this._tokenToAddressRepository = connection.getRepository(TokenToAddress);
+    return this._tokenToAddressRepository;
+  }
+
+  get tokenToHashRepository() {
+    if (this._tokenToHashRepository) {
+      return this._tokenToHashRepository;
+    }
+    this._tokenToHashRepository = connection.getRepository(TokenToHash);
+    return this._tokenToHashRepository;
+  }
+
+  get tokenToTxidRepository() {
+    if (this._tokenToTxidRepository) {
+      return this._tokenToTxidRepository;
+    }
+
+    this._tokenToTxidRepository = connection.getRepository(TokenToTxid);
+    return this._tokenToTxidRepository;
+  }
+
+  get tokenConfigurationRepository() {
+    if (this._tokenConfigurationRepository) {
+      return this._tokenConfigurationRepository;
+    }
+
+    this._tokenConfigurationRepository = connection.getRepository(TokenConfiguration);
+    return this._tokenConfigurationRepository;
+  }
+
+  get sendQueueRepository() {
+    if (this._sendQueueRepository) {
+      return this._sendQueueRepository;
+    }
+
+    this._sendQueueRepository = connection.getRepository(SendQueue);
+    return this._sendQueueRepository;
+  }
 
   /**
    * Submit bitcoin addressess that you wish to be notified about to specific push token. Token serves as unique identifier of a device/user. Also, OS of the token
@@ -174,7 +225,7 @@ export class GroundController {
     const tokenToHashAll = await this.tokenToHashRepository.find({
       where: {
         hash: hashShouldBe,
-      }
+      },
     });
     for (const tokenToHash of tokenToHashAll) {
       process.env.VERBOSE && console.log("enqueueing to token", tokenToHash.token, tokenToHash.os);
@@ -198,8 +249,8 @@ export class GroundController {
   }
 
   async ping(request: Request, response: Response, next: NextFunction) {
-    const keyValueRepository = getRepository(KeyValue);
-    const sendQueueRepository = getRepository(SendQueue);
+    const keyValueRepository = connection.getRepository(KeyValue);
+    const sendQueueRepository = connection.getRepository(SendQueue);
     const keyVal = await keyValueRepository.findOneBy({ key: LAST_PROCESSED_BLOCK });
     const send_queue_size = await sendQueueRepository.count();
 

@@ -1,16 +1,12 @@
 import "./openapi/api";
 import "reflect-metadata";
-import { DataSource } from "typeorm";
 import { SendQueue } from "./entity/SendQueue";
 import { GroundControlToMajorTom } from "./class/GroundControlToMajorTom";
 import { TokenConfiguration } from "./entity/TokenConfiguration";
 import { NOTIFICATION_LEVEL_NEWS, NOTIFICATION_LEVEL_PRICE, NOTIFICATION_LEVEL_TIPS, NOTIFICATION_LEVEL_TRANSACTIONS } from "./openapi/constants";
+import dataSource from "./data-source";
 require("dotenv").config();
-const url = require("url");
-const parsed = url.parse(process.env.JAWSDB_MARIA_URL);
-const serverKey = process.env.FCM_SERVER_KEY;
-const apnsPem = process.env.APNS_PEM;
-if (!process.env.JAWSDB_MARIA_URL || !process.env.FCM_SERVER_KEY || !process.env.APNS_PEM) {
+if (!process.env.FCM_SERVER_KEY || !process.env.APNS_P8 || !process.env.APNS_TOPIC || !process.env.APPLE_TEAM_ID || !process.env.APNS_P8_KID) {
   console.error("not all env variables set");
   process.exit();
 }
@@ -25,21 +21,9 @@ process
     process.exit(1);
   });
 
-const dataSource = new DataSource({
-  type: "mariadb",
-  host: parsed.hostname,
-  port: parsed.port,
-  username: parsed.auth.split(":")[0],
-  password: parsed.auth.split(":")[1],
-  database: parsed.path.replace("/", ""),
-  synchronize: true,
-  logging: false,
-  entities: ["src/entity/**/*.ts"],
-  migrations: ["src/migration/**/*.ts"],
-  subscribers: ["src/subscriber/**/*.ts"]
-});
-
-dataSource.connect().then(async (connection) => {
+dataSource
+  .initialize()
+  .then(async (connection) => {
     // start worker
     console.log("running groundcontrol worker-sender");
     console.log(require("fs").readFileSync("./bowie.txt").toString("ascii"));
@@ -108,25 +92,25 @@ dataSource.connect().then(async (connection) => {
         case 2:
           payload = <Components.Schemas.PushNotificationOnchainAddressGotPaid>payload;
           process.env.VERBOSE && console.warn("pushing to token", payload.token, payload.os);
-          await GroundControlToMajorTom.pushOnchainAddressWasPaid(serverKey, apnsPem, payload);
+          await GroundControlToMajorTom.pushOnchainAddressWasPaid(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
         case 3:
           payload = <Components.Schemas.PushNotificationOnchainAddressGotUnconfirmedTransaction>payload;
           process.env.VERBOSE && console.warn("pushing to token", payload.token, payload.os);
-          await GroundControlToMajorTom.pushOnchainAddressGotUnconfirmedTransaction(serverKey, apnsPem, payload);
+          await GroundControlToMajorTom.pushOnchainAddressGotUnconfirmedTransaction(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
         case 1:
           payload = <Components.Schemas.PushNotificationLightningInvoicePaid>payload;
           process.env.VERBOSE && console.warn("pushing to token", payload.token, payload.os);
-          await GroundControlToMajorTom.pushLightningInvoicePaid(serverKey, apnsPem, payload);
+          await GroundControlToMajorTom.pushLightningInvoicePaid(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
         case 4:
           payload = <Components.Schemas.PushNotificationTxidGotConfirmed>payload;
           process.env.VERBOSE && console.warn("pushing to token", payload.token, payload.os);
-          await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(serverKey, apnsPem, payload);
+          await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
       }

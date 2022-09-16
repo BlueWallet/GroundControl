@@ -1,6 +1,6 @@
 {
   "name": "groundcontrol",
-  "version": "1.0.7",
+  "version": "2.0.0",
   "description": "GroundControl push server API",
   "devDependencies": {
     "prettier": "2.0.5"
@@ -15,6 +15,7 @@
     "frisbee": "^3.1.4",
     "helmet": "^5.1.0",
     "jayson": "^3.6.6",
+    "jsonwebtoken": "^8.5.1",
     "mysql2": "^2.3.3",
     "reflect-metadata": "^0.1.10",
     "ts-node": "10.9.1",
