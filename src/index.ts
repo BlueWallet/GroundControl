@@ -1,34 +1,20 @@
 import "reflect-metadata";
-import { DataSource } from "typeorm";
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import { Request, Response } from "express";
 import { Routes } from "./routes";
+import dataSource from "./data-source";
 require("dotenv").config();
 const helmet = require("helmet");
 const cors = require("cors");
-const url = require("url");
-const parsed = url.parse(process.env.JAWSDB_MARIA_URL);
-if (!process.env.JAWSDB_MARIA_URL || !process.env.FCM_SERVER_KEY || !process.env.APNS_PEM || !process.env.APNS_TOPIC) {
+if (!process.env.JAWSDB_MARIA_URL || !process.env.FCM_SERVER_KEY || !process.env.APNS_P8 || !process.env.APNS_TOPIC) {
   console.error("not all env variables set");
   process.exit();
 }
 
-const dataSource = new DataSource({
-  type: "mariadb",
-  host: parsed.hostname,
-  port: parsed.port,
-  username: parsed.auth.split(":")[0],
-  password: parsed.auth.split(":")[1],
-  database: parsed.path.replace("/", ""),
-  synchronize: true,
-  logging: false,
-  entities: ["src/entity/**/*.ts"],
-  migrations: ["src/migration/**/*.ts"],
-  subscribers: ["src/subscriber/**/*.ts"]
-});
-
-dataSource.connect().then(async (connection) => {
+dataSource
+  .initialize()
+  .then(async (connection) => {
     // create express app
     const app = express();
     app.use(bodyParser.json());

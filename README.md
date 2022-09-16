@@ -90,21 +90,17 @@ Set them as env variables or put them into `.env` file in project root dir.
 
 - `JAWSDB_MARIA_URL` for example `mysql://username:password@host:port/database`
 - `FCM_SERVER_KEY` hex encoded
-- `APNS_PEM` hex encoded
+- `APNS_P8` hex encoded
+- `APNS_P8_KID` issuer key which is "key ID" of your p8 file
+- `APPLE_TEAM_ID` "team ID" of your developer account
 - `BITCOIN_RPC` for example `http://username:password@host:8332`
 - `APNS_TOPIC` for example `io.bluewallet.bluewallet`
 
 ### Getting certificates
 
-https://dev.to/jakubkoci/react-native-push-notifications-313i
-
-### Re-issue Apple certificate when it expires (yearly)
-
-- create certificate signing request https://help.apple.com/developer-account/#/devbfa00fef7
-- create certificate & export to p12 https://help.apple.com/developer-account/#/dev82a71386a
-- convert .p12 to .pem `openssl pkcs12 -in push_certificates.p12 -out push_certificates.pem -nodes`
-- get pem hex `xxd -p  push_certificates.pem  | tr -d '\n'`
-- replace `APNS_PEM` environment variable on production (don't forget to restart)
+* outdated https://dev.to/jakubkoci/react-native-push-notifications-313i
+* https://stackoverflow.com/questions/44631803/ios-swift-how-to-create-p8-file/67533665#67533665
+* get P8 hex `xxd -p file.p8 | tr -d '\n'`
 
 ### License
 

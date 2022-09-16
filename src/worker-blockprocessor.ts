@@ -1,14 +1,15 @@
 import "./openapi/api";
 import "reflect-metadata";
-import { DataSource, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { TokenToAddress } from "./entity/TokenToAddress";
 import { SendQueue } from "./entity/SendQueue";
 import { KeyValue } from "./entity/KeyValue";
 import { TokenToTxid } from "./entity/TokenToTxid";
+import dataSource from "./data-source";
 require("dotenv").config();
 const url = require("url");
-const parsed = url.parse(process.env.JAWSDB_MARIA_URL);
-if (!process.env.JAWSDB_MARIA_URL || !process.env.BITCOIN_RPC) {
+
+if (!process.env.BITCOIN_RPC) {
   console.error("not all env variables set");
   process.exit();
 }
@@ -104,21 +105,9 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
   }
 }
 
-const dataSource = new DataSource({
-  type: "mariadb",
-  host: parsed.hostname,
-  port: parsed.port,
-  username: parsed.auth.split(":")[0],
-  password: parsed.auth.split(":")[1],
-  database: parsed.path.replace("/", ""),
-  synchronize: true,
-  logging: false,
-  entities: ["src/entity/**/*.ts"],
-  migrations: ["src/migration/**/*.ts"],
-  subscribers: ["src/subscriber/**/*.ts"]
-});
-
-dataSource.connect().then(async (connection) => {
+dataSource
+  .initialize()
+  .then(async (connection) => {
     // start worker
     console.log("running groundcontrol worker-blockprocessor");
     console.log(require("fs").readFileSync("./bowie.txt").toString("ascii"));
