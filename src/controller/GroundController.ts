@@ -45,6 +45,15 @@ const ADDRESS_IGNORE_LIST = [
   "bc1qt5m8xeclsja4lkfvl2nvmrt6z9vg60sd8w2kc6",
   "bc1qsatlphjcgvzlt9xhsgn0dnjus5jgwg83dr05c6",
   "bc1quq29mutxkgxmjfdr7ayj3zd9ad0ld5mrhh89l2",
+  "bc1qe9nagya0tvfhvymt8sejwedlukwq4a094h6ht9",
+  "1GrwDkr33gT6LuumniYjKEGjTLhsL5kmqC",
+  "33WSGLeVoEpuZDjB54HKZ1y5YsERELoVNq",
+  "3A8n8rwMnHnt2BqnjW4R73eZCMcUDTpYvv",
+  "bc1qns9f7yfx3ry9lj6yz7c9er0vwa0ye2eklpzqfw",
+  "38XnPvu9PmonFU9WouPXUjYbW91wa5MerL",
+  "1Bo8hs81QwnR6A3oFBXcWNZXgtwpfgByb3",
+  "37Z6neB2wDC3hsPDHLy2n2kFahNNU3eos8",
+  "1CK6KHY6MHgYvmRQ4PAafKYDrg1ejbH1cE",
 ];
 
 let connection: DataSource;
