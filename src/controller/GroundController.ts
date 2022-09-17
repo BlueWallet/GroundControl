@@ -6,6 +6,7 @@ import { TokenToHash } from "../entity/TokenToHash";
 import { TokenToTxid } from "../entity/TokenToTxid";
 import { TokenConfiguration } from "../entity/TokenConfiguration";
 import { SendQueue } from "../entity/SendQueue";
+import { PushLog } from "../entity/PushLog";
 import { KeyValue } from "../entity/KeyValue";
 import dataSource from "../data-source";
 require("dotenv").config();
@@ -275,6 +276,9 @@ export class GroundController {
     const keyVal = await keyValueRepository.findOneBy({ key: LAST_PROCESSED_BLOCK });
     const send_queue_size = await sendQueueRepository.count();
 
+    const ts = new Date(+new Date() - 1000 * 3600 * 24).toISOString();
+    const sent_24h = await connection.createQueryBuilder(PushLog, "PushLog").where("PushLog.created >= :ts", { ts }).getCount();
+
     const serverInfo: Paths.Ping.Get.Responses.$200 = {
       name: pck.name,
       description: pck.description,
@@ -282,6 +286,8 @@ export class GroundController {
       uptime: Math.floor(process.uptime()),
       last_processed_block: +keyVal.value,
       send_queue_size,
+      // @ts-ignore
+      sent_24h,
     };
 
     return serverInfo;
