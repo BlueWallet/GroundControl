@@ -1,9 +1,9 @@
-import "../openapi/api";
 import { DataSource } from "typeorm";
 import { PushLog } from "../entity/PushLog";
 import { TokenToAddress } from "../entity/TokenToAddress";
 import { TokenToHash } from "../entity/TokenToHash";
 import { TokenToTxid } from "../entity/TokenToTxid";
+import { components } from "../openapi/api";
 const jwt = require("jsonwebtoken");
 const Frisbee = require("frisbee");
 const http2 = require("http2");
@@ -64,7 +64,7 @@ export class GroundControlToMajorTom {
     dataSource: DataSource,
     serverKey: string,
     apnsP8: string,
-    pushNotification: Components.Schemas.PushNotificationOnchainAddressGotUnconfirmedTransaction
+    pushNotification: components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"]
   ): Promise<[object, object]> {
     const fcmPayload = {
       data: {},
@@ -92,7 +92,7 @@ export class GroundControlToMajorTom {
     if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(dataSource, apnsP8, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
   }
 
-  static async pushOnchainTxidGotConfirmed(dataSource: DataSource, serverKey: string, apnsP8: string, pushNotification: Components.Schemas.PushNotificationTxidGotConfirmed): Promise<[object, object]> {
+  static async pushOnchainTxidGotConfirmed(dataSource: DataSource, serverKey: string, apnsP8: string, pushNotification: components["schemas"]["PushNotificationTxidGotConfirmed"]): Promise<[object, object]> {
     const fcmPayload = {
       data: {},
       notification: {
@@ -119,7 +119,7 @@ export class GroundControlToMajorTom {
     if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(dataSource, apnsP8, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
   }
 
-  static async pushOnchainAddressWasPaid(dataSource: DataSource, serverKey: string, apnsP8: string, pushNotification: Components.Schemas.PushNotificationOnchainAddressGotPaid): Promise<[object, object]> {
+  static async pushOnchainAddressWasPaid(dataSource: DataSource, serverKey: string, apnsP8: string, pushNotification: components["schemas"]["PushNotificationOnchainAddressGotPaid"]): Promise<[object, object]> {
     const fcmPayload = {
       data: {},
       notification: {
@@ -146,7 +146,7 @@ export class GroundControlToMajorTom {
     if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(dataSource, apnsP8, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
   }
 
-  static async pushLightningInvoicePaid(dataSource: DataSource, serverKey: string, apnsP8: string, pushNotification: Components.Schemas.PushNotificationLightningInvoicePaid): Promise<[object, object]> {
+  static async pushLightningInvoicePaid(dataSource: DataSource, serverKey: string, apnsP8: string, pushNotification: components["schemas"]["PushNotificationLightningInvoicePaid"]): Promise<[object, object]> {
     const fcmPayload = {
       data: {},
       notification: {
@@ -173,7 +173,7 @@ export class GroundControlToMajorTom {
     if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(dataSource, apnsP8, pushNotification.token, apnsPayload, pushNotification, pushNotification.hash);
   }
 
-  protected static async _pushToApns(dataSource: DataSource, apnsP8: string, token: string, apnsPayload: object, pushNotification: Components.Schemas.PushNotificationBase, collapseId): Promise<[object, object]> {
+  protected static async _pushToApns(dataSource: DataSource, apnsP8: string, token: string, apnsPayload: object, pushNotification: components["schemas"]["PushNotificationBase"], collapseId): Promise<[object, object]> {
     return new Promise(function (resolve) {
       // we pass some of the notification properties as data properties to FCM payload:
       for (let dataKey of Object.keys(pushNotification)) {
@@ -249,7 +249,7 @@ export class GroundControlToMajorTom {
     });
   }
 
-  protected static async _pushToFcm(dataSource: DataSource, serverKey: string, token: string, fcmPayload: object, pushNotification: Components.Schemas.PushNotificationBase): Promise<[object, object]> {
+  protected static async _pushToFcm(dataSource: DataSource, serverKey: string, token: string, fcmPayload: object, pushNotification: components["schemas"]["PushNotificationBase"]): Promise<[object, object]> {
     const _api = new Frisbee({ baseURI: "https://fcm.googleapis.com" });
 
     fcmPayload["to"] = token;

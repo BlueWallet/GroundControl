@@ -169,6 +169,8 @@ components:
           type: "number"
         send_queue_size:
           type: "number"
+        sent_24h:
+          type: "number"
 
     NotificationLevel:
       type: string

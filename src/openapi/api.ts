@@ -1,246 +1,231 @@
-declare namespace Components {
-    namespace Schemas {
-        /**
-         * object thats posted to GroundControl to notify end-user that his specific invoice was paid by someone
-         */
-        export interface LightningInvoiceSettledNotification {
-            /**
-             * text that was embedded in invoice paid
-             */
-            memo?: string;
-            /**
-             * hex string preimage
-             */
-            preimage?: string;
-            /**
-             * hex string preimage hash
-             */
-            hash?: string;
-            /**
-             * exactly how much satoshis was paid to make this invoice settked (>= invoice amount)
-             */
-            amt_paid_sat?: number;
-        }
-        export type NotificationLevel = "transactions" | "news" | "price" | "tips";
-        /**
-         * payload for push notification delivered to phone
-         */
-        export interface PushNotificationBase {
-            /**
-             * type:
-             *  * `1` - Your lightning invoice was paid
-             *  * `2` - New transaction to one of your addresses
-             *  * `3` - New unconfirmed transaction to one of your addresses
-             *  * `4` - Transaction confirmed
-             *
-             */
-            type: 1 | 2 | 3 | 4;
-            token: string;
-            os: "android" | "ios";
-            badge?: number;
-            level: NotificationLevel;
-        }
-        /**
-         * payload for push notification delivered to phone
-         */
-        export interface PushNotificationLightningInvoicePaid {
-            type: 1;
-            token: string;
-            os: "android" | "ios";
-            badge?: number;
-            level: "transactions";
-            /**
-             * amount of satoshis
-             */
-            sat: number;
-            /**
-             * hash of specific ln invoice preimage
-             */
-            hash: string;
-            /**
-             * text attached to bolt11
-             */
-            memo: string;
-        }
-        /**
-         * payload for push notification delivered to phone
-         */
-        export interface PushNotificationOnchainAddressGotPaid {
-            type: 2;
-            token: string;
-            os: "android" | "ios";
-            badge?: number;
-            level: "transactions";
-            /**
-             * amount of satoshis
-             */
-            sat: number;
-            /**
-             * user's onchain address that has incoming transaction
-             */
-            address: string;
-            /**
-             * txid of the transaction where this address is one of the outputs
-             */
-            txid: string;
-        }
-        /**
-         * payload for push notification delivered to phone
-         */
-        export interface PushNotificationOnchainAddressGotUnconfirmedTransaction {
-            type: 3;
-            token: string;
-            os: "android" | "ios";
-            badge?: number;
-            level: "transactions";
-            /**
-             * amount of satoshis
-             */
-            sat: number;
-            /**
-             * user's onchain address that has incoming transaction
-             */
-            address: string;
-            /**
-             * txid of the transaction where this address is one of the outputs
-             */
-            txid: string;
-        }
-        /**
-         * payload for push notification delivered to phone
-         */
-        export interface PushNotificationTxidGotConfirmed {
-            type: 4;
-            token: string;
-            os: "android" | "ios";
-            badge?: number;
-            level: "transactions";
-            /**
-             * txid of the transaction that got confirmed
-             */
-            txid: string;
-        }
-        export interface ServerInfo {
-            name?: string;
-            description?: string;
-            version?: string;
-            uptime?: number;
-            last_processed_block?: number;
-            send_queue_size?: number;
-        }
-        export interface TokenConfiguration {
-            level_all?: boolean;
-            level_transactions?: boolean;
-            level_news?: boolean;
-            level_price?: boolean;
-            level_tips?: boolean;
-            lang?: string;
-            app_version?: string;
-        }
-    }
-}
-declare namespace Paths {
-    namespace Enqueue {
-        namespace Post {
-            /**
-             * payload for push notification delivered to phone
-             */
-            export interface RequestBody {
-                /**
-                 * type:
-                 *  * `1` - Your lightning invoice was paid
-                 *  * `2` - New transaction to one of your addresses
-                 *  * `3` - New unconfirmed transaction to one of your addresses
-                 *  * `4` - Transaction confirmed
-                 *
-                 */
-                type: 1 | 2 | 3 | 4;
-                token: string;
-                os: "android" | "ios";
-                badge?: number;
-                level: Components.Schemas.NotificationLevel;
-            }
-            namespace Responses {
-                export interface $200 {
-                }
-            }
-        }
-    }
-    namespace GetTokenConfiguration {
-        namespace Post {
-            export interface RequestBody {
-                token?: string;
-                os?: string;
-            }
-            namespace Responses {
-                export type $200 = Components.Schemas.TokenConfiguration;
-            }
-        }
-    }
-    namespace LightningInvoiceGotSettled {
-        namespace Post {
-            export type RequestBody = /* object thats posted to GroundControl to notify end-user that his specific invoice was paid by someone */ Components.Schemas.LightningInvoiceSettledNotification;
-            namespace Responses {
-                export interface $200 {
-                }
-            }
-        }
-    }
-    namespace MajorTomToGroundControl {
-        namespace Post {
-            export interface RequestBody {
-                addresses?: string[];
-                hashes?: string[];
-                txids?: string[];
-                token?: string;
-                os?: string;
-            }
-            namespace Responses {
-                export interface $201 {
-                }
-            }
-        }
-    }
-    namespace Ping {
-        namespace Get {
-            namespace Responses {
-                export type $200 = Components.Schemas.ServerInfo;
-            }
-        }
-    }
-    namespace SetTokenConfiguration {
-        namespace Post {
-            export interface RequestBody {
-                level_all?: boolean;
-                level_transactions?: boolean;
-                level_news?: boolean;
-                level_price?: boolean;
-                level_tips?: boolean;
-                lang?: string;
-                app_version?: string;
-                token: string;
-                os: string;
-            }
-            namespace Responses {
-                export interface $200 {
-                }
-            }
-        }
-    }
-    namespace Unsubscribe {
-        namespace Post {
-            export interface RequestBody {
-                addresses?: string[];
-                hashes?: string[];
-                txids?: string[];
-                token?: string;
-                os?: string;
-            }
-            namespace Responses {
-                export interface $201 {
-                }
-            }
-        }
-    }
-}
+/**
+ * This file was auto-generated by openapi-typescript.
+ * Do not make direct changes to the file.
+ */
 
+export type paths = {
+  "/lightningInvoiceGotSettled": {
+    post: {
+      responses: {
+        /** OK */
+        200: unknown;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["LightningInvoiceSettledNotification"];
+        };
+      };
+    };
+  };
+  "/majorTomToGroundControl": {
+    post: {
+      responses: {
+        /** Created */
+        201: unknown;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            addresses?: string[];
+            hashes?: string[];
+            txids?: string[];
+            token?: string;
+            os?: string;
+          } & { [key: string]: unknown };
+        };
+      };
+    };
+  };
+  "/unsubscribe": {
+    post: {
+      responses: {
+        /** Created */
+        201: unknown;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            addresses?: string[];
+            hashes?: string[];
+            txids?: string[];
+            token?: string;
+            os?: string;
+          } & { [key: string]: unknown };
+        };
+      };
+    };
+  };
+  "/ping": {
+    get: {
+      responses: {
+        /** OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["ServerInfo"];
+          };
+        };
+      };
+    };
+  };
+  "/getTokenConfiguration": {
+    post: {
+      responses: {
+        /** OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["TokenConfiguration"];
+          };
+        };
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            token?: string;
+            os?: string;
+          } & { [key: string]: unknown };
+        };
+      };
+    };
+  };
+  "/setTokenConfiguration": {
+    post: {
+      responses: {
+        /** OK */
+        200: unknown;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["TokenConfiguration"] &
+            ({
+              token: string;
+              os: string;
+            } & { [key: string]: unknown }) & { [key: string]: unknown };
+        };
+      };
+    };
+  };
+  "/enqueue": {
+    post: {
+      responses: {
+        /** OK */
+        200: unknown;
+      };
+      requestBody: {
+        content: {
+          "application/json": (
+            | components["schemas"]["PushNotificationLightningInvoicePaid"]
+            | components["schemas"]["PushNotificationOnchainAddressGotPaid"]
+            | components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"]
+            | components["schemas"]["PushNotificationTxidGotConfirmed"]
+          ) & { [key: string]: unknown };
+        };
+      };
+    };
+  };
+};
+
+export type components = {
+  schemas: {
+    ServerInfo: {
+      name?: string;
+      description?: string;
+      version?: string;
+      uptime?: number;
+      last_processed_block?: number;
+      send_queue_size?: number;
+      sent_24h?: number;
+    } & { [key: string]: unknown };
+    /** @enum {string} */
+    NotificationLevel: "transactions" | "news" | "price" | "tips";
+    TokenConfiguration: {
+      level_all?: boolean;
+      level_transactions?: boolean;
+      level_news?: boolean;
+      level_price?: boolean;
+      level_tips?: boolean;
+      lang?: string;
+      app_version?: string;
+    } & { [key: string]: unknown };
+    /** @description object thats posted to GroundControl to notify end-user that his specific invoice was paid by someone */
+    LightningInvoiceSettledNotification: {
+      /** @description text that was embedded in invoice paid */
+      memo?: string;
+      /** @description hex string preimage */
+      preimage?: string;
+      /** @description hex string preimage hash */
+      hash?: string;
+      /** @description exactly how much satoshis was paid to make this invoice settked (>= invoice amount) */
+      amt_paid_sat?: number;
+    } & { [key: string]: unknown };
+    /** @description payload for push notification delivered to phone */
+    PushNotificationBase: {
+      /**
+       * @description type:
+       *  * `1` - Your lightning invoice was paid
+       *  * `2` - New transaction to one of your addresses
+       *  * `3` - New unconfirmed transaction to one of your addresses
+       *  * `4` - Transaction confirmed
+       *
+       * @enum {integer}
+       */
+      type: 1 | 2 | 3 | 4;
+      token: string;
+      /** @enum {string} */
+      os: "android" | "ios";
+      badge?: number;
+      level: components["schemas"]["NotificationLevel"];
+    } & { [key: string]: unknown };
+    PushNotificationLightningInvoicePaid: components["schemas"]["PushNotificationBase"] &
+      ({
+        /** @enum {integer} */
+        type?: 1;
+        /** @enum {string} */
+        level?: "transactions";
+        /** @description amount of satoshis */
+        sat: number;
+        /** @description hash of specific ln invoice preimage */
+        hash: string;
+        /** @description text attached to bolt11 */
+        memo: string;
+      } & { [key: string]: unknown }) & { [key: string]: unknown };
+    PushNotificationOnchainAddressGotPaid: components["schemas"]["PushNotificationBase"] &
+      ({
+        /** @enum {integer} */
+        type?: 2;
+        /** @enum {string} */
+        level?: "transactions";
+        /** @description amount of satoshis */
+        sat: number;
+        /** @description user's onchain address that has incoming transaction */
+        address: string;
+        /** @description txid of the transaction where this address is one of the outputs */
+        txid: string;
+      } & { [key: string]: unknown }) & { [key: string]: unknown };
+    PushNotificationOnchainAddressGotUnconfirmedTransaction: components["schemas"]["PushNotificationBase"] &
+      ({
+        /** @enum {integer} */
+        type?: 3;
+        /** @enum {string} */
+        level?: "transactions";
+        /** @description amount of satoshis */
+        sat: number;
+        /** @description user's onchain address that has incoming transaction */
+        address: string;
+        /** @description txid of the transaction where this address is one of the outputs */
+        txid: string;
+      } & { [key: string]: unknown }) & { [key: string]: unknown };
+    PushNotificationTxidGotConfirmed: components["schemas"]["PushNotificationBase"] &
+      ({
+        /** @enum {integer} */
+        type?: 4;
+        /** @enum {string} */
+        level?: "transactions";
+        /** @description txid of the transaction that got confirmed */
+        txid: string;
+      } & { [key: string]: unknown }) & { [key: string]: unknown };
+  };
+};
+
+export type operations = {};
+
+export type external = {};

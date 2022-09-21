@@ -1,9 +1,9 @@
-import "./openapi/api";
 import "reflect-metadata";
 import { Repository } from "typeorm";
 import { TokenToAddress } from "./entity/TokenToAddress";
 import { SendQueue } from "./entity/SendQueue";
 import dataSource from "./data-source";
+import { components } from "./openapi/api";
 require("dotenv").config();
 const url = require("url");
 let jayson = require("jayson/promise");
@@ -34,7 +34,7 @@ async function processMempool() {
   process.env.VERBOSE && console.log(responseGetrawmempool.result.length, "txs in mempool");
 
   let addresses: string[] = [];
-  let allPotentialPushPayloadsArray: Components.Schemas.PushNotificationOnchainAddressGotUnconfirmedTransaction[] = [];
+  let allPotentialPushPayloadsArray: components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"][] = [];
 
   let rpcBatch = [];
   const batchSize = 100;
@@ -54,7 +54,7 @@ async function processMempool() {
               for (const address of output.scriptPubKey.addresses) {
                 addresses.push(address);
                 processedTxids[response.result.txid] = true;
-                const payload: Components.Schemas.PushNotificationOnchainAddressGotUnconfirmedTransaction = {
+                const payload: components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"] = {
                   address,
                   txid: response.result.txid,
                   sat: Math.floor(output.value * 100000000),
