@@ -1,4 +1,3 @@
-import "./openapi/api";
 import "reflect-metadata";
 import { Repository } from "typeorm";
 import { TokenToAddress } from "./entity/TokenToAddress";
@@ -6,6 +5,7 @@ import { SendQueue } from "./entity/SendQueue";
 import { KeyValue } from "./entity/KeyValue";
 import { TokenToTxid } from "./entity/TokenToTxid";
 import dataSource from "./data-source";
+import { components } from "./openapi/api";
 require("dotenv").config();
 const url = require("url");
 
@@ -35,7 +35,7 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
   const responseGetblockhash = await client.request("getblockhash", [blockNum]);
   const responseGetblock = await client.request("getblock", [responseGetblockhash.result, 2]);
   const addresses: string[] = [];
-  const allPotentialPushPayloadsArray: Components.Schemas.PushNotificationOnchainAddressGotPaid[] = [];
+  const allPotentialPushPayloadsArray: components["schemas"]["PushNotificationOnchainAddressGotPaid"][] = [];
   const txids: string[] = [];
   for (const tx of responseGetblock.result.tx) {
     txids.push(tx.txid);
@@ -44,7 +44,7 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
         if (output.scriptPubKey && output.scriptPubKey.addresses) {
           for (const address of output.scriptPubKey.addresses) {
             addresses.push(address);
-            const payload: Components.Schemas.PushNotificationOnchainAddressGotPaid = {
+            const payload: components["schemas"]["PushNotificationOnchainAddressGotPaid"] = {
               address,
               txid: tx.txid,
               sat: Math.floor(output.value * 100000000),
@@ -89,7 +89,7 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
   // now, checking if there is a subscription to one of the mined txids:
   const query2 = dataSource.getRepository(TokenToTxid).createQueryBuilder().where("txid IN (:...txids)", { txids });
   for (const t2txid of await query2.getMany()) {
-    const payload: Components.Schemas.PushNotificationTxidGotConfirmed = {
+    const payload: components["schemas"]["PushNotificationTxidGotConfirmed"] = {
       txid: t2txid.txid,
       type: 4,
       level: "transactions",

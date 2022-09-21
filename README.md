@@ -73,8 +73,6 @@ In memory of David Bowie
 ### Installation
 
 ```shell script
-npm install -g dtsgenerator
-dtsgen openapi.yaml > src/openapi/api.ts
 npm i
 npm start
 npm run worker-blockprocessor

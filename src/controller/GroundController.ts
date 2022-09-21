@@ -1,4 +1,3 @@
-import "../openapi/api";
 import { DataSource } from "typeorm";
 import { NextFunction, Request, Response } from "express";
 import { TokenToAddress } from "../entity/TokenToAddress";
@@ -9,6 +8,7 @@ import { SendQueue } from "../entity/SendQueue";
 import { PushLog } from "../entity/PushLog";
 import { KeyValue } from "../entity/KeyValue";
 import dataSource from "../data-source";
+import { paths, components } from "../openapi/api";
 require("dotenv").config();
 const pck = require("../../package.json");
 if (!process.env.JAWSDB_MARIA_URL || !process.env.FCM_SERVER_KEY || !process.env.APNS_P8 || !process.env.APNS_TOPIC || !process.env.APPLE_TEAM_ID || !process.env.APNS_P8_KID) {
@@ -55,6 +55,8 @@ const ADDRESS_IGNORE_LIST = [
   "1Bo8hs81QwnR6A3oFBXcWNZXgtwpfgByb3",
   "37Z6neB2wDC3hsPDHLy2n2kFahNNU3eos8",
   "1CK6KHY6MHgYvmRQ4PAafKYDrg1ejbH1cE",
+  "36XWTfSYJJz3WSNPZVZ3q3aa5eFuJHR9nu",
+  "bc1qc8ee9860cdnkyej0ag5hf49pcx7uvz89lkwpr9",
 ];
 
 let connection: DataSource;
@@ -122,7 +124,8 @@ export class GroundController {
    * @param next
    */
   async majorTomToGroundControl(request: Request, response: Response, next: NextFunction) {
-    const body: Paths.MajorTomToGroundControl.Post.RequestBody = request.body;
+    const body: paths["/majorTomToGroundControl"]["post"]["requestBody"]["content"]["application/json"] = request.body;
+
     // todo: checks that we are receiving data and that there are not too much records in it (probably 1000 addresses for a start is enough)
 
     if (!body.addresses || !Array.isArray(body.addresses)) {
@@ -186,7 +189,7 @@ export class GroundController {
   }
 
   async unsubscribe(request: Request, response: Response, next: NextFunction) {
-    const body: Paths.Unsubscribe.Post.RequestBody = request.body;
+    const body: paths["/unsubscribe"]["post"]["requestBody"]["content"]["application/json"] = request.body;
     // todo: checks that we are receiving data and that there are not too much records in it (probably 1000 addresses for a start is enough)
 
     if (!body.addresses || !Array.isArray(body.addresses)) {
@@ -236,7 +239,7 @@ export class GroundController {
    * @param next
    */
   async lightningInvoiceGotSettled(request: Request, response: Response, next: NextFunction) {
-    const body: Paths.LightningInvoiceGotSettled.Post.RequestBody = request.body;
+    const body: paths["/lightningInvoiceGotSettled"]["post"]["requestBody"]["content"]["application/json"] = request.body;
 
     const hashShouldBe = require("crypto").createHash("sha256").update(Buffer.from(body.preimage, "hex")).digest("hex");
     if (hashShouldBe !== body.hash) {
@@ -251,7 +254,7 @@ export class GroundController {
     });
     for (const tokenToHash of tokenToHashAll) {
       process.env.VERBOSE && console.log("enqueueing to token", tokenToHash.token, tokenToHash.os);
-      const pushNotification: Components.Schemas.PushNotificationLightningInvoicePaid = {
+      const pushNotification: components["schemas"]["PushNotificationLightningInvoicePaid"] = {
         sat: body.amt_paid_sat,
         badge: 1,
         type: 1,
@@ -279,14 +282,13 @@ export class GroundController {
     const ts = new Date(+new Date() - 1000 * 3600 * 24).toISOString();
     const sent_24h = await connection.createQueryBuilder(PushLog, "PushLog").where("PushLog.created >= :ts", { ts }).getCount();
 
-    const serverInfo: Paths.Ping.Get.Responses.$200 = {
+    const serverInfo: paths["/ping"]["get"]["responses"]["200"]["content"]["application/json"] = {
       name: pck.name,
       description: pck.description,
       version: pck.version,
       uptime: Math.floor(process.uptime()),
       last_processed_block: +keyVal.value,
       send_queue_size,
-      // @ts-ignore
       sent_24h,
     };
 
@@ -294,7 +296,7 @@ export class GroundController {
   }
 
   async setTokenConfiguration(request: Request, response: Response, next: NextFunction) {
-    const body: Paths.SetTokenConfiguration.Post.RequestBody = request.body;
+    const body: paths["/setTokenConfiguration"]["post"]["requestBody"]["content"]["application/json"] = request.body;
     let tokenConfig = await this.tokenConfigurationRepository.findOneBy({ token: body.token, os: body.os });
     if (!tokenConfig) {
       tokenConfig = new TokenConfiguration();
@@ -320,7 +322,7 @@ export class GroundController {
   }
 
   async enqueue(request: Request, response: Response, next: NextFunction) {
-    const body: Paths.Enqueue.Post.RequestBody = request.body;
+    const body: paths["/enqueue"]["post"]["requestBody"]["content"]["application/json"] = request.body;
 
     process.env.VERBOSE && console.log("enqueueing", body);
     await this.sendQueueRepository.save({
@@ -330,7 +332,7 @@ export class GroundController {
   }
 
   async getTokenConfiguration(request: Request, response: Response, next: NextFunction) {
-    const body: Paths.GetTokenConfiguration.Post.RequestBody = request.body;
+    const body: paths["/getTokenConfiguration"]["post"]["requestBody"]["content"]["application/json"] = request.body;
     let tokenConfig = await this.tokenConfigurationRepository.findOneBy({ token: body.token, os: body.os });
     if (!tokenConfig) {
       tokenConfig = new TokenConfiguration();
@@ -339,7 +341,7 @@ export class GroundController {
       await this.tokenConfigurationRepository.save(tokenConfig);
     }
 
-    const config: Paths.GetTokenConfiguration.Post.Responses.$200 = {
+    const config: paths["/getTokenConfiguration"]["post"]["responses"]["200"]["content"]["application/json"] = {
       level_all: tokenConfig.level_all,
       level_news: tokenConfig.level_news,
       level_price: tokenConfig.level_price,
