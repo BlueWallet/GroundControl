@@ -12,7 +12,7 @@
     "dotenv": "^16.0.2",
     "dtsgenerator": "^3.16.1",
     "express": "^4.17.3",
-    "express-rate-limit": "^6.0.5",
+    "express-rate-limit": "^6.6.0",
     "frisbee": "^3.1.4",
     "helmet": "^5.1.0",
     "jayson": "^3.6.6",
