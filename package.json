@@ -1,16 +1,16 @@
 {
   "name": "groundcontrol",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "GroundControl push server API",
   "devDependencies": {
+    "@types/node": "18.7.16",
+    "openapi-typescript": "^5.4.1",
     "prettier": "2.0.5"
   },
   "dependencies": {
-    "@types/node": "18.7.16",
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.2",
-    "dtsgenerator": "^3.16.1",
     "express": "^4.17.3",
     "express-rate-limit": "^6.6.0",
     "frisbee": "^3.1.4",
