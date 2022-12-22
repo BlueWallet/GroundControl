@@ -16,7 +16,7 @@
     "frisbee": "^3.1.4",
     "helmet": "^5.1.0",
     "jayson": "^3.6.6",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "mysql2": "^2.3.3",
     "reflect-metadata": "^0.1.10",
     "ts-node": "10.9.1",
