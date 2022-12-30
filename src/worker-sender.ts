@@ -32,7 +32,7 @@ dataSource
     const tokenConfigurationRepository = dataSource.getRepository(TokenConfiguration);
 
     while (1) {
-      const [record] = await sendQueueRepository.find();
+      const [record] = await sendQueueRepository.find({ take: 1 });
       if (!record) {
         await new Promise((resolve) => setTimeout(resolve, 1000, false));
         continue;
@@ -113,6 +113,9 @@ dataSource
           await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
+        default:
+          process.env.VERBOSE && console.warn("malformed payload:", payload);
+          await sendQueueRepository.remove(record);
       }
       clearTimeout(timeoutId);
     }
