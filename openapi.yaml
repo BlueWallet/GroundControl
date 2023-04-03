@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: GroundControl push server API
   description: Push notifications server for BlueWallet
-  version: 0.0.12
+  version: 0.0.13
 servers:
   - url: http://localhost:3001
   - url: https://groundcontrol-bluewallet-stg.herokuapp.com
@@ -231,12 +231,14 @@ components:
             - 2
             - 3
             - 4
+            - 5
           description: >
             type:
              * `1` - Your lightning invoice was paid
              * `2` - New transaction to one of your addresses
              * `3` - New unconfirmed transaction to one of your addresses
              * `4` - Transaction confirmed
+             * `5` - Arbitrary text message
         "token":
           type: "string"
         "os":
@@ -340,3 +342,17 @@ components:
             txid:
               type: "string"
               description: txid of the transaction that got confirmed
+
+    PushNotificationMessage:
+      allOf: # Combines PushNotificationBase and the inline model
+        - $ref: "#/components/schemas/PushNotificationBase"
+        - type: object
+          required:
+            - text
+          properties:
+            type:
+              type: "integer"
+              enum: [5]
+            text:
+              type: "string"
+              description: custom text thats displayed on push notification buble

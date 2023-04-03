@@ -113,6 +113,12 @@ dataSource
           await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
+        case 5:
+          payload = <components["schemas"]["PushNotificationMessage"]>payload;
+          process.env.VERBOSE && console.warn("pushing to token", payload.token, payload.os);
+          await GroundControlToMajorTom.pushMessage(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
+          await sendQueueRepository.remove(record);
+          break;
         default:
           process.env.VERBOSE && console.warn("malformed payload:", payload);
           await sendQueueRepository.remove(record);

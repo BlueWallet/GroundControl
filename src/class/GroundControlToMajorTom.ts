@@ -119,6 +119,31 @@ export class GroundControlToMajorTom {
     if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(dataSource, apnsP8, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
   }
 
+  static async pushMessage(dataSource: DataSource, serverKey: string, apnsP8: string, pushNotification: components["schemas"]["PushNotificationMessage"]): Promise<[object, object]> {
+    const fcmPayload = {
+      data: {},
+      notification: {
+        title: "Message",
+        body: pushNotification.text,
+      },
+    };
+
+    const apnsPayload = {
+      aps: {
+        badge: pushNotification.badge,
+        alert: {
+          title: "Message",
+          body: pushNotification.text,
+        },
+        sound: "default",
+      },
+      data: {},
+    };
+
+    if (pushNotification.os === "android") return GroundControlToMajorTom._pushToFcm(dataSource, serverKey, pushNotification.token, fcmPayload, pushNotification);
+    if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(dataSource, apnsP8, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
+  }
+
   static async pushOnchainAddressWasPaid(dataSource: DataSource, serverKey: string, apnsP8: string, pushNotification: components["schemas"]["PushNotificationOnchainAddressGotPaid"]): Promise<[object, object]> {
     const fcmPayload = {
       data: {},

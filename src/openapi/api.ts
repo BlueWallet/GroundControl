@@ -165,10 +165,11 @@ export type components = {
        *  * `2` - New transaction to one of your addresses
        *  * `3` - New unconfirmed transaction to one of your addresses
        *  * `4` - Transaction confirmed
+       *  * `5` - Arbitrary text message
        *
        * @enum {integer}
        */
-      type: 1 | 2 | 3 | 4;
+      type: 1 | 2 | 3 | 4 | 5;
       token: string;
       /** @enum {string} */
       os: "android" | "ios";
@@ -222,6 +223,13 @@ export type components = {
         level?: "transactions";
         /** @description txid of the transaction that got confirmed */
         txid: string;
+      } & { [key: string]: unknown }) & { [key: string]: unknown };
+    PushNotificationMessage: components["schemas"]["PushNotificationBase"] &
+      ({
+        /** @enum {integer} */
+        type?: 5;
+        /** @description custom text thats displayed on push notification buble */
+        text: string;
       } & { [key: string]: unknown }) & { [key: string]: unknown };
   };
 };
