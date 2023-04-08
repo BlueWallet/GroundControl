@@ -57,12 +57,46 @@ const ADDRESS_IGNORE_LIST = [
   "1CK6KHY6MHgYvmRQ4PAafKYDrg1ejbH1cE",
   "36XWTfSYJJz3WSNPZVZ3q3aa5eFuJHR9nu",
   "bc1qc8ee9860cdnkyej0ag5hf49pcx7uvz89lkwpr9",
+  "bc1q7ug4w4as2sefar89q057hnmxkakp58a25535ttlmurn6cncs8tms4e7gp2",
+  "3JodN7GmkHdPgKj9G7HCkn9NDLhrcWCjVN",
+  "bc1qujepl0k5n0ga2e86yskvxa6auehpf6dlf84dx0",
+  "bc1qg9lgqyukp2rup5x4frrz7hhw7988k5q26luakm",
+  "3JSdUu1ivm3rqMvuCTAdAj6Dc2hdVhHiEe",
 ];
 
 let connection: DataSource;
+
+const pushLogPurge = () => {
+  console.log("purging PushLog...");
+  let today = new Date();
+  connection
+    .createQueryBuilder()
+    .delete()
+    .from(PushLog)
+    .where("created <= :currentDate", { currentDate: new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000) })
+    .execute()
+    .then(() => console.log("PushLog purged ok"))
+    .catch((error) => console.log("error purging PushLog:", error));
+};
+
+const purgeIgnoredAddressesSubscriptions = () => {
+  console.log("Purging addresses subscriptions...");
+  connection
+    .createQueryBuilder()
+    .delete()
+    .from(TokenToAddress)
+    .where("address IN (:...id)", { id: ADDRESS_IGNORE_LIST })
+    .execute()
+    .then(() => console.log("Addresses subscriptions purged ok"))
+    .catch((error) => console.log("error purging addresses subscriptions:", error));
+};
+
 dataSource.initialize().then((c) => {
   console.log("db connected");
   connection = c;
+  purgeIgnoredAddressesSubscriptions();
+  pushLogPurge();
+  setInterval(pushLogPurge, 3600 * 1000);
 });
 
 export class GroundController {
