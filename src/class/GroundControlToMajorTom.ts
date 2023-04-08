@@ -5,7 +5,6 @@ import { TokenToHash } from "../entity/TokenToHash";
 import { TokenToTxid } from "../entity/TokenToTxid";
 import { components } from "../openapi/api";
 const jwt = require("jsonwebtoken");
-const Frisbee = require("frisbee");
 const http2 = require("http2");
 require("dotenv").config();
 
@@ -275,8 +274,6 @@ export class GroundControlToMajorTom {
   }
 
   protected static async _pushToFcm(dataSource: DataSource, serverKey: string, token: string, fcmPayload: object, pushNotification: components["schemas"]["PushNotificationBase"]): Promise<[object, object]> {
-    const _api = new Frisbee({ baseURI: "https://fcm.googleapis.com" });
-
     fcmPayload["to"] = token;
     fcmPayload["priority"] = "high";
 
@@ -286,23 +283,18 @@ export class GroundControlToMajorTom {
       fcmPayload["data"][dataKey] = pushNotification[dataKey];
     }
 
-    const apiResponse = await _api.post(
-      "/fcm/send",
-      Object.assign(
-        {},
-        {
-          headers: {
-            Authorization: "key=" + serverKey,
-            "Content-Type": "application/json",
-            Host: "fcm.googleapis.com",
-          },
-          body: fcmPayload,
-        }
-      )
-    );
+    // @ts-ignore
+    const rawResponse = await fetch("https://fcm.googleapis.com/fcm/send", {
+      method: "POST",
+      headers: {
+        Authorization: "key=" + serverKey,
+        "Content-Type": "application/json",
+        Host: "fcm.googleapis.com",
+      },
+      body: JSON.stringify(Object.assign({}, fcmPayload)),
+    });
+    const responseJson = await rawResponse.json();
 
-    let responseJson = {};
-    if (typeof apiResponse.body === "object") responseJson = apiResponse.body;
     delete fcmPayload["to"]; // compacting a bit, we dont need token in payload as well
 
     GroundControlToMajorTom.processFcmResponse(dataSource, responseJson, token);
