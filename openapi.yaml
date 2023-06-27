@@ -1,107 +1,124 @@
-openapi: 3.0.0
-info:
-  title: GroundControl push server API
-  description: Push notifications server for BlueWallet
-  version: 0.0.13
-servers:
-  - url: http://localhost:3001
-  - url: https://groundcontrol-bluewallet-stg.herokuapp.com
-  - url: https://groundcontrol-bluewallet.herokuapp.com
+openapi: 
+3.0
+infotitle:
+GroundControl push server API
+  description:
+Push notifications server for BlueWallet
+  version: 2
+servers:  
+<url: http://localhost:3001>
+<url: https:/
+/
+groundcontrol-bluewallet-stg.herokuapp.com>
+url: 
+https:/
+/
+groundcontrol
+<bluewallet.herokuapp.com>
 paths:
-  /lightningInvoiceGotSettled:
-    post:
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LightningInvoiceSettledNotification"
-      responses:
-        "200":
-          description: OK
-
-  /majorTomToGroundControl:
-    post:
-      summary: "Associate bitcoin addressess / ln preimage hashes / txids that you wish to be notified about to specific push token. Token serves as unique identifier of a device/user. Also, OS of the token"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                addresses:
-                  type: array
-                  items:
-                    type: string
-                hashes:
-                  type: array
-                  items:
-                    type: string
-                txids:
-                  type: array
-                  items:
-                    type: string
-                token:
-                  type: string
-                os:
-                  type: string
-      responses:
-        "201":
-          description: Created
-
-  /unsubscribe:
-    post:
-      summary: "This call is a reverse call for /majorTomToGroundControl. In case user doesnt want to track addresses/txids/ln invoice hashes, he makes this call along with his token/os so GroundControl can remove them from the database"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                addresses:
-                  type: array
-                  items:
-                    type: string
-                hashes:
-                  type: array
-                  items:
-                    type: string
-                txids:
-                  type: array
-                  items:
-                    type: string
-                token:
-                  type: string
-                os:
-                  type: string
-      responses:
-        "201":
-          description: Created
-
-  /ping:
-    get:
-      responses:
-        "200":
+/lightning
+Invoice
+Got
+Settled
+post:
+requestBody required
+true
+content application:
+/json
+schema:
+ref:
+/
+components
+/
+schema:
+/
+LightningInvoiceSettled
+Notification
+responses:
+      "200
+      description: 
+      OK: */
+      majorTomToGroundControl
+      postsummary: 
+      Associate bitcoin addressess 
+      / 
+      ln preimage hashes 
+      /
+      txids that you wish 
+      to be notified about to specific push 
+      token. Token serves as unique identifier
+      of a device
+      /
+      user Also
+      OS of the token
+      requestBodyrequired: true
+        content: application
+        /
+        json
+        schema:
+        type: object
+        properties:
+        addressestype: array
+        itemstypestringhashestype:
+        arrayitemstype: string
+        txidstype: array
+        itemstype: stringtoken
+        type: stringostype
+        stringresponse:
+        201
+        description: Created
+       /
+       unsubscribe
+       post summary: 
+       This call is a reverse call for 
+       /
+       majorTomToGroundControl
+       In case user doesnt want to 
+       track addresses
+       /
+       txids
+       /
+       ln invoice hashes
+       he makes this call along 
+       with his token/os so GroundControl 
+       can remove them from the database
+      requestBodyrequired: 
+       true
+       contentapplication
+       /json
+       schematypeobjectproperties
+       addresses type: array
+        items
+        type: string
+                hashestype: array
+                  itemstype: string
+                txids type: array
+                  items type: string
+                tokentype: string
+                  ostype: string
+                  responses:
+                  201
+                  description: Create
+                   /
+                  ping get responses:
+                  200
           description: OK
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/ServerInfo"
-
-  /getTokenConfiguration:
-    post:
-      requestBody:
-        required: true
-        content:
-          application/json:
+              schema:$ref:
+                components/schemas/ServerInfo
+                /
+                getTokenConfigurationpost: requestBody:
+                required
+                true
+               content:
+              application/json:
             schema:
               type: object
               properties:
                 token:
                   type: string
-                os:
+                   os:
                   type: string
       summary: "Returns levels of notifications user currently subscribed to"
       responses:
@@ -197,7 +214,6 @@ components:
           type: "string"
         app_version:
           type: "string"
-
     LightningInvoiceSettledNotification:
       description: object thats posted to GroundControl to notify end-user that his specific invoice was paid by someone
       type: "object"
@@ -214,7 +230,6 @@ components:
         amt_paid_sat:
           type: "number"
           description: "exactly how much satoshis was paid to make this invoice settked (>= invoice amount)"
-
     PushNotificationBase:
       description: payload for push notification delivered to phone
       type: object
@@ -300,7 +315,6 @@ components:
             txid:
               type: "string"
               description: txid of the transaction where this address is one of the outputs
-
     PushNotificationOnchainAddressGotUnconfirmedTransaction:
       allOf: # Combines PushNotificationBase and the inline model
         - $ref: "#/components/schemas/PushNotificationBase"
@@ -325,7 +339,6 @@ components:
             txid:
               type: "string"
               description: txid of the transaction where this address is one of the outputs
-
     PushNotificationTxidGotConfirmed:
       allOf: # Combines PushNotificationBase and the inline model
         - $ref: "#/components/schemas/PushNotificationBase"
@@ -342,7 +355,6 @@ components:
             txid:
               type: "string"
               description: txid of the transaction that got confirmed
-
     PushNotificationMessage:
       allOf: # Combines PushNotificationBase and the inline model
         - $ref: "#/components/schemas/PushNotificationBase"
