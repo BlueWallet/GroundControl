@@ -17,7 +17,7 @@
     "jayson": "^3.6.6",
     "jsonwebtoken": "^9.0.0",
     "mysql2": "^2.3.3",
-    "node-fetch": "^3.3.1",
+    "node-fetch": "^3.3.2",
     "reflect-metadata": "^0.1.10",
     "ts-node": "10.9.1",
     "typeorm": "0.3.14",
