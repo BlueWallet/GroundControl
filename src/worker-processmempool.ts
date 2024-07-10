@@ -50,8 +50,8 @@ async function processMempool() {
       for (const response of responses) {
         if (response.result && response.result.vout) {
           for (const output of response.result.vout) {
-            if (output.scriptPubKey && output.scriptPubKey.addresses) {
-              for (const address of output.scriptPubKey.addresses) {
+            if (output.scriptPubKey && (output.scriptPubKey.addresses || output.scriptPubKey.address)) {
+              for (const address of output.scriptPubKey?.addresses ?? (output.scriptPubKey?.address ? [output.scriptPubKey?.address] : []) ) {
                 addresses.push(address);
                 processedTxids[response.result.txid] = true;
                 const payload: components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"] = {
