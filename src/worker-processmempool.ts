@@ -125,7 +125,7 @@ dataSource
       try {
         await processMempool();
       } catch (error) {
-        console.log(error);
+        console.warn('Exception in processMempool():', error);
       }
       const end = +new Date();
       process.env.VERBOSE && console.log("processing mempool took", (end - start) / 1000, "sec");

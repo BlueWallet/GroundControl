@@ -91,31 +91,31 @@ dataSource
       switch (payload.type) {
         case 2:
           payload = <components["schemas"]["PushNotificationOnchainAddressGotPaid"]>payload;
-          process.env.VERBOSE && console.warn("pushing to token", payload.token, payload.os);
+          process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
           await GroundControlToMajorTom.pushOnchainAddressWasPaid(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
         case 3:
           payload = <components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"]>payload;
-          process.env.VERBOSE && console.warn("pushing to token", payload.token, payload.os);
+          process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
           await GroundControlToMajorTom.pushOnchainAddressGotUnconfirmedTransaction(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
         case 1:
           payload = <components["schemas"]["PushNotificationLightningInvoicePaid"]>payload;
-          process.env.VERBOSE && console.warn("pushing to token", payload.token, payload.os);
+          process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
           await GroundControlToMajorTom.pushLightningInvoicePaid(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
         case 4:
           payload = <components["schemas"]["PushNotificationTxidGotConfirmed"]>payload;
-          process.env.VERBOSE && console.warn("pushing to token", payload.token, payload.os);
+          process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
           await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
         case 5:
           payload = <components["schemas"]["PushNotificationMessage"]>payload;
-          process.env.VERBOSE && console.warn("pushing to token", payload.token, payload.os);
+          process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
           await GroundControlToMajorTom.pushMessage(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
