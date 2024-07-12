@@ -32,13 +32,28 @@ dataSource
     const tokenConfigurationRepository = dataSource.getRepository(TokenConfiguration);
 
     while (1) {
-      const [record] = await sendQueueRepository.find({ take: 1 });
+      // getting random record so multiple workers wont fight for the same record to send
+      const [record] = await sendQueueRepository .createQueryBuilder()
+          .orderBy('RAND()') // mysql-specific
+          .limit(1)
+          .getMany();
+      // ^^^ 'order by rand' is suboptimal, but will have to do for now, especially if we are aiming to keep
+      // queue table near-empty
+
       if (!record) {
-        await new Promise((resolve) => setTimeout(resolve, 1000, false));
+        await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (60000 - 1000 + 1)) + 1000, false));
         continue;
       }
-      // TODO: we could atomically lock this record via mariadb's GET_LOCK and typeorm's raw query, and that would
-      //       allow us to run multiple sender workers in parallel
+      // we atomically lock this record via mariadb's GET_LOCK and typeorm's raw query to allow us
+      // run multiple sender workers in parallel
+
+      const query = `SELECT GET_LOCK(?, ?) as result`;
+      const result = await sendQueueRepository.query(query, [`send${record.id}`, 0]);
+      if (result[0].result !== 1) {
+        process.env.VERBOSE && console.log('could not acquire lock, skipping record');
+        continue;
+      }
+
       let payload;
       try {
         payload = JSON.parse(record.data);
