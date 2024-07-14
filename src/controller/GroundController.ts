@@ -104,6 +104,19 @@ const pushLogPurge = () => {
     .catch((error) => console.log("error purging PushLog:", error));
 };
 
+const purgeOldTxidSubscriptions = () => {
+  console.log("purging TokenToTxid...");
+  let today = new Date();
+  connection
+    .createQueryBuilder()
+    .delete()
+    .from(TokenToTxid)
+    .where("created <= :currentDate", { currentDate: new Date(today.getTime() - 3 * 30 * 24 * 60 * 60 * 1000) }) // 3 mo
+    .execute()
+    .then(() => console.log("TokenToTxid purged ok"))
+    .catch((error) => console.log("error purging TokenToTxid:", error));
+};
+
 const purgeIgnoredAddressesSubscriptions = () => {
   console.log("Purging addresses subscriptions...");
   connection
@@ -121,6 +134,7 @@ dataSource.initialize().then((c) => {
   connection = c;
   purgeIgnoredAddressesSubscriptions();
   pushLogPurge();
+  purgeOldTxidSubscriptions();
   setInterval(pushLogPurge, 3600 * 1000);
 });
 

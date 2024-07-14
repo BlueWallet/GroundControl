@@ -2,6 +2,8 @@ import { Entity, PrimaryGeneratedColumn, Column, Index } from "typeorm";
 
 @Entity()
 @Index(["token", "txid"], { unique: true })
+@Index(["txid"], { unique: false })
+@Index(["created"], { unique: false })
 export class TokenToTxid {
   @PrimaryGeneratedColumn()
   id: number;
