@@ -66,6 +66,7 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
 
   const query = dataSource.getRepository(TokenToAddress).createQueryBuilder().where("address IN (:...address)", { address: addresses });
 
+  let entities2save = [];
   for (const t2a of await query.getMany()) {
     // found all addresses that we are tracking on behalf of our users. now,
     // iterating all addresses in a block to see if there is a match.
@@ -79,15 +80,24 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
         payload.token = t2a.token;
         payload.type = 2;
         payload.badge = 1;
-        await sendQueueRepository.save({
+        entities2save.push({
           data: JSON.stringify(payload),
         });
       }
     }
   }
 
+  // batch insert via a raw query as its faster
+  await sendQueueRepository
+    .createQueryBuilder()
+    .insert()
+    .into(SendQueue)
+    .values(entities2save)
+    .execute();
+
   // now, checking if there is a subscription to one of the mined txids:
   const query2 = dataSource.getRepository(TokenToTxid).createQueryBuilder().where("txid IN (:...txids)", { txids });
+  entities2save = [];
   for (const t2txid of await query2.getMany()) {
     const payload: components["schemas"]["PushNotificationTxidGotConfirmed"] = {
       txid: t2txid.txid,
@@ -99,10 +109,19 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
     };
 
     process.env.VERBOSE && console.log("enqueueing", payload);
-    await sendQueueRepository.save({
+    entities2save.push({
       data: JSON.stringify(payload),
     });
   }
+
+
+  // batch insert via a raw query as its faster
+  await sendQueueRepository
+      .createQueryBuilder()
+      .insert()
+      .into(SendQueue)
+      .values(entities2save)
+      .execute();
 }
 
 dataSource
