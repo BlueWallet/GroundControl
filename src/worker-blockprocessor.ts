@@ -146,7 +146,7 @@ dataSource
       const responseGetblockcount = await client.request("getblockcount", []);
 
       if (+responseGetblockcount.result <= +keyVal.value) {
-        await new Promise((resolve) => setTimeout(resolve, 60000, false));
+        await new Promise((resolve) => setTimeout(resolve, 10_000, false));
         continue;
       }
 
