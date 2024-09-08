@@ -16,7 +16,7 @@
     "helmet": "^5.1.0",
     "jayson": "^3.6.6",
     "jsonwebtoken": "^9.0.0",
-    "mysql2": "^3.9.7",
+    "mysql2": "^3.9.8",
     "node-fetch": "^3.3.2",
     "reflect-metadata": "^0.1.10",
     "ts-node": "10.9.1",
