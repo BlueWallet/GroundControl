@@ -339,13 +339,6 @@ export interface components {
             os: "android" | "ios";
             badge?: number;
             level: components["schemas"]["NotificationLevel"];
-            aps?: {
-                /**
-                 * @description To send a background notification, include only this key in the aps dictionary for types 1, 2, 3, and 4. Custom keys may also be added outside the aps dictionary.
-                 * @enum {integer}
-                 */
-                "content-available"?: 1;
-            };
         };
         PushNotificationLightningInvoicePaid: components["schemas"]["PushNotificationBase"] & {
             /** @enum {integer} */
@@ -358,15 +351,6 @@ export interface components {
             hash: string;
             /** @description text attached to bolt11 */
             memo: string;
-            aps?: {
-                /** @enum {integer} */
-                "content-available"?: 1;
-            };
-            /**
-             * @default time-sensitive
-             * @enum {string}
-             */
-            "interruption-level": "time-sensitive";
         };
         PushNotificationOnchainAddressGotPaid: components["schemas"]["PushNotificationBase"] & {
             /** @enum {integer} */

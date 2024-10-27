@@ -250,13 +250,6 @@ components:
           type: "integer"
         level:
           $ref: "#/components/schemas/NotificationLevel"
-        aps:
-          type: object
-          properties:
-            content-available:
-              type: integer
-              enum: [1]
-              description: "To send a background notification, include only this key in the aps dictionary for types 1, 2, 3, and 4. Custom keys may also be added outside the aps dictionary."
 
     PushNotificationLightningInvoicePaid:
       allOf: # Combines PushNotificationBase and the inline model
@@ -282,17 +275,6 @@ components:
             memo:
               type: "string"
               description: text attached to bolt11
-            aps:
-              type: object
-              properties:
-                content-available:
-                  type: integer
-                  enum: [1]
-            interruption-level:
-              type: "string"
-              enum:
-                - "time-sensitive"
-              default: "time-sensitive"
 
     PushNotificationOnchainAddressGotPaid:
       allOf: # Combines PushNotificationBase and the inline model
