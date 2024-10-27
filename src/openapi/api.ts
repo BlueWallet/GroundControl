@@ -357,47 +357,47 @@ export interface components {
             type?: 2;
             /** @enum {string} */
             level?: "transactions";
+            /**
+             * @description Only included if type is 2, 3, or 4
+             * @default TRANSACTION_CATEGORY
+             */
+            category: string;
             /** @description amount of satoshis */
             sat: number;
             /** @description user's onchain address that has incoming transaction */
             address: string;
             /** @description txid of the transaction where this address is one of the outputs */
             txid: string;
-            /**
-             * @description Only included if type is 2, 3, or 4
-             * @default TRANSACTION_CATEGORY
-             */
-            category: string;
         };
         PushNotificationOnchainAddressGotUnconfirmedTransaction: components["schemas"]["PushNotificationBase"] & {
             /** @enum {integer} */
             type?: 3;
             /** @enum {string} */
             level?: "transactions";
+            /**
+             * @description Only included if type is 2, 3, or 4
+             * @default TRANSACTION_CATEGORY
+             */
+            category: string;
             /** @description amount of satoshis */
             sat: number;
             /** @description user's onchain address that has incoming transaction */
             address: string;
             /** @description txid of the transaction where this address is one of the outputs */
             txid: string;
-            /**
-             * @description Only included if type is 2, 3, or 4
-             * @default TRANSACTION_CATEGORY
-             */
-            category: string;
         };
         PushNotificationTxidGotConfirmed: components["schemas"]["PushNotificationBase"] & {
             /** @enum {integer} */
             type?: 4;
             /** @enum {string} */
             level?: "transactions";
-            /** @description txid of the transaction that got confirmed */
-            txid: string;
             /**
              * @description Only included if type is 2, 3, or 4
              * @default TRANSACTION_CATEGORY
              */
             category: string;
+            /** @description txid of the transaction that got confirmed */
+            txid: string;
         };
         PushNotificationMessage: components["schemas"]["PushNotificationBase"] & {
             /** @enum {integer} */
