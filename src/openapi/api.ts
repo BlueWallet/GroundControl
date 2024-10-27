@@ -363,7 +363,10 @@ export interface components {
             address: string;
             /** @description txid of the transaction where this address is one of the outputs */
             txid: string;
-            /** @default TRANSACTION_CATEGORY */
+            /**
+             * @description Only included if type is 2, 3, or 4
+             * @default TRANSACTION_CATEGORY
+             */
             category: string;
         };
         PushNotificationOnchainAddressGotUnconfirmedTransaction: components["schemas"]["PushNotificationBase"] & {
@@ -377,7 +380,10 @@ export interface components {
             address: string;
             /** @description txid of the transaction where this address is one of the outputs */
             txid: string;
-            /** @default TRANSACTION_CATEGORY */
+            /**
+             * @description Only included if type is 2, 3, or 4
+             * @default TRANSACTION_CATEGORY
+             */
             category: string;
         };
         PushNotificationTxidGotConfirmed: components["schemas"]["PushNotificationBase"] & {
@@ -387,7 +393,10 @@ export interface components {
             level?: "transactions";
             /** @description txid of the transaction that got confirmed */
             txid: string;
-            /** @default TRANSACTION_CATEGORY */
+            /**
+             * @description Only included if type is 2, 3, or 4
+             * @default TRANSACTION_CATEGORY
+             */
             category: string;
         };
         PushNotificationMessage: components["schemas"]["PushNotificationBase"] & {

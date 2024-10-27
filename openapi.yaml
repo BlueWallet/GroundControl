@@ -303,6 +303,7 @@ components:
             category:
               type: "string"
               default: "TRANSACTION_CATEGORY"
+              description: "Only included if type is 2, 3, or 4"
 
     PushNotificationOnchainAddressGotUnconfirmedTransaction:
       allOf: # Combines PushNotificationBase and the inline model
@@ -331,6 +332,7 @@ components:
             category:
               type: "string"
               default: "TRANSACTION_CATEGORY"
+              description: "Only included if type is 2, 3, or 4"
 
     PushNotificationTxidGotConfirmed:
       allOf: # Combines PushNotificationBase and the inline model
@@ -351,6 +353,7 @@ components:
             category:
               type: "string"
               default: "TRANSACTION_CATEGORY"
+              description: "Only included if type is 2, 3, or 4"
 
     PushNotificationMessage:
       allOf: # Combines PushNotificationBase and the inline model
