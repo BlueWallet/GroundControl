@@ -305,7 +305,6 @@ components:
               type: "string"
               description: txid of the transaction where this address is one of the outputs
 
-
     PushNotificationOnchainAddressGotUnconfirmedTransaction:
       allOf: # Combines PushNotificationBase and the inline model
         - $ref: "#/components/schemas/PushNotificationBase"
@@ -355,7 +354,7 @@ components:
             txid:
               type: "string"
               description: txid of the transaction that got confirmed
-              
+
     PushNotificationMessage:
       allOf: # Combines PushNotificationBase and the inline model
         - $ref: "#/components/schemas/PushNotificationBase"
