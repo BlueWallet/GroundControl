@@ -73,6 +73,7 @@ export class GroundControlToMajorTom {
         badge: pushNotification.badge,
         tag: pushNotification.txid,
       },
+      category: "TRANSACTION_CATEGORY",
     };
 
     const apnsPayload = {
@@ -100,6 +101,7 @@ export class GroundControlToMajorTom {
         badge: pushNotification.badge,
         tag: pushNotification.txid,
       },
+      category: "TRANSACTION_CATEGORY",
     };
 
     const apnsPayload = {

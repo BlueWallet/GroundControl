@@ -52,6 +52,7 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
               level: "transactions",
               token: "",
               os: "ios",
+              category: "TRANSACTION_CATEGORY",
             };
             allPotentialPushPayloadsArray.push(payload);
           }
