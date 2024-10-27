@@ -4,13 +4,17 @@ import { TokenToAddress } from "./entity/TokenToAddress";
 import { SendQueue } from "./entity/SendQueue";
 import dataSource from "./data-source";
 import { components } from "./openapi/api";
+import { NOTIFICATION_CATEGORY_TRANSACTION } from "./openapi/constants";
+
 require("dotenv").config();
+
 const url = require("url");
 let jayson = require("jayson/promise");
 let rpc = url.parse(process.env.BITCOIN_RPC);
 let client = jayson.client.http(rpc);
 
 let processedTxids = {};
+
 if (!process.env.BITCOIN_RPC) {
   console.error("not all env variables set");
   process.exit();
@@ -51,9 +55,11 @@ async function processMempool() {
         if (response.result && response.result.vout) {
           for (const output of response.result.vout) {
             if (output.scriptPubKey && (output.scriptPubKey.addresses || output.scriptPubKey.address)) {
-              for (const address of output.scriptPubKey?.addresses ?? (output.scriptPubKey?.address ? [output.scriptPubKey?.address] : []) ) {
+              for (const address of output.scriptPubKey?.addresses ?? (output.scriptPubKey?.address ? [output.scriptPubKey?.address] : [])) {
                 addresses.push(address);
                 processedTxids[response.result.txid] = true;
+
+                // Define the payload object
                 const payload: components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"] = {
                   address,
                   txid: response.result.txid,
@@ -63,6 +69,12 @@ async function processMempool() {
                   token: "",
                   os: "ios",
                 };
+
+                // Add category only if type is 2, 3, or 4
+                if ([2, 3, 4].includes(payload.type)) {
+                  payload.category = NOTIFICATION_CATEGORY_TRANSACTION;
+                }
+
                 allPotentialPushPayloadsArray.push(payload);
               }
             }
@@ -134,6 +146,6 @@ dataSource
     }
   })
   .catch((error) => {
-    console.error("exception in mempool processor:", error, "comitting suicide");
+    console.error("exception in mempool processor:", error, "committing suicide");
     process.exit(1);
   });
