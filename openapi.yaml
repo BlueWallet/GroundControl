@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: GroundControl push server API
   description: Push notifications server for BlueWallet
-  version: 0.0.13
+  version: 0.0.14
 servers:
   - url: http://localhost:3001
   - url: https://groundcontrol-bluewallet-stg.herokuapp.com
@@ -250,6 +250,13 @@ components:
           type: "integer"
         level:
           $ref: "#/components/schemas/NotificationLevel"
+        aps:
+          type: object
+          properties:
+            content-available:
+              type: integer
+              enum: [1]
+              description: "To send a background notification, include only this key in the aps dictionary for types 1, 2, 3, and 4. Custom keys may also be added outside the aps dictionary."
 
     PushNotificationLightningInvoicePaid:
       allOf: # Combines PushNotificationBase and the inline model
@@ -275,6 +282,17 @@ components:
             memo:
               type: "string"
               description: text attached to bolt11
+            aps:
+              type: object
+              properties:
+                content-available:
+                  type: integer
+                  enum: [1]
+            interruption-level:
+              type: "string"
+              enum:
+                - "time-sensitive"
+              default: "time-sensitive"
 
     PushNotificationOnchainAddressGotPaid:
       allOf: # Combines PushNotificationBase and the inline model
@@ -300,6 +318,20 @@ components:
             txid:
               type: "string"
               description: txid of the transaction where this address is one of the outputs
+            aps:
+              type: object
+              properties:
+                content-available:
+                  type: integer
+                  enum: [1]
+            category:
+              type: "string"
+              default: "TRANSACTION_CATEGORY"
+            interruption-level:
+              type: "string"
+              enum:
+                - "active"
+              default: "active"
 
     PushNotificationOnchainAddressGotUnconfirmedTransaction:
       allOf: # Combines PushNotificationBase and the inline model
@@ -325,6 +357,20 @@ components:
             txid:
               type: "string"
               description: txid of the transaction where this address is one of the outputs
+            aps:
+              type: object
+              properties:
+                content-available:
+                  type: integer
+                  enum: [1]
+            category:
+              type: "string"
+              default: "TRANSACTION_CATEGORY"
+            interruption-level:
+              type: "string"
+              enum:
+                - "active"
+              default: "active"
 
     PushNotificationTxidGotConfirmed:
       allOf: # Combines PushNotificationBase and the inline model
@@ -342,6 +388,20 @@ components:
             txid:
               type: "string"
               description: txid of the transaction that got confirmed
+            aps:
+              type: object
+              properties:
+                content-available:
+                  type: integer
+                  enum: [1]
+            category:
+              type: "string"
+              default: "TRANSACTION_CATEGORY"
+            interruption-level:
+              type: "string"
+              enum:
+                - "time-sensitive"
+              default: "time-sensitive"
 
     PushNotificationMessage:
       allOf: # Combines PushNotificationBase and the inline model
@@ -355,4 +415,4 @@ components:
               enum: [5]
             text:
               type: "string"
-              description: custom text thats displayed on push notification buble
+              description: custom text thats displayed on push notification bubble

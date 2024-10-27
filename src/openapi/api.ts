@@ -3,237 +3,448 @@
  * Do not make direct changes to the file.
  */
 
-export type paths = {
-  "/lightningInvoiceGotSettled": {
-    post: {
-      responses: {
-        /** OK */
-        200: unknown;
-      };
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["LightningInvoiceSettledNotification"];
+export interface paths {
+    "/lightningInvoiceGotSettled": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["LightningInvoiceSettledNotification"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-  };
-  "/majorTomToGroundControl": {
-    post: {
-      responses: {
-        /** Created */
-        201: unknown;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            addresses?: string[];
-            hashes?: string[];
-            txids?: string[];
-            token?: string;
-            os?: string;
-          } & { [key: string]: unknown };
+    "/majorTomToGroundControl": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
+        get?: never;
+        put?: never;
+        /** Associate bitcoin addressess / ln preimage hashes / txids that you wish to be notified about to specific push token. Token serves as unique identifier of a device/user. Also, OS of the token */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        addresses?: string[];
+                        hashes?: string[];
+                        txids?: string[];
+                        token?: string;
+                        os?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-  };
-  "/unsubscribe": {
-    post: {
-      responses: {
-        /** Created */
-        201: unknown;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            addresses?: string[];
-            hashes?: string[];
-            txids?: string[];
-            token?: string;
-            os?: string;
-          } & { [key: string]: unknown };
+    "/unsubscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
+        get?: never;
+        put?: never;
+        /** This call is a reverse call for /majorTomToGroundControl. In case user doesnt want to track addresses/txids/ln invoice hashes, he makes this call along with his token/os so GroundControl can remove them from the database */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        addresses?: string[];
+                        hashes?: string[];
+                        txids?: string[];
+                        token?: string;
+                        os?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-  };
-  "/ping": {
-    get: {
-      responses: {
-        /** OK */
-        200: {
-          content: {
-            "application/json": components["schemas"]["ServerInfo"];
-          };
+    "/ping": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServerInfo"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-  };
-  "/getTokenConfiguration": {
-    post: {
-      responses: {
-        /** OK */
-        200: {
-          content: {
-            "application/json": components["schemas"]["TokenConfiguration"];
-          };
+    "/getTokenConfiguration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            token?: string;
-            os?: string;
-          } & { [key: string]: unknown };
+        get?: never;
+        put?: never;
+        /** Returns levels of notifications user currently subscribed to */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        token?: string;
+                        os?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TokenConfiguration"];
+                    };
+                };
+            };
         };
-      };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-  };
-  "/setTokenConfiguration": {
-    post: {
-      responses: {
-        /** OK */
-        200: unknown;
-      };
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["TokenConfiguration"] &
-            ({
-              token: string;
-              os: string;
-            } & { [key: string]: unknown }) & { [key: string]: unknown };
+    "/setTokenConfiguration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-    };
-  };
-  "/enqueue": {
-    post: {
-      responses: {
-        /** OK */
-        200: unknown;
-      };
-      requestBody: {
-        content: {
-          "application/json": (
-            | components["schemas"]["PushNotificationLightningInvoicePaid"]
-            | components["schemas"]["PushNotificationOnchainAddressGotPaid"]
-            | components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"]
-            | components["schemas"]["PushNotificationTxidGotConfirmed"]
-          ) & { [key: string]: unknown };
+        get?: never;
+        put?: never;
+        /** Sets levels of notifications user is subscribed to; also saves some user info, like lang or app version */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TokenConfiguration"] & {
+                        token: string;
+                        os: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
         };
-      };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-  };
-};
-
-export type components = {
-  schemas: {
-    ServerInfo: {
-      name?: string;
-      description?: string;
-      version?: string;
-      uptime?: number;
-      last_processed_block?: number;
-      send_queue_size?: number;
-      sent_24h?: number;
-    } & { [key: string]: unknown };
-    /** @enum {string} */
-    NotificationLevel: "transactions" | "news" | "price" | "tips";
-    TokenConfiguration: {
-      level_all?: boolean;
-      level_transactions?: boolean;
-      level_news?: boolean;
-      level_price?: boolean;
-      level_tips?: boolean;
-      lang?: string;
-      app_version?: string;
-    } & { [key: string]: unknown };
-    /** @description object thats posted to GroundControl to notify end-user that his specific invoice was paid by someone */
-    LightningInvoiceSettledNotification: {
-      /** @description text that was embedded in invoice paid */
-      memo?: string;
-      /** @description hex string preimage */
-      preimage?: string;
-      /** @description hex string preimage hash */
-      hash?: string;
-      /** @description exactly how much satoshis was paid to make this invoice settked (>= invoice amount) */
-      amt_paid_sat?: number;
-    } & { [key: string]: unknown };
-    /** @description payload for push notification delivered to phone */
-    PushNotificationBase: {
-      /**
-       * @description type:
-       *  * `1` - Your lightning invoice was paid
-       *  * `2` - New transaction to one of your addresses
-       *  * `3` - New unconfirmed transaction to one of your addresses
-       *  * `4` - Transaction confirmed
-       *  * `5` - Arbitrary text message
-       *
-       * @enum {integer}
-       */
-      type: 1 | 2 | 3 | 4 | 5;
-      token: string;
-      /** @enum {string} */
-      os: "android" | "ios";
-      badge?: number;
-      level: components["schemas"]["NotificationLevel"];
-    } & { [key: string]: unknown };
-    PushNotificationLightningInvoicePaid: components["schemas"]["PushNotificationBase"] &
-      ({
-        /** @enum {integer} */
-        type?: 1;
+    "/enqueue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Puts push in send queue. Push body should be any descendant of `/components/schemas/PushNotificationBase` */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PushNotificationLightningInvoicePaid"] | components["schemas"]["PushNotificationOnchainAddressGotPaid"] | components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"] | components["schemas"]["PushNotificationTxidGotConfirmed"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+}
+export type webhooks = Record<string, never>;
+export interface components {
+    schemas: {
+        ServerInfo: {
+            name?: string;
+            description?: string;
+            version?: string;
+            uptime?: number;
+            last_processed_block?: number;
+            send_queue_size?: number;
+            sent_24h?: number;
+        };
         /** @enum {string} */
-        level?: "transactions";
-        /** @description amount of satoshis */
-        sat: number;
-        /** @description hash of specific ln invoice preimage */
-        hash: string;
-        /** @description text attached to bolt11 */
-        memo: string;
-      } & { [key: string]: unknown }) & { [key: string]: unknown };
-    PushNotificationOnchainAddressGotPaid: components["schemas"]["PushNotificationBase"] &
-      ({
-        /** @enum {integer} */
-        type?: 2;
-        /** @enum {string} */
-        level?: "transactions";
-        /** @description amount of satoshis */
-        sat: number;
-        /** @description user's onchain address that has incoming transaction */
-        address: string;
-        /** @description txid of the transaction where this address is one of the outputs */
-        txid: string;
-      } & { [key: string]: unknown }) & { [key: string]: unknown };
-    PushNotificationOnchainAddressGotUnconfirmedTransaction: components["schemas"]["PushNotificationBase"] &
-      ({
-        /** @enum {integer} */
-        type?: 3;
-        /** @enum {string} */
-        level?: "transactions";
-        /** @description amount of satoshis */
-        sat: number;
-        /** @description user's onchain address that has incoming transaction */
-        address: string;
-        /** @description txid of the transaction where this address is one of the outputs */
-        txid: string;
-      } & { [key: string]: unknown }) & { [key: string]: unknown };
-    PushNotificationTxidGotConfirmed: components["schemas"]["PushNotificationBase"] &
-      ({
-        /** @enum {integer} */
-        type?: 4;
-        /** @enum {string} */
-        level?: "transactions";
-        /** @description txid of the transaction that got confirmed */
-        txid: string;
-      } & { [key: string]: unknown }) & { [key: string]: unknown };
-    PushNotificationMessage: components["schemas"]["PushNotificationBase"] &
-      ({
-        /** @enum {integer} */
-        type?: 5;
-        /** @description custom text thats displayed on push notification buble */
-        text: string;
-      } & { [key: string]: unknown }) & { [key: string]: unknown };
-  };
-};
-
-export type operations = {};
-
-export type external = {};
+        NotificationLevel: "transactions" | "news" | "price" | "tips";
+        TokenConfiguration: {
+            level_all?: boolean;
+            level_transactions?: boolean;
+            level_news?: boolean;
+            level_price?: boolean;
+            level_tips?: boolean;
+            lang?: string;
+            app_version?: string;
+        };
+        /** @description object thats posted to GroundControl to notify end-user that his specific invoice was paid by someone */
+        LightningInvoiceSettledNotification: {
+            /** @description text that was embedded in invoice paid */
+            memo?: string;
+            /** @description hex string preimage */
+            preimage?: string;
+            /** @description hex string preimage hash */
+            hash?: string;
+            /** @description exactly how much satoshis was paid to make this invoice settked (>= invoice amount) */
+            amt_paid_sat?: number;
+        };
+        /** @description payload for push notification delivered to phone */
+        PushNotificationBase: {
+            /**
+             * @description type:
+             *      * `1` - Your lightning invoice was paid
+             *      * `2` - New transaction to one of your addresses
+             *      * `3` - New unconfirmed transaction to one of your addresses
+             *      * `4` - Transaction confirmed
+             *      * `5` - Arbitrary text message
+             *
+             * @enum {integer}
+             */
+            type: 1 | 2 | 3 | 4 | 5;
+            token: string;
+            /** @enum {string} */
+            os: "android" | "ios";
+            badge?: number;
+            level: components["schemas"]["NotificationLevel"];
+            aps?: {
+                /**
+                 * @description To send a background notification, include only this key in the aps dictionary for types 1, 2, 3, and 4. Custom keys may also be added outside the aps dictionary.
+                 * @enum {integer}
+                 */
+                "content-available"?: 1;
+            };
+        };
+        PushNotificationLightningInvoicePaid: components["schemas"]["PushNotificationBase"] & {
+            /** @enum {integer} */
+            type?: 1;
+            /** @enum {string} */
+            level?: "transactions";
+            /** @description amount of satoshis */
+            sat: number;
+            /** @description hash of specific ln invoice preimage */
+            hash: string;
+            /** @description text attached to bolt11 */
+            memo: string;
+            aps?: {
+                /** @enum {integer} */
+                "content-available"?: 1;
+            };
+            /**
+             * @default time-sensitive
+             * @enum {string}
+             */
+            "interruption-level": "time-sensitive";
+        };
+        PushNotificationOnchainAddressGotPaid: components["schemas"]["PushNotificationBase"] & {
+            /** @enum {integer} */
+            type?: 2;
+            /** @enum {string} */
+            level?: "transactions";
+            /** @description amount of satoshis */
+            sat: number;
+            /** @description user's onchain address that has incoming transaction */
+            address: string;
+            /** @description txid of the transaction where this address is one of the outputs */
+            txid: string;
+            aps?: {
+                /** @enum {integer} */
+                "content-available"?: 1;
+            };
+            /** @default TRANSACTION_CATEGORY */
+            category: string;
+            /**
+             * @default active
+             * @enum {string}
+             */
+            "interruption-level": "active";
+        };
+        PushNotificationOnchainAddressGotUnconfirmedTransaction: components["schemas"]["PushNotificationBase"] & {
+            /** @enum {integer} */
+            type?: 3;
+            /** @enum {string} */
+            level?: "transactions";
+            /** @description amount of satoshis */
+            sat: number;
+            /** @description user's onchain address that has incoming transaction */
+            address: string;
+            /** @description txid of the transaction where this address is one of the outputs */
+            txid: string;
+            aps?: {
+                /** @enum {integer} */
+                "content-available"?: 1;
+            };
+            /** @default TRANSACTION_CATEGORY */
+            category: string;
+            /**
+             * @default active
+             * @enum {string}
+             */
+            "interruption-level": "active";
+        };
+        PushNotificationTxidGotConfirmed: components["schemas"]["PushNotificationBase"] & {
+            /** @enum {integer} */
+            type?: 4;
+            /** @enum {string} */
+            level?: "transactions";
+            /** @description txid of the transaction that got confirmed */
+            txid: string;
+            aps?: {
+                /** @enum {integer} */
+                "content-available"?: 1;
+            };
+            /** @default TRANSACTION_CATEGORY */
+            category: string;
+            /**
+             * @default time-sensitive
+             * @enum {string}
+             */
+            "interruption-level": "time-sensitive";
+        };
+        PushNotificationMessage: components["schemas"]["PushNotificationBase"] & {
+            /** @enum {integer} */
+            type?: 5;
+            /** @description custom text thats displayed on push notification bubble */
+            text: string;
+        };
+    };
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
+}
+export type $defs = Record<string, never>;
+export type operations = Record<string, never>;
