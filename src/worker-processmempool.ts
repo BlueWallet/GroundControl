@@ -66,7 +66,6 @@ async function processMempool() {
                   level: "transactions",
                   token: "",
                   os: "ios",
-                  category: "TRANSACTION_CATEGORY",
                 };
 
                 allPotentialPushPayloadsArray.push(payload);

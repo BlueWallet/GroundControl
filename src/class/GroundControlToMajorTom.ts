@@ -73,7 +73,6 @@ export class GroundControlToMajorTom {
         badge: pushNotification.badge,
         tag: pushNotification.txid,
       },
-      category: "TRANSACTION_CATEGORY",
     };
 
     const apnsPayload = {
@@ -86,7 +85,6 @@ export class GroundControlToMajorTom {
         sound: "default",
       },
       data: {},
-      category: "TRANSACTION_CATEGORY",
     };
 
     if (pushNotification.os === "android") return GroundControlToMajorTom._pushToFcm(dataSource, serverKey, pushNotification.token, fcmPayload, pushNotification);
@@ -102,7 +100,6 @@ export class GroundControlToMajorTom {
         badge: pushNotification.badge,
         tag: pushNotification.txid,
       },
-      category: "TRANSACTION_CATEGORY",
     };
 
     const apnsPayload = {
@@ -115,7 +112,6 @@ export class GroundControlToMajorTom {
         sound: "default",
       },
       data: {},
-      category: "TRANSACTION_CATEGORY",
     };
 
     if (pushNotification.os === "android") return GroundControlToMajorTom._pushToFcm(dataSource, serverKey, pushNotification.token, fcmPayload, pushNotification);
@@ -156,7 +152,6 @@ export class GroundControlToMajorTom {
         badge: pushNotification.badge,
         tag: pushNotification.txid,
       },
-      category: "TRANSACTION_CATEGORY",
     };
 
     const apnsPayload = {
@@ -169,7 +164,6 @@ export class GroundControlToMajorTom {
         sound: "default",
       },
       data: {},
-      category: "TRANSACTION_CATEGORY",
     };
 
     if (pushNotification.os === "android") return GroundControlToMajorTom._pushToFcm(dataSource, serverKey, pushNotification.token, fcmPayload, pushNotification);
