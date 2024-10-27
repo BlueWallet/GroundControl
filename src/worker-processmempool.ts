@@ -4,7 +4,6 @@ import { TokenToAddress } from "./entity/TokenToAddress";
 import { SendQueue } from "./entity/SendQueue";
 import dataSource from "./data-source";
 import { components } from "./openapi/api";
-import { NOTIFICATION_CATEGORY_TRANSACTION } from "./openapi/constants";
 
 require("dotenv").config();
 
@@ -59,7 +58,6 @@ async function processMempool() {
                 addresses.push(address);
                 processedTxids[response.result.txid] = true;
 
-                // Define the payload object
                 const payload: components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"] = {
                   address,
                   txid: response.result.txid,
