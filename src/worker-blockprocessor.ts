@@ -107,6 +107,7 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
       token: t2txid.token,
       os: t2txid.os === "ios" ? "ios" : "android",
       badge: 1,
+      category: "TRANSACTION_CATEGORY",
     };
 
     process.env.VERBOSE && console.log("enqueueing", payload);
