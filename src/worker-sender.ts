@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { SendQueue } from "./entity/SendQueue";
 import { GroundControlToMajorTom } from "./class/GroundControlToMajorTom";
 import { TokenConfiguration } from "./entity/TokenConfiguration";
-import { NOTIFICATION_CATEGORY_TRANSACTION, NOTIFICATION_LEVEL_NEWS, NOTIFICATION_LEVEL_PRICE, NOTIFICATION_LEVEL_TIPS, NOTIFICATION_LEVEL_TRANSACTIONS } from "./openapi/constants";
+import { NOTIFICATION_LEVEL_NEWS, NOTIFICATION_LEVEL_PRICE, NOTIFICATION_LEVEL_TIPS, NOTIFICATION_LEVEL_TRANSACTIONS } from "./openapi/constants";
 import dataSource from "./data-source";
 import { components } from "./openapi/api";
 require("dotenv").config();
@@ -107,14 +107,12 @@ dataSource
       switch (payload.type) {
         case 2:
           payload = <components["schemas"]["PushNotificationOnchainAddressGotPaid"]>payload;
-          payload.category = NOTIFICATION_CATEGORY_TRANSACTION;
           process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
           await GroundControlToMajorTom.pushOnchainAddressWasPaid(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
         case 3:
           payload = <components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"]>payload;
-          payload.category = NOTIFICATION_CATEGORY_TRANSACTION;
           process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
           await GroundControlToMajorTom.pushOnchainAddressGotUnconfirmedTransaction(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
@@ -127,7 +125,6 @@ dataSource
           break;
         case 4:
           payload = <components["schemas"]["PushNotificationTxidGotConfirmed"]>payload;
-          payload.category = NOTIFICATION_CATEGORY_TRANSACTION;
           process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
           await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);

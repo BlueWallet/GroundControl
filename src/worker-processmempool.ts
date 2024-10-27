@@ -70,11 +70,6 @@ async function processMempool() {
                   os: "ios",
                 };
 
-                // Add category only if type is 2, 3, or 4
-                if ([2, 3, 4].includes(payload.type)) {
-                  payload.category = NOTIFICATION_CATEGORY_TRANSACTION;
-                }
-
                 allPotentialPushPayloadsArray.push(payload);
               }
             }
