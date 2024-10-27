@@ -91,12 +91,7 @@ export class GroundControlToMajorTom {
     if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(dataSource, apnsP8, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
   }
 
-  static async pushOnchainTxidGotConfirmed(
-    dataSource: DataSource,
-    serverKey: string,
-    apnsP8: string,
-    pushNotification: components["schemas"]["PushNotificationTxidGotConfirmed"]
-  ): Promise<[object, object]> {
+  static async pushOnchainTxidGotConfirmed(dataSource: DataSource, serverKey: string, apnsP8: string, pushNotification: components["schemas"]["PushNotificationTxidGotConfirmed"]): Promise<[object, object]> {
     const fcmPayload = {
       data: {},
       notification: {
@@ -148,12 +143,7 @@ export class GroundControlToMajorTom {
     if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(dataSource, apnsP8, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
   }
 
-  static async pushOnchainAddressWasPaid(
-    dataSource: DataSource,
-    serverKey: string,
-    apnsP8: string,
-    pushNotification: components["schemas"]["PushNotificationOnchainAddressGotPaid"]
-  ): Promise<[object, object]> {
+  static async pushOnchainAddressWasPaid(dataSource: DataSource, serverKey: string, apnsP8: string, pushNotification: components["schemas"]["PushNotificationOnchainAddressGotPaid"]): Promise<[object, object]> {
     const fcmPayload = {
       data: {},
       notification: {
