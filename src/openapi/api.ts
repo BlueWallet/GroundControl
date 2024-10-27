@@ -379,17 +379,8 @@ export interface components {
             address: string;
             /** @description txid of the transaction where this address is one of the outputs */
             txid: string;
-            aps?: {
-                /** @enum {integer} */
-                "content-available"?: 1;
-            };
             /** @default TRANSACTION_CATEGORY */
             category: string;
-            /**
-             * @default active
-             * @enum {string}
-             */
-            "interruption-level": "active";
         };
         PushNotificationOnchainAddressGotUnconfirmedTransaction: components["schemas"]["PushNotificationBase"] & {
             /** @enum {integer} */
@@ -402,17 +393,8 @@ export interface components {
             address: string;
             /** @description txid of the transaction where this address is one of the outputs */
             txid: string;
-            aps?: {
-                /** @enum {integer} */
-                "content-available"?: 1;
-            };
             /** @default TRANSACTION_CATEGORY */
             category: string;
-            /**
-             * @default active
-             * @enum {string}
-             */
-            "interruption-level": "active";
         };
         PushNotificationTxidGotConfirmed: components["schemas"]["PushNotificationBase"] & {
             /** @enum {integer} */
@@ -421,17 +403,8 @@ export interface components {
             level?: "transactions";
             /** @description txid of the transaction that got confirmed */
             txid: string;
-            aps?: {
-                /** @enum {integer} */
-                "content-available"?: 1;
-            };
             /** @default TRANSACTION_CATEGORY */
             category: string;
-            /**
-             * @default time-sensitive
-             * @enum {string}
-             */
-            "interruption-level": "time-sensitive";
         };
         PushNotificationMessage: components["schemas"]["PushNotificationBase"] & {
             /** @enum {integer} */
