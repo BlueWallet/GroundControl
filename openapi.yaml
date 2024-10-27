@@ -291,6 +291,10 @@ components:
             level:
               type: "string"
               enum: ["transactions"]
+            category:
+              type: "string"
+              default: "TRANSACTION_CATEGORY"
+              description: "Only included if type is 2, 3, or 4"
             sat:
               type: "integer"
               description: amount of satoshis
@@ -300,10 +304,7 @@ components:
             txid:
               type: "string"
               description: txid of the transaction where this address is one of the outputs
-            category:
-              type: "string"
-              default: "TRANSACTION_CATEGORY"
-              description: "Only included if type is 2, 3, or 4"
+
 
     PushNotificationOnchainAddressGotUnconfirmedTransaction:
       allOf: # Combines PushNotificationBase and the inline model
@@ -320,6 +321,10 @@ components:
             level:
               type: "string"
               enum: ["transactions"]
+            category:
+              type: "string"
+              default: "TRANSACTION_CATEGORY"
+              description: "Only included if type is 2, 3, or 4"
             sat:
               type: "integer"
               description: amount of satoshis
@@ -329,10 +334,6 @@ components:
             txid:
               type: "string"
               description: txid of the transaction where this address is one of the outputs
-            category:
-              type: "string"
-              default: "TRANSACTION_CATEGORY"
-              description: "Only included if type is 2, 3, or 4"
 
     PushNotificationTxidGotConfirmed:
       allOf: # Combines PushNotificationBase and the inline model
@@ -347,14 +348,14 @@ components:
             level:
               type: "string"
               enum: ["transactions"]
-            txid:
-              type: "string"
-              description: txid of the transaction that got confirmed
             category:
               type: "string"
               default: "TRANSACTION_CATEGORY"
               description: "Only included if type is 2, 3, or 4"
-
+            txid:
+              type: "string"
+              description: txid of the transaction that got confirmed
+              
     PushNotificationMessage:
       allOf: # Combines PushNotificationBase and the inline model
         - $ref: "#/components/schemas/PushNotificationBase"
