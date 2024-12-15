@@ -9,7 +9,7 @@ const jwt = require("jsonwebtoken");
 const http2 = require("http2");
 require("dotenv").config();
 
-if (!process.env.APNS_P8 || !process.env.APPLE_TEAM_ID || !process.env.APNS_P8_KID || !process.env.GOOGLE_KEY_FILE) {
+if (!process.env.APNS_P8 || !process.env.APPLE_TEAM_ID || !process.env.APNS_P8_KID || !process.env.GOOGLE_KEY_FILE || !process.env.GOOGLE_PROJECT_ID) {
   console.error("not all env variables set");
   process.exit();
 }
