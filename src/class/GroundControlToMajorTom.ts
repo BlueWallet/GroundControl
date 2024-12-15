@@ -309,7 +309,7 @@ export class GroundControlToMajorTom {
     }
 
     // @ts-ignore
-    const rawResponse = await fetch("https://fcm.googleapis.com/v1/projects/bluewallet-d7cd5/messages:send", {
+    const rawResponse = await fetch(`https://fcm.googleapis.com/v1/projects/${process.env.GOOGLE_PROJECT_ID}/messages:send`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${bearer}`,

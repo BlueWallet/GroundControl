@@ -94,6 +94,7 @@ Set them as env variables or put them into `.env` file in project root dir.
 - `BITCOIN_RPC` for example `http://username:password@host:8332`
 - `APNS_TOPIC` for example `io.bluewallet.bluewallet`
 - `GOOGLE_KEY_FILE` - json file with Google key for FCM, in hex
+- `GOOGLE_PROJECT_ID` - acquired with the key file
 
 
 ### Getting certificates
@@ -101,6 +102,7 @@ Set them as env variables or put them into `.env` file in project root dir.
 - outdated https://dev.to/jakubkoci/react-native-push-notifications-313i
 - https://stackoverflow.com/questions/44631803/ios-swift-how-to-create-p8-file/67533665#67533665
 - get P8 hex `xxd -p file.p8 | tr -d '\n'` (google key file as well)
+- https://firebase.google.com/docs/cloud-messaging/migrate-v1
 
 ### License
 
