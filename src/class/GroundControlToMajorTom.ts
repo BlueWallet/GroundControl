@@ -1,10 +1,10 @@
-import {GoogleAuth} from "google-auth-library";
-import {DataSource} from "typeorm";
-import {PushLog} from "../entity/PushLog";
-import {TokenToAddress} from "../entity/TokenToAddress";
-import {TokenToHash} from "../entity/TokenToHash";
-import {TokenToTxid} from "../entity/TokenToTxid";
-import {components} from "../openapi/api";
+import { GoogleAuth } from "google-auth-library";
+import { DataSource } from "typeorm";
+import { PushLog } from "../entity/PushLog";
+import { TokenToAddress } from "../entity/TokenToAddress";
+import { TokenToHash } from "../entity/TokenToHash";
+import { TokenToTxid } from "../entity/TokenToTxid";
+import { components } from "../openapi/api";
 const jwt = require("jsonwebtoken");
 const http2 = require("http2");
 require("dotenv").config();
