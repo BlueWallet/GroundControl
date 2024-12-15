@@ -6,7 +6,7 @@ import { NOTIFICATION_LEVEL_NEWS, NOTIFICATION_LEVEL_PRICE, NOTIFICATION_LEVEL_T
 import dataSource from "./data-source";
 import { components } from "./openapi/api";
 require("dotenv").config();
-if (!process.env.FCM_SERVER_KEY || !process.env.APNS_P8 || !process.env.APNS_TOPIC || !process.env.APPLE_TEAM_ID || !process.env.APNS_P8_KID) {
+if (!process.env.GOOGLE_KEY_FILE || !process.env.APNS_P8 || !process.env.APNS_TOPIC || !process.env.APPLE_TEAM_ID || !process.env.APNS_P8_KID || !process.env.GOOGLE_PROJECT_ID) {
   console.error("not all env variables set");
   process.exit();
 }
@@ -107,31 +107,31 @@ dataSource
         case 2:
           payload = <components["schemas"]["PushNotificationOnchainAddressGotPaid"]>payload;
           process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
-          await GroundControlToMajorTom.pushOnchainAddressWasPaid(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
+          await GroundControlToMajorTom.pushOnchainAddressWasPaid(connection, await GroundControlToMajorTom.getGoogleCredentials(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
         case 3:
           payload = <components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"]>payload;
           process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
-          await GroundControlToMajorTom.pushOnchainAddressGotUnconfirmedTransaction(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
+          await GroundControlToMajorTom.pushOnchainAddressGotUnconfirmedTransaction(connection, await GroundControlToMajorTom.getGoogleCredentials(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
         case 1:
           payload = <components["schemas"]["PushNotificationLightningInvoicePaid"]>payload;
           process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
-          await GroundControlToMajorTom.pushLightningInvoicePaid(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
+          await GroundControlToMajorTom.pushLightningInvoicePaid(connection, await GroundControlToMajorTom.getGoogleCredentials(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
         case 4:
           payload = <components["schemas"]["PushNotificationTxidGotConfirmed"]>payload;
           process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
-          await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
+          await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(connection, await GroundControlToMajorTom.getGoogleCredentials(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
         case 5:
           payload = <components["schemas"]["PushNotificationMessage"]>payload;
           process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
-          await GroundControlToMajorTom.pushMessage(connection, GroundControlToMajorTom.getGoogleServerKey(), GroundControlToMajorTom.getApnsJwtToken(), payload);
+          await GroundControlToMajorTom.pushMessage(connection, await GroundControlToMajorTom.getGoogleCredentials(), GroundControlToMajorTom.getApnsJwtToken(), payload);
           await sendQueueRepository.remove(record);
           break;
         default:

@@ -11,7 +11,7 @@ import dataSource from "../data-source";
 import { paths, components } from "../openapi/api";
 require("dotenv").config();
 const pck = require("../../package.json");
-if (!process.env.JAWSDB_MARIA_URL || !process.env.FCM_SERVER_KEY || !process.env.APNS_P8 || !process.env.APNS_TOPIC || !process.env.APPLE_TEAM_ID || !process.env.APNS_P8_KID) {
+if (!process.env.JAWSDB_MARIA_URL || !process.env.GOOGLE_KEY_FILE || !process.env.APNS_P8 || !process.env.APNS_TOPIC || !process.env.APPLE_TEAM_ID || !process.env.APNS_P8_KID || !process.env.GOOGLE_PROJECT_ID) {
   console.error("not all env variables set");
   process.exit();
 }
@@ -19,6 +19,9 @@ if (!process.env.JAWSDB_MARIA_URL || !process.env.FCM_SERVER_KEY || !process.env
 const LAST_PROCESSED_BLOCK = "LAST_PROCESSED_BLOCK";
 
 const ADDRESS_IGNORE_LIST = [
+  "1NXNHZr6Pbzi3VStcgaxwEhspTWNXQ3Q4G",
+  "bc1qee7hk4a3k3km7j8hwclm0pkl76dhhgxay5nevu",
+  "bc1qclyfsxuu8vcwq38yygs5zrskwacq8sjlyvk9mx",
   "bc1qltxjty7xfrnkzlrhmxpcekknr3uncne8sht7rn",
   "bc1qwqdg6squsna38e46795at95yu9atm8azzmyvckulcc7kytlcckxswvvzej",
   "bc1qw8wrek2m7nlqldll66ajnwr9mh64syvkt67zlu",

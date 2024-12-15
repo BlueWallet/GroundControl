@@ -1,6 +1,6 @@
 {
   "name": "groundcontrol",
-  "version": "2.3.4",
+  "version": "3.0.0",
   "description": "GroundControl push server API",
   "devDependencies": {
     "@types/node": "18.7.16",
@@ -13,6 +13,7 @@
     "dotenv": "^16.0.2",
     "express": "^4.21.1",
     "express-rate-limit": "^6.6.0",
+    "google-auth-library": "^9.15.0",
     "helmet": "^5.1.0",
     "jayson": "^3.6.6",
     "jsonwebtoken": "^9.0.0",
