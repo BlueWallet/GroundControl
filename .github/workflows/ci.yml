@@ -15,7 +15,7 @@ jobs:
           node-version: 16
 
       - name: Use npm caches
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
@@ -24,7 +24,7 @@ jobs:
 
       - name: Use node_modules caches
         id: cache-nm
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: node_modules
           key: ${{ runner.os }}-nm-${{ hashFiles('package-lock.json') }}
