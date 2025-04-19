@@ -1,6 +1,6 @@
 {
   "name": "groundcontrol",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "GroundControl push server API",
   "devDependencies": {
     "@types/node": "18.7.16",

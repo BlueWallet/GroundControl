@@ -150,12 +150,17 @@ dataSource
         continue;
       }
 
-      const nextBlockToProcess = +keyVal.value + 1; // or +responseGetblockcount.result to aways process last block and skip intermediate blocks
+      let nextBlockToProcess: number = +keyVal.value + 1; // or +responseGetblockcount.result to aways process last block and skip intermediate blocks
       const start = +new Date();
       try {
         await processBlock(nextBlockToProcess, sendQueueRepository);
       } catch (error) {
         console.warn("exception when processing block:", error, "continuing as usuall");
+        if (error.message.includes('socket hang up')) {
+          // issue fetching block from bitcoind
+          console.warn("retrying block number", nextBlockToProcess);
+          continue; // skip overwriting `LAST_PROCESSED_BLOCK` in `KeyValue` table
+        }
       }
       const end = +new Date();
       console.log("took", (end - start) / 1000, "sec");

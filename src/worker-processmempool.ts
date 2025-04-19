@@ -128,9 +128,9 @@ dataSource
         console.warn('Exception in processMempool():', error);
       }
       const end = +new Date();
-      process.env.VERBOSE && console.log("processing mempool took", (end - start) / 1000, "sec");
-      process.env.VERBOSE && console.log("-----------------------");
-      await new Promise((resolve) => setTimeout(resolve, 3000, false));
+      console.log("processing mempool took", (end - start) / 1000, "sec");
+      console.log("-----------------------");
+      await new Promise((resolve) => setTimeout(resolve, 9000, false));
     }
   })
   .catch((error) => {
