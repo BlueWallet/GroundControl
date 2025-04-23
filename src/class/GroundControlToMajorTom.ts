@@ -15,10 +15,10 @@ if (!process.env.APNS_P8 || !process.env.APPLE_TEAM_ID || !process.env.APNS_P8_K
 }
 
 const keyFileStr = Buffer.from(process.env.GOOGLE_KEY_FILE, "hex").toString("ascii");
-require('fs').writeFileSync('/tmp/google_key_file.json', keyFileStr, {encoding: "ascii"});
+require("fs").writeFileSync("/tmp/google_key_file.json", keyFileStr, { encoding: "ascii" });
 const auth = new GoogleAuth({
-  keyFile: '/tmp/google_key_file.json',
-  scopes: 'https://www.googleapis.com/auth/cloud-platform',
+  keyFile: "/tmp/google_key_file.json",
+  scopes: "https://www.googleapis.com/auth/cloud-platform",
 });
 
 /**
@@ -77,7 +77,7 @@ export class GroundControlToMajorTom {
   ): Promise<void> {
     const fcmPayload = {
       message: {
-        token: '',
+        token: "",
         data: {
           badge: String(pushNotification.badge),
           tag: pushNotification.txid,
@@ -86,7 +86,7 @@ export class GroundControlToMajorTom {
           title: "New unconfirmed transaction",
           body: "You received new transfer on " + GroundControlToMajorTom.shortenAddress(pushNotification.address),
         },
-      }
+      },
     };
 
     const apnsPayload = {
@@ -165,7 +165,7 @@ export class GroundControlToMajorTom {
   static async pushOnchainAddressWasPaid(dataSource: DataSource, serverKey: string, apnsP8: string, pushNotification: components["schemas"]["PushNotificationOnchainAddressGotPaid"]): Promise<void> {
     const fcmPayload = {
       message: {
-        token: '',
+        token: "",
         data: {
           badge: String(pushNotification.badge),
           tag: pushNotification.txid,
@@ -174,7 +174,7 @@ export class GroundControlToMajorTom {
           title: "+" + pushNotification.sat + " sats",
           body: "Received on " + GroundControlToMajorTom.shortenAddress(pushNotification.address),
         },
-      }
+      },
     };
 
     const apnsPayload = {
@@ -322,7 +322,7 @@ export class GroundControlToMajorTom {
     try {
       responseText = await rawResponse.text();
     } catch (error) {
-        console.error("error getting response from FCM", error);
+      console.error("error getting response from FCM", error);
     }
 
     delete fcmPayload["message"]["token"]; // compacting a bit, we dont need token in payload as well
@@ -382,7 +382,7 @@ export class GroundControlToMajorTom {
   static processApnsResponse(dataSource: DataSource, response, token: string) {
     if (response && response.data) {
       try {
-        console.log('parsing', response.data);
+        console.log("parsing", response.data);
         const data = JSON.parse(response.data);
         if (data && data.reason && ["Unregistered", "BadDeviceToken", "DeviceTokenNotForTopic"].includes(data.reason)) return GroundControlToMajorTom.killDeadToken(dataSource, token);
       } catch (_) {}

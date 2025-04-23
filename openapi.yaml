@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: GroundControl push server API
   description: Push notifications server for BlueWallet
-  version: 0.0.13
+  version: 0.0.14
 servers:
   - url: http://localhost:3001
   - url: https://groundcontrol-bluewallet-stg.herokuapp.com
@@ -291,6 +291,10 @@ components:
             level:
               type: "string"
               enum: ["transactions"]
+            category:
+              type: "string"
+              default: "TRANSACTION_CATEGORY"
+              description: "Only included if type is 2, 3, or 4"
             sat:
               type: "integer"
               description: amount of satoshis
@@ -316,6 +320,10 @@ components:
             level:
               type: "string"
               enum: ["transactions"]
+            category:
+              type: "string"
+              default: "TRANSACTION_CATEGORY"
+              description: "Only included if type is 2, 3, or 4"
             sat:
               type: "integer"
               description: amount of satoshis
@@ -339,6 +347,10 @@ components:
             level:
               type: "string"
               enum: ["transactions"]
+            category:
+              type: "string"
+              default: "TRANSACTION_CATEGORY"
+              description: "Only included if type is 2, 3, or 4"
             txid:
               type: "string"
               description: txid of the transaction that got confirmed
@@ -355,4 +367,4 @@ components:
               enum: [5]
             text:
               type: "string"
-              description: custom text thats displayed on push notification buble
+              description: custom text thats displayed on push notification bubble

@@ -33,10 +33,11 @@ dataSource
 
     while (1) {
       // getting random record so multiple workers wont fight for the same record to send
-      const [record] = await sendQueueRepository .createQueryBuilder()
-          .orderBy('RAND()') // mysql-specific
-          .limit(1)
-          .getMany();
+      const [record] = await sendQueueRepository
+        .createQueryBuilder()
+        .orderBy("RAND()") // mysql-specific
+        .limit(1)
+        .getMany();
       // ^^^ 'order by rand' is suboptimal, but will have to do for now, especially if we are aiming to keep
       // queue table near-empty
 
@@ -50,7 +51,7 @@ dataSource
       const query = `SELECT GET_LOCK(?, ?) as result`;
       const result = await sendQueueRepository.query(query, [`send${record.id}`, 0]);
       if (result[0].result !== 1) {
-        process.env.VERBOSE && console.log('could not acquire lock, skipping record');
+        process.env.VERBOSE && console.log("could not acquire lock, skipping record");
         continue;
       }
 
