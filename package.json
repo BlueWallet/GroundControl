@@ -15,7 +15,7 @@
     "express-rate-limit": "^6.6.0",
     "google-auth-library": "^9.15.0",
     "helmet": "^5.1.0",
-    "jayson": "^3.6.6",
+    "jayson": "^4.1.0",
     "jsonwebtoken": "^9.0.0",
     "mysql2": "^3.9.8",
     "node-fetch": "^3.3.2",
