@@ -17,14 +17,23 @@ npm test
 Tests are located in the `src/tests/` directory with the `.test.ts` suffix.
 
 Current test coverage includes:
+
 - `StringUtils` - Utility functions for shortening addresses and transaction IDs
 
 ## GitHub Actions
 
-Tests are automatically run on every pull request via GitHub Actions. The CI workflow:
+The CI pipeline runs on every pull request via GitHub Actions with two separate jobs:
+
+### Lint Job
+
 1. Sets up Node.js 18
 2. Installs dependencies
-3. Runs linting
-4. Executes the test suite
+3. Runs linting (Prettier + TypeScript compilation)
 
-The workflow file is located at `.github/workflows/ci.yml`.
+### Test Job
+
+1. Sets up Node.js 18
+2. Installs dependencies
+3. Executes the test suite
+
+Both jobs run in parallel for faster feedback. The workflow file is located at `.github/workflows/ci.yml`.
