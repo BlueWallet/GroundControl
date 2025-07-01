@@ -6,8 +6,7 @@
     "@types/node": "18.7.16",
     "openapi-typescript": "^5.4.1",
     "prettier": "2.0.5",
-    "vitest": "^1.0.0",
-    "@vitest/ui": "^1.0.0"
+    "vitest": "^1.0.0"
   },
   "dependencies": {
     "body-parser": "^1.20.2",
@@ -34,7 +33,6 @@
     "worker-sender": "ts-node src/worker-sender.ts",
     "openapi": "npx openapi-typescript openapi.yaml  --additional-properties true --export-type true  --output src/openapi/api.ts",
     "test": "vitest",
-    "test:ui": "vitest --ui",
     "test:run": "vitest run"
   }
 }

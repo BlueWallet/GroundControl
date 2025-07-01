@@ -10,9 +10,6 @@ npm run test:run
 
 # Run tests in watch mode
 npm test
-
-# Run tests with UI
-npm run test:ui
 ```
 
 ## Test Structure
