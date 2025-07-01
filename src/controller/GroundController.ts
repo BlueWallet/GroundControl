@@ -133,6 +133,39 @@ const purgeIgnoredAddressesSubscriptions = () => {
     .catch((error) => console.log("error purging addresses subscriptions:", error));
 };
 
+const killSleepingMySQLProcesses = () => {
+  console.log("Checking for sleeping MySQL processes...");
+  
+  // Query to find processes sleeping for more than 3600 seconds
+  const query = `
+    SELECT id, user, host, db, command, time, state, info
+    FROM information_schema.processlist 
+    WHERE command = 'Sleep' AND time > 3600 AND id != CONNECTION_ID()
+  `;
+  
+  connection.query(query)
+    .then((sleepingProcesses: any[]) => {
+      if (sleepingProcesses.length > 0) {
+        console.log(`Found ${sleepingProcesses.length} sleeping processes older than 1 hour`);
+        
+        // Kill each sleeping process
+        const killPromises = sleepingProcesses.map((process) => {
+          console.log(`Killing process ID ${process.id} (user: ${process.user}, host: ${process.host}, sleeping for ${process.time}s)`);
+          return connection.query(`KILL ${process.id}`)
+            .then(() => console.log(`Successfully killed process ${process.id}`))
+            .catch((error) => console.log(`Error killing process ${process.id}:`, error.message));
+        });
+        
+        return Promise.all(killPromises);
+      } else {
+        console.log("No sleeping processes found that are older than 1 hour");
+      }
+    })
+    .catch((error) => {
+      console.log("Error checking sleeping processes:", error.message);
+    });
+};
+
 dataSource.initialize().then((c) => {
   console.log("db connected");
   connection = c;
@@ -140,6 +173,7 @@ dataSource.initialize().then((c) => {
   pushLogPurge();
   purgeOldTxidSubscriptions();
   setInterval(pushLogPurge, 3600 * 1000);
+  setInterval(killSleepingMySQLProcesses, 3600 * 1000); // Run every hour
 });
 
 export class GroundController {
