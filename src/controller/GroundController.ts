@@ -172,6 +172,7 @@ dataSource.initialize().then((c) => {
   purgeIgnoredAddressesSubscriptions();
   pushLogPurge();
   purgeOldTxidSubscriptions();
+  killSleepingMySQLProcesses();
   setInterval(pushLogPurge, 3600 * 1000);
   setInterval(killSleepingMySQLProcesses, 3600 * 1000); // Run every hour
 });
