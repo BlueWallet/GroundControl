@@ -3,35 +3,23 @@ name: Tests
 on: [pull_request]
 
 jobs:
-  lint:
-    runs-on: macos-latest
+  test:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout project
         uses: actions/checkout@v3
 
-      - name: Specify node version
-        uses: actions/setup-node@v2-beta
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
+          cache: "npm"
 
-      - name: Use npm caches
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Use node_modules caches
-        id: cache-nm
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-nm-${{ hashFiles('package-lock.json') }}
-
-      - name: Install node_modules
-        if: steps.cache-nm.outputs.cache-hit != 'true'
-        run: npm install
+      - name: Run linting
+        run: npm run lint
 
       - name: Run tests
-        run: npm run lint
+        run: npm run test:run
