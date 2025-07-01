@@ -14,7 +14,7 @@ npm test
 
 ## Test Structure
 
-Tests are located alongside their corresponding source files with the `.test.ts` suffix.
+Tests are located in the `src/tests/` directory with the `.test.ts` suffix.
 
 Current test coverage includes:
 - `StringUtils` - Utility functions for shortening addresses and transaction IDs
