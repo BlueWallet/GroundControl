@@ -91,6 +91,13 @@ const ADDRESS_IGNORE_LIST = [
   "bc1qws8yeyfxzykuq7tevwwxezyv3ad99emlyy9uls",
   "bc1q42kvqt0e3f27qhd2ucnprarl5ywpuj7tu0h9v2",
   "bc1q5k9tyr30xhmvmnj2z2cx0psprz44ksnmpuw7q8",
+  "bc1qfpeps3wcmzk422hvm5jeq5lelnqlzznjwyfy69",
+  "bc1qfy4ck4xpu3vg2226ew9jssly6xvc8w5xhjkzxz",
+  "bc1q9yn6zdkjjlh0z5y6sqpdvwq7pwkeh5r0ka28ad",
+  "bc1qpsys7sfk5u7ue3lffwzszzvffhtku78kr0vva4",
+  "bc1q0qfzuge7vr5s2xkczrjkccmxemlyyn8mhx298v",
+  "bc1pz454nh8mdcq093zfcc4qe2hw5ejha98k3e6n9apqkhemqv9w5kuqh2xcst",
+  "bc1qynygs8d3ju9cpum9pepmh94qk57tf67paka78g",
 ];
 
 let connection: DataSource;
