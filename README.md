@@ -96,7 +96,6 @@ Set them as env variables or put them into `.env` file in project root dir.
 - `GOOGLE_KEY_FILE` - json file with Google key for FCM, in hex
 - `GOOGLE_PROJECT_ID` - acquired with the key file
 
-
 ### Getting certificates
 
 - outdated https://dev.to/jakubkoci/react-native-push-notifications-313i

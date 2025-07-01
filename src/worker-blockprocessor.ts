@@ -88,12 +88,7 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
   }
 
   // batch insert via a raw query as its faster
-  await sendQueueRepository
-    .createQueryBuilder()
-    .insert()
-    .into(SendQueue)
-    .values(entities2save)
-    .execute();
+  await sendQueueRepository.createQueryBuilder().insert().into(SendQueue).values(entities2save).execute();
 
   // now, checking if there is a subscription to one of the mined txids:
   const query2 = dataSource.getRepository(TokenToTxid).createQueryBuilder().where("txid IN (:...txids)", { txids });
@@ -114,14 +109,8 @@ async function processBlock(blockNum, sendQueueRepository: Repository<SendQueue>
     });
   }
 
-
   // batch insert via a raw query as its faster
-  await sendQueueRepository
-      .createQueryBuilder()
-      .insert()
-      .into(SendQueue)
-      .values(entities2save)
-      .execute();
+  await sendQueueRepository.createQueryBuilder().insert().into(SendQueue).values(entities2save).execute();
 }
 
 dataSource
@@ -156,7 +145,7 @@ dataSource
         await processBlock(nextBlockToProcess, sendQueueRepository);
       } catch (error) {
         console.warn("exception when processing block:", error, "continuing as usuall");
-        if (error.message.includes('socket hang up')) {
+        if (error.message.includes("socket hang up")) {
           // issue fetching block from bitcoind
           console.warn("retrying block number", nextBlockToProcess);
           continue; // skip overwriting `LAST_PROCESSED_BLOCK` in `KeyValue` table

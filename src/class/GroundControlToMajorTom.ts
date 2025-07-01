@@ -5,6 +5,7 @@ import { TokenToAddress } from "../entity/TokenToAddress";
 import { TokenToHash } from "../entity/TokenToHash";
 import { TokenToTxid } from "../entity/TokenToTxid";
 import { components } from "../openapi/api";
+import { StringUtils } from "../utils/stringUtils";
 const jwt = require("jsonwebtoken");
 const http2 = require("http2");
 require("dotenv").config();
@@ -15,10 +16,10 @@ if (!process.env.APNS_P8 || !process.env.APPLE_TEAM_ID || !process.env.APNS_P8_K
 }
 
 const keyFileStr = Buffer.from(process.env.GOOGLE_KEY_FILE, "hex").toString("ascii");
-require('fs').writeFileSync('/tmp/google_key_file.json', keyFileStr, {encoding: "ascii"});
+require("fs").writeFileSync("/tmp/google_key_file.json", keyFileStr, { encoding: "ascii" });
 const auth = new GoogleAuth({
-  keyFile: '/tmp/google_key_file.json',
-  scopes: 'https://www.googleapis.com/auth/cloud-platform',
+  keyFile: "/tmp/google_key_file.json",
+  scopes: "https://www.googleapis.com/auth/cloud-platform",
 });
 
 /**
@@ -77,16 +78,16 @@ export class GroundControlToMajorTom {
   ): Promise<void> {
     const fcmPayload = {
       message: {
-        token: '',
+        token: "",
         data: {
           badge: String(pushNotification.badge),
           tag: pushNotification.txid,
         },
         notification: {
           title: "New unconfirmed transaction",
-          body: "You received new transfer on " + GroundControlToMajorTom.shortenAddress(pushNotification.address),
+          body: "You received new transfer on " + StringUtils.shortenAddress(pushNotification.address),
         },
-      }
+      },
     };
 
     const apnsPayload = {
@@ -94,7 +95,7 @@ export class GroundControlToMajorTom {
         badge: pushNotification.badge,
         alert: {
           title: "New Transaction - Pending",
-          body: "Received transaction on " + GroundControlToMajorTom.shortenAddress(pushNotification.address),
+          body: "Received transaction on " + StringUtils.shortenAddress(pushNotification.address),
         },
         sound: "default",
       },
@@ -114,7 +115,7 @@ export class GroundControlToMajorTom {
         },
         notification: {
           title: "Transaction - Confirmed",
-          body: "Your transaction " + GroundControlToMajorTom.shortenTxid(pushNotification.txid) + " has been confirmed",
+          body: "Your transaction " + StringUtils.shortenTxid(pushNotification.txid) + " has been confirmed",
         },
       },
     };
@@ -124,7 +125,7 @@ export class GroundControlToMajorTom {
         badge: pushNotification.badge,
         alert: {
           title: "Transaction - Confirmed",
-          body: "Your transaction " + GroundControlToMajorTom.shortenTxid(pushNotification.txid) + " has been confirmed",
+          body: "Your transaction " + StringUtils.shortenTxid(pushNotification.txid) + " has been confirmed",
         },
         sound: "default",
       },
@@ -165,16 +166,16 @@ export class GroundControlToMajorTom {
   static async pushOnchainAddressWasPaid(dataSource: DataSource, serverKey: string, apnsP8: string, pushNotification: components["schemas"]["PushNotificationOnchainAddressGotPaid"]): Promise<void> {
     const fcmPayload = {
       message: {
-        token: '',
+        token: "",
         data: {
           badge: String(pushNotification.badge),
           tag: pushNotification.txid,
         },
         notification: {
           title: "+" + pushNotification.sat + " sats",
-          body: "Received on " + GroundControlToMajorTom.shortenAddress(pushNotification.address),
+          body: "Received on " + StringUtils.shortenAddress(pushNotification.address),
         },
-      }
+      },
     };
 
     const apnsPayload = {
@@ -182,7 +183,7 @@ export class GroundControlToMajorTom {
         badge: pushNotification.badge,
         alert: {
           title: "+" + pushNotification.sat + " sats",
-          body: "Received on " + GroundControlToMajorTom.shortenAddress(pushNotification.address),
+          body: "Received on " + StringUtils.shortenAddress(pushNotification.address),
         },
         sound: "default",
       },
@@ -322,7 +323,7 @@ export class GroundControlToMajorTom {
     try {
       responseText = await rawResponse.text();
     } catch (error) {
-        console.error("error getting response from FCM", error);
+      console.error("error getting response from FCM", error);
     }
 
     delete fcmPayload["message"]["token"]; // compacting a bit, we dont need token in payload as well
@@ -382,19 +383,10 @@ export class GroundControlToMajorTom {
   static processApnsResponse(dataSource: DataSource, response, token: string) {
     if (response && response.data) {
       try {
-        console.log('parsing', response.data);
+        console.log("parsing", response.data);
         const data = JSON.parse(response.data);
         if (data && data.reason && ["Unregistered", "BadDeviceToken", "DeviceTokenNotForTopic"].includes(data.reason)) return GroundControlToMajorTom.killDeadToken(dataSource, token);
       } catch (_) {}
     }
-  }
-
-  static shortenAddress(address) {
-    if (address.length < 10) return address;
-    return address.substring(0, 5) + "...." + address.substring(address.length - 4);
-  }
-
-  static shortenTxid(txid) {
-    return GroundControlToMajorTom.shortenAddress(txid);
   }
 }

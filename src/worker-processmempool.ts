@@ -51,7 +51,7 @@ async function processMempool() {
         if (response.result && response.result.vout) {
           for (const output of response.result.vout) {
             if (output.scriptPubKey && (output.scriptPubKey.addresses || output.scriptPubKey.address)) {
-              for (const address of output.scriptPubKey?.addresses ?? (output.scriptPubKey?.address ? [output.scriptPubKey?.address] : []) ) {
+              for (const address of output.scriptPubKey?.addresses ?? (output.scriptPubKey?.address ? [output.scriptPubKey?.address] : [])) {
                 addresses.push(address);
                 processedTxids[response.result.txid] = true;
                 const payload: components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"] = {
@@ -125,7 +125,7 @@ dataSource
       try {
         await processMempool();
       } catch (error) {
-        console.warn('Exception in processMempool():', error);
+        console.warn("Exception in processMempool():", error);
       }
       const end = +new Date();
       console.log("processing mempool took", (end - start) / 1000, "sec");
