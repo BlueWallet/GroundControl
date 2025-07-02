@@ -43,7 +43,7 @@ describe("GroundControlToMajorTom", () => {
   beforeEach(async () => {
     // Reset mocks
     vi.clearAllMocks();
-    
+
     // Set up environment variables
     process.env.APNS_P8 = "6d6f636b5f6170706c655f6b6579";
     process.env.APPLE_TEAM_ID = "MOCK_TEAM_ID";
@@ -76,15 +76,10 @@ describe("GroundControlToMajorTom", () => {
     // Dynamically import the class after setting up environment
     const groundControlModule = await import("../class/GroundControlToMajorTom");
     GroundControlToMajorTom = groundControlModule.GroundControlToMajorTom;
-    
-    const entityModules = await Promise.all([
-      import("../entity/PushLog"),
-      import("../entity/TokenToAddress"),
-      import("../entity/TokenToHash"),
-      import("../entity/TokenToTxid"),
-    ]);
-    
-    [PushLog, TokenToAddress, TokenToHash, TokenToTxid] = entityModules.map(m => Object.values(m)[0]);
+
+    const entityModules = await Promise.all([import("../entity/PushLog"), import("../entity/TokenToAddress"), import("../entity/TokenToHash"), import("../entity/TokenToTxid")]);
+
+    [PushLog, TokenToAddress, TokenToHash, TokenToTxid] = entityModules.map((m) => Object.values(m)[0]);
   });
 
   afterEach(() => {
@@ -99,21 +94,21 @@ describe("GroundControlToMajorTom", () => {
       const mockClient = {
         getAccessToken: vi.fn().mockResolvedValue({ token: mockToken }),
       };
-      
+
       // Mock the auth object that's created at module level - we need to spy on the actual instance
       const mockAuth = {
         getClient: vi.fn().mockResolvedValue(mockClient),
       };
-      
+
       // Since auth is already created when the module loads, we need to spy on it
-      const authSpy = vi.spyOn(GroundControlToMajorTom as any, 'getGoogleCredentials').mockImplementation(async () => {
+      const authSpy = vi.spyOn(GroundControlToMajorTom as any, "getGoogleCredentials").mockImplementation(async () => {
         const client = await mockAuth.getClient();
         const accessTokenResponse = await client.getAccessToken();
         return accessTokenResponse.token;
       });
 
       const result = await GroundControlToMajorTom.getGoogleCredentials();
-      
+
       expect(result).toBe(mockToken);
       expect(authSpy).toHaveBeenCalled();
       authSpy.mockRestore();
@@ -128,16 +123,16 @@ describe("GroundControlToMajorTom", () => {
       (GroundControlToMajorTom as any)._jwtTokenMicroTimestamp = Date.now();
 
       const result = GroundControlToMajorTom.getApnsJwtToken();
-      
+
       expect(result).toBe(mockToken);
     });
 
     it("should generate new JWT token if cache is expired", async () => {
       const mockNewToken = "new-jwt-token";
-      
+
       // Set expired timestamp
-      (GroundControlToMajorTom as any)._jwtTokenMicroTimestamp = Date.now() - (1900 * 1000);
-      
+      (GroundControlToMajorTom as any)._jwtTokenMicroTimestamp = Date.now() - 1900 * 1000;
+
       // Mock the entire getApnsJwtToken method to test the caching logic
       const originalMethod = GroundControlToMajorTom.getApnsJwtToken;
       let callCount = 0;
@@ -151,10 +146,10 @@ describe("GroundControlToMajorTom", () => {
       });
 
       const result = GroundControlToMajorTom.getApnsJwtToken();
-      
+
       expect(result).toBe(mockNewToken);
       expect(GroundControlToMajorTom.getApnsJwtToken).toHaveBeenCalled();
-      
+
       // Restore original method
       GroundControlToMajorTom.getApnsJwtToken = originalMethod;
     });
@@ -174,13 +169,8 @@ describe("GroundControlToMajorTom", () => {
 
     it("should call FCM for Android devices", async () => {
       const mockFcmPush = vi.spyOn(GroundControlToMajorTom as any, "_pushToFcm").mockResolvedValue(undefined);
-      
-      await GroundControlToMajorTom.pushOnchainAddressGotUnconfirmedTransaction(
-        mockDataSource,
-        "server-key",
-        "apns-p8",
-        mockPushNotification
-      );
+
+      await GroundControlToMajorTom.pushOnchainAddressGotUnconfirmedTransaction(mockDataSource, "server-key", "apns-p8", mockPushNotification);
 
       expect(mockFcmPush).toHaveBeenCalledWith(
         mockDataSource,
@@ -205,13 +195,8 @@ describe("GroundControlToMajorTom", () => {
     it("should call APNS for iOS devices", async () => {
       const iosPushNotification = { ...mockPushNotification, os: "ios" as const };
       const mockApnsPush = vi.spyOn(GroundControlToMajorTom as any, "_pushToApns").mockResolvedValue(undefined);
-      
-      await GroundControlToMajorTom.pushOnchainAddressGotUnconfirmedTransaction(
-        mockDataSource,
-        "server-key",
-        "apns-p8",
-        iosPushNotification
-      );
+
+      await GroundControlToMajorTom.pushOnchainAddressGotUnconfirmedTransaction(mockDataSource, "server-key", "apns-p8", iosPushNotification);
 
       expect(mockApnsPush).toHaveBeenCalledWith(
         mockDataSource,
@@ -245,13 +230,8 @@ describe("GroundControlToMajorTom", () => {
 
     it("should call FCM for Android devices", async () => {
       const mockFcmPush = vi.spyOn(GroundControlToMajorTom as any, "_pushToFcm").mockResolvedValue(undefined);
-      
-      await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(
-        mockDataSource,
-        "server-key",
-        "apns-p8",
-        mockPushNotification
-      );
+
+      await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(mockDataSource, "server-key", "apns-p8", mockPushNotification);
 
       expect(mockFcmPush).toHaveBeenCalledWith(
         mockDataSource,
@@ -276,13 +256,8 @@ describe("GroundControlToMajorTom", () => {
     it("should call APNS for iOS devices", async () => {
       const iosPushNotification = { ...mockPushNotification, os: "ios" as const };
       const mockApnsPush = vi.spyOn(GroundControlToMajorTom as any, "_pushToApns").mockResolvedValue(undefined);
-      
-      await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(
-        mockDataSource,
-        "server-key",
-        "apns-p8",
-        iosPushNotification
-      );
+
+      await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(mockDataSource, "server-key", "apns-p8", iosPushNotification);
 
       expect(mockApnsPush).toHaveBeenCalledWith(
         mockDataSource,
@@ -316,13 +291,8 @@ describe("GroundControlToMajorTom", () => {
 
     it("should call FCM for Android devices", async () => {
       const mockFcmPush = vi.spyOn(GroundControlToMajorTom as any, "_pushToFcm").mockResolvedValue(undefined);
-      
-      await GroundControlToMajorTom.pushMessage(
-        mockDataSource,
-        "server-key",
-        "apns-p8",
-        mockPushNotification
-      );
+
+      await GroundControlToMajorTom.pushMessage(mockDataSource, "server-key", "apns-p8", mockPushNotification);
 
       expect(mockFcmPush).toHaveBeenCalledWith(
         mockDataSource,
@@ -344,13 +314,8 @@ describe("GroundControlToMajorTom", () => {
     it("should call APNS for iOS devices", async () => {
       const iosPushNotification = { ...mockPushNotification, os: "ios" as const };
       const mockApnsPush = vi.spyOn(GroundControlToMajorTom as any, "_pushToApns").mockResolvedValue(undefined);
-      
-      await GroundControlToMajorTom.pushMessage(
-        mockDataSource,
-        "server-key",
-        "apns-p8",
-        iosPushNotification
-      );
+
+      await GroundControlToMajorTom.pushMessage(mockDataSource, "server-key", "apns-p8", iosPushNotification);
 
       expect(mockApnsPush).toHaveBeenCalledWith(
         mockDataSource,
@@ -385,13 +350,8 @@ describe("GroundControlToMajorTom", () => {
 
     it("should call FCM for Android devices", async () => {
       const mockFcmPush = vi.spyOn(GroundControlToMajorTom as any, "_pushToFcm").mockResolvedValue(undefined);
-      
-      await GroundControlToMajorTom.pushOnchainAddressWasPaid(
-        mockDataSource,
-        "server-key",
-        "apns-p8",
-        mockPushNotification
-      );
+
+      await GroundControlToMajorTom.pushOnchainAddressWasPaid(mockDataSource, "server-key", "apns-p8", mockPushNotification);
 
       expect(mockFcmPush).toHaveBeenCalledWith(
         mockDataSource,
@@ -428,13 +388,8 @@ describe("GroundControlToMajorTom", () => {
 
     it("should call FCM for Android devices with memo", async () => {
       const mockFcmPush = vi.spyOn(GroundControlToMajorTom as any, "_pushToFcm").mockResolvedValue(undefined);
-      
-      await GroundControlToMajorTom.pushLightningInvoicePaid(
-        mockDataSource,
-        "server-key",
-        "apns-p8",
-        mockPushNotification
-      );
+
+      await GroundControlToMajorTom.pushLightningInvoicePaid(mockDataSource, "server-key", "apns-p8", mockPushNotification);
 
       expect(mockFcmPush).toHaveBeenCalledWith(
         mockDataSource,
@@ -459,13 +414,8 @@ describe("GroundControlToMajorTom", () => {
     it("should handle missing memo gracefully", async () => {
       const notificationWithoutMemo = { ...mockPushNotification, memo: undefined };
       const mockFcmPush = vi.spyOn(GroundControlToMajorTom as any, "_pushToFcm").mockResolvedValue(undefined);
-      
-      await GroundControlToMajorTom.pushLightningInvoicePaid(
-        mockDataSource,
-        "server-key",
-        "apns-p8",
-        notificationWithoutMemo
-      );
+
+      await GroundControlToMajorTom.pushLightningInvoicePaid(mockDataSource, "server-key", "apns-p8", notificationWithoutMemo);
 
       expect(mockFcmPush).toHaveBeenCalledWith(
         mockDataSource,
@@ -501,18 +451,18 @@ describe("GroundControlToMajorTom", () => {
   describe("processFcmResponse", () => {
     it("should return true for successful response", () => {
       const successResponse = JSON.stringify({ name: "projects/mock-project/messages/123" });
-      
+
       const result = GroundControlToMajorTom.processFcmResponse(mockDataSource, successResponse, "token");
-      
+
       expect(result).toBe(true);
     });
 
     it("should kill dead token on 404 error and return false", async () => {
       const errorResponse = JSON.stringify({ error: { code: 404 } });
       const mockKillDeadToken = vi.spyOn(GroundControlToMajorTom, "killDeadToken").mockResolvedValue(undefined);
-      
+
       const result = GroundControlToMajorTom.processFcmResponse(mockDataSource, errorResponse, "dead-token");
-      
+
       expect(mockKillDeadToken).toHaveBeenCalledWith(mockDataSource, "dead-token");
       expect(result).toBe(false);
     });
@@ -520,30 +470,30 @@ describe("GroundControlToMajorTom", () => {
     it("should kill dead token on UNREGISTERED error and return false", async () => {
       const errorResponse = JSON.stringify({
         error: {
-          details: [{ errorCode: "UNREGISTERED" }]
-        }
+          details: [{ errorCode: "UNREGISTERED" }],
+        },
       });
       const mockKillDeadToken = vi.spyOn(GroundControlToMajorTom, "killDeadToken").mockResolvedValue(undefined);
-      
+
       const result = GroundControlToMajorTom.processFcmResponse(mockDataSource, errorResponse, "unregistered-token");
-      
+
       expect(mockKillDeadToken).toHaveBeenCalledWith(mockDataSource, "unregistered-token");
       expect(result).toBe(false);
     });
 
     it("should return false for invalid JSON response", () => {
       const invalidResponse = "invalid json";
-      
+
       const result = GroundControlToMajorTom.processFcmResponse(mockDataSource, invalidResponse, "token");
-      
+
       expect(result).toBe(false);
     });
 
     it("should return false for response without name field", () => {
       const responseWithoutName = JSON.stringify({ someOtherField: "value" });
-      
+
       const result = GroundControlToMajorTom.processFcmResponse(mockDataSource, responseWithoutName, "token");
-      
+
       expect(result).toBe(false);
     });
   });
@@ -551,65 +501,65 @@ describe("GroundControlToMajorTom", () => {
   describe("processApnsResponse", () => {
     it("should kill dead token for Unregistered reason", async () => {
       const response = {
-        data: JSON.stringify({ reason: "Unregistered" })
+        data: JSON.stringify({ reason: "Unregistered" }),
       };
       const mockKillDeadToken = vi.spyOn(GroundControlToMajorTom, "killDeadToken").mockResolvedValue(undefined);
-      
+
       GroundControlToMajorTom.processApnsResponse(mockDataSource, response, "unregistered-token");
-      
+
       expect(mockKillDeadToken).toHaveBeenCalledWith(mockDataSource, "unregistered-token");
     });
 
     it("should kill dead token for BadDeviceToken reason", async () => {
       const response = {
-        data: JSON.stringify({ reason: "BadDeviceToken" })
+        data: JSON.stringify({ reason: "BadDeviceToken" }),
       };
       const mockKillDeadToken = vi.spyOn(GroundControlToMajorTom, "killDeadToken").mockResolvedValue(undefined);
-      
+
       GroundControlToMajorTom.processApnsResponse(mockDataSource, response, "bad-token");
-      
+
       expect(mockKillDeadToken).toHaveBeenCalledWith(mockDataSource, "bad-token");
     });
 
     it("should kill dead token for DeviceTokenNotForTopic reason", async () => {
       const response = {
-        data: JSON.stringify({ reason: "DeviceTokenNotForTopic" })
+        data: JSON.stringify({ reason: "DeviceTokenNotForTopic" }),
       };
       const mockKillDeadToken = vi.spyOn(GroundControlToMajorTom, "killDeadToken").mockResolvedValue(undefined);
-      
+
       GroundControlToMajorTom.processApnsResponse(mockDataSource, response, "wrong-topic-token");
-      
+
       expect(mockKillDeadToken).toHaveBeenCalledWith(mockDataSource, "wrong-topic-token");
     });
 
     it("should not kill token for other reasons", async () => {
       const response = {
-        data: JSON.stringify({ reason: "PayloadTooLarge" })
+        data: JSON.stringify({ reason: "PayloadTooLarge" }),
       };
       const mockKillDeadToken = vi.spyOn(GroundControlToMajorTom, "killDeadToken").mockResolvedValue(undefined);
-      
+
       GroundControlToMajorTom.processApnsResponse(mockDataSource, response, "valid-token");
-      
+
       expect(mockKillDeadToken).not.toHaveBeenCalled();
     });
 
     it("should handle invalid JSON gracefully", async () => {
       const response = {
-        data: "invalid json"
+        data: "invalid json",
       };
       const mockKillDeadToken = vi.spyOn(GroundControlToMajorTom, "killDeadToken").mockResolvedValue(undefined);
-      
+
       GroundControlToMajorTom.processApnsResponse(mockDataSource, response, "valid-token");
-      
+
       expect(mockKillDeadToken).not.toHaveBeenCalled();
     });
 
     it("should handle response without data", async () => {
       const response = {};
       const mockKillDeadToken = vi.spyOn(GroundControlToMajorTom, "killDeadToken").mockResolvedValue(undefined);
-      
+
       GroundControlToMajorTom.processApnsResponse(mockDataSource, response, "valid-token");
-      
+
       expect(mockKillDeadToken).not.toHaveBeenCalled();
     });
   });
@@ -617,18 +567,18 @@ describe("GroundControlToMajorTom", () => {
   describe("_pushToFcm", () => {
     it("should send push notification to FCM successfully", async () => {
       const mockResponse = {
-        text: vi.fn().mockResolvedValue(JSON.stringify({ name: "projects/mock/messages/123" }))
+        text: vi.fn().mockResolvedValue(JSON.stringify({ name: "projects/mock/messages/123" })),
       };
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as any);
-      
+
       const mockProcessFcmResponse = vi.spyOn(GroundControlToMajorTom, "processFcmResponse").mockReturnValue(true);
 
       const fcmPayload = {
         message: {
           token: "",
           data: { badge: "1" },
-          notification: { title: "Test", body: "Test message" }
-        }
+          notification: { title: "Test", body: "Test message" },
+        },
       };
 
       const pushNotification: components["schemas"]["PushNotificationBase"] = {
@@ -636,16 +586,10 @@ describe("GroundControlToMajorTom", () => {
         token: "test-token",
         os: "android",
         badge: 1,
-        level: "transactions"
+        level: "transactions",
       };
 
-      await (GroundControlToMajorTom as any)._pushToFcm(
-        mockDataSource,
-        "bearer-token",
-        "test-token",
-        fcmPayload,
-        pushNotification
-      );
+      await (GroundControlToMajorTom as any)._pushToFcm(mockDataSource, "bearer-token", "test-token", fcmPayload, pushNotification);
 
       expect(global.fetch).toHaveBeenCalledWith(
         `https://fcm.googleapis.com/v1/projects/${process.env.GOOGLE_PROJECT_ID}/messages:send`,
@@ -670,13 +614,13 @@ describe("GroundControlToMajorTom", () => {
 
     it("should handle FCM network errors gracefully", async () => {
       vi.mocked(global.fetch).mockRejectedValue(new Error("Network error"));
-      
+
       const fcmPayload = {
         message: {
           token: "",
           data: { badge: "1" },
-          notification: { title: "Test", body: "Test message" }
-        }
+          notification: { title: "Test", body: "Test message" },
+        },
       };
 
       const pushNotification: components["schemas"]["PushNotificationBase"] = {
@@ -684,19 +628,11 @@ describe("GroundControlToMajorTom", () => {
         token: "test-token",
         os: "android",
         badge: 1,
-        level: "transactions"
+        level: "transactions",
       };
 
       // The method should reject when fetch fails
-      await expect(
-        (GroundControlToMajorTom as any)._pushToFcm(
-          mockDataSource,
-          "bearer-token",
-          "test-token",
-          fcmPayload,
-          pushNotification
-        )
-      ).rejects.toThrow("Network error");
+      await expect((GroundControlToMajorTom as any)._pushToFcm(mockDataSource, "bearer-token", "test-token", fcmPayload, pushNotification)).rejects.toThrow("Network error");
     });
   });
 });
