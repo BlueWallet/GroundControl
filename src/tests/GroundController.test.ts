@@ -14,16 +14,18 @@ vi.mock("../entity/TokenToTxid", () => ({
 }));
 vi.mock("../entity/TokenConfiguration", () => ({
   TokenConfiguration: class TokenConfiguration {
-    constructor() {
-      this.level_all = true;
-      this.level_transactions = true;
-      this.level_price = true;
-      this.level_news = true;
-      this.level_tips = true;
-      this.lang = "en";
-      this.app_version = "1.0.0";
-      this.last_online = new Date();
-    }
+    id!: number;
+    token!: string;
+    os!: string;
+    level_all: boolean = true;
+    level_transactions: boolean = true;
+    level_price: boolean = true;
+    level_news: boolean = true;
+    level_tips: boolean = true;
+    lang: string = "en";
+    app_version: string = "1.0.0";
+    created!: Date;
+    last_online: Date = new Date();
   },
 }));
 vi.mock("../entity/SendQueue", () => ({
@@ -80,7 +82,7 @@ vi.mock("../../package.json", () => ({
 }));
 
 // Mock global functions to prevent module initialization issues
-global.setInterval = vi.fn();
+global.setInterval = vi.fn() as any;
 global.console = {
   ...console,
   log: vi.fn(),
@@ -89,8 +91,6 @@ global.console = {
 
 // Mock environment variables
 const originalEnv = { ...process.env };
-
-
 
 describe("GroundController", () => {
   let mockDataSource: DataSource;
@@ -104,7 +104,7 @@ describe("GroundController", () => {
   beforeEach(async () => {
     // Reset mocks
     vi.clearAllMocks();
-    
+
     // Set up require mock to return the mocked crypto module
     (global as any).require = vi.fn().mockImplementation((module: string) => {
       if (module === "crypto") {
@@ -118,7 +118,7 @@ describe("GroundController", () => {
       const originalRequire = require;
       return originalRequire(module);
     });
-    
+
     // Set up environment variables
     process.env.JAWSDB_MARIA_URL = "mock-db-url";
     process.env.GOOGLE_KEY_FILE = "mock-google-key";
@@ -163,7 +163,7 @@ describe("GroundController", () => {
     // Dynamically import GroundController after setting up environment
     const { GroundController } = await import("../controller/GroundController");
     groundController = new GroundController();
-    
+
     // Mock the connection property by directly setting repositories
     (groundController as any)._tokenToAddressRepository = mockRepository;
     (groundController as any)._tokenToHashRepository = mockRepository;
@@ -313,10 +313,7 @@ describe("GroundController", () => {
       const mockHashRecord = { id: 2, hash: "hash123" };
       const mockTxidRecord = { id: 3, txid: "txid123" };
 
-      mockRepository.findOneBy
-        .mockResolvedValueOnce(mockAddressRecord)
-        .mockResolvedValueOnce(mockHashRecord)
-        .mockResolvedValueOnce(mockTxidRecord);
+      mockRepository.findOneBy.mockResolvedValueOnce(mockAddressRecord).mockResolvedValueOnce(mockHashRecord).mockResolvedValueOnce(mockTxidRecord);
 
       await groundController.unsubscribe(mockRequest, mockResponse, mockNext);
 
@@ -365,10 +362,10 @@ describe("GroundController", () => {
       // Test the method structure and basic validation
       expect(typeof groundController.lightningInvoiceGotSettled).toBe("function");
       expect(groundController.lightningInvoiceGotSettled.length).toBe(3); // request, response, next parameters
-      
+
       // Test that the method validates the hash correctly by expecting it to call response.send
       await groundController.lightningInvoiceGotSettled(mockRequest, mockResponse, mockNext);
-      
+
       // Either successful processing (status 200) or hash validation failure (status 500)
       expect(mockResponse.status).toHaveBeenCalled();
       expect(mockResponse.send).toHaveBeenCalled();
