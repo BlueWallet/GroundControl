@@ -115,6 +115,7 @@ dataSource
   .initialize()
   .then(async (connection) => {
     // start worker
+    console.log("db connected");
     console.log("running groundcontrol worker-processmempool");
     console.log(require("fs").readFileSync("./bowie.txt").toString("ascii"));
 
