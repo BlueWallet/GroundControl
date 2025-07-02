@@ -25,6 +25,7 @@ dataSource
   .initialize()
   .then(async (connection) => {
     // start worker
+    console.log("db connected");
     console.log("running groundcontrol worker-sender");
     console.log(require("fs").readFileSync("./bowie.txt").toString("ascii"));
 

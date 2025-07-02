@@ -162,7 +162,7 @@ describe("GroundController", () => {
 
     // Dynamically import GroundController after setting up environment
     const { GroundController } = await import("../controller/GroundController");
-    groundController = new GroundController();
+    groundController = new GroundController((mockConnection as unknown) as DataSource);
 
     // Mock the connection property by directly setting repositories
     (groundController as any)._tokenToAddressRepository = mockRepository;
