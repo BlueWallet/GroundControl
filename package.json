@@ -4,7 +4,7 @@
   "description": "GroundControl push server API",
   "devDependencies": {
     "@types/node": "18.7.16",
-    "openapi-typescript": "^5.4.1",
+    "openapi-typescript": "^7.13.0",
     "prettier": "2.0.5",
     "vitest": "^1.0.0"
   },
