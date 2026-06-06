@@ -107,6 +107,14 @@ dataSource
 
     // create express app
     const app = express();
+    // some misconfigured clients have a trailing slash in their saved base url, producing
+    // requests like `//getTokenConfiguration` which express treats as 404. strip the leading slash.
+    app.use((req, _res, next) => {
+      if (req.url.startsWith("//")) {
+        req.url = req.url.slice(1);
+      }
+      next();
+    });
     app.use(bodyParser.json());
     app.use(cors());
     app.use(helmet.hidePoweredBy());
