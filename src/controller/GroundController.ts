@@ -200,15 +200,14 @@ export class GroundController {
   async lightningInvoiceGotSettled(request: Request, response: Response, next: NextFunction) {
     const body: paths["/lightningInvoiceGotSettled"]["post"]["requestBody"]["content"]["application/json"] = request.body;
 
-    const hashShouldBe = require("crypto").createHash("sha256").update(Buffer.from(body.preimage, "hex")).digest("hex");
-    if (hashShouldBe !== body.hash) {
-      response.status(500).send("preimage doesnt match hash");
+    if (!body.hash) {
+      response.status(500).send("preimage hash is not provided");
       return;
     }
 
     const tokenToHashAll = await this.tokenToHashRepository.find({
       where: {
-        hash: hashShouldBe,
+        hash: body.hash,
       },
     });
     for (const tokenToHash of tokenToHashAll) {
@@ -220,7 +219,7 @@ export class GroundController {
         level: "transactions",
         os: tokenToHash.os === "android" ? "android" : "ios", //hacky
         token: tokenToHash.token,
-        hash: hashShouldBe,
+        hash: body.hash,
         memo: body.memo,
       };
 

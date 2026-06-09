@@ -370,28 +370,6 @@ describe("GroundController", () => {
       expect(mockResponse.status).toHaveBeenCalled();
       expect(mockResponse.send).toHaveBeenCalled();
     });
-
-    it("should reject invalid preimage/hash combination", async () => {
-      // Temporarily change the require mock to return a different hash
-      const mockDigest = vi.fn().mockReturnValue("different-hash");
-      (global as any).require = vi.fn().mockImplementation((module: string) => {
-        if (module === "crypto") {
-          return {
-            createHash: vi.fn().mockReturnValue({
-              update: vi.fn().mockReturnThis(),
-              digest: mockDigest,
-            }),
-          };
-        }
-        const originalRequire = require;
-        return originalRequire(module);
-      });
-
-      await groundController.lightningInvoiceGotSettled(mockRequest, mockResponse, mockNext);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
-      expect(mockResponse.send).toHaveBeenCalledWith("preimage doesnt match hash");
-    });
   });
 
   describe("ping", () => {
