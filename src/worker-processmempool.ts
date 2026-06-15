@@ -4,13 +4,14 @@ import { TokenToAddress } from "./entity/TokenToAddress";
 import { SendQueue } from "./entity/SendQueue";
 import dataSource from "./data-source";
 import { components } from "./openapi/api";
+import { LruCache } from "./lru-cache";
 require("dotenv").config();
 const url = require("url");
 let jayson = require("jayson/promise");
 let rpc = url.parse(process.env.BITCOIN_RPC);
 let client = jayson.client.http(rpc);
 
-let processedTxids = {};
+const processedTxids = new LruCache(250000);
 if (!process.env.BITCOIN_RPC) {
   console.error("not all env variables set");
   process.exit();
@@ -29,7 +30,7 @@ process
 let sendQueueRepository: Repository<SendQueue>;
 
 async function processMempool() {
-  process.env.VERBOSE && console.log("cached txids=", Object.keys(processedTxids).length);
+  process.env.VERBOSE && console.log("cached txids=", processedTxids.size);
   const responseGetrawmempool = await client.request("getrawmempool", []);
   process.env.VERBOSE && console.log(responseGetrawmempool.result.length, "txs in mempool");
 
@@ -42,7 +43,7 @@ async function processMempool() {
   for (const txid of responseGetrawmempool.result) {
     countTxidsProcessed++;
     if (!txid) continue;
-    if (!processedTxids[txid]) rpcBatch.push(client.request("getrawtransaction", [txid, true], undefined, false));
+    if (!processedTxids.has(txid)) rpcBatch.push(client.request("getrawtransaction", [txid, true], undefined, false));
     if (rpcBatch.length >= batchSize || countTxidsProcessed === responseGetrawmempool.result.length) {
       const startBatch = +new Date();
       // got enough txids lets batch fetch them from bitcoind rpc
@@ -53,7 +54,7 @@ async function processMempool() {
             if (output.scriptPubKey && (output.scriptPubKey.addresses || output.scriptPubKey.address)) {
               for (const address of output.scriptPubKey?.addresses ?? (output.scriptPubKey?.address ? [output.scriptPubKey?.address] : [])) {
                 addresses.push(address);
-                processedTxids[response.result.txid] = true;
+                processedTxids.add(response.result.txid);
                 const payload: components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"] = {
                   address,
                   txid: response.result.txid,
