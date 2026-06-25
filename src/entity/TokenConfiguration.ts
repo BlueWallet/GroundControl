@@ -27,6 +27,9 @@ export class TokenConfiguration {
   @Column({ default: true })
   level_tips: boolean;
 
+  @Column({ default: false })
+  redacted: boolean;
+
   @Column({ default: "en" })
   lang: string;
 

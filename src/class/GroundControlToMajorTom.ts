@@ -35,6 +35,7 @@ const auth = new GoogleAuth({
  * @see https://firebase.google.com/docs/cloud-messaging/http-server-ref
  */
 export class GroundControlToMajorTom {
+  protected static readonly REDACTED_ALERT = { title: "BlueWallet", body: "You have a new notification" };
   protected static _jwtToken: string = "";
   protected static _jwtTokenMicroTimestamp: number = 0;
 
@@ -225,11 +226,17 @@ export class GroundControlToMajorTom {
   }
 
   protected static async _pushToApns(dataSource: DataSource, apnsP8: string, token: string, apnsPayload: object, pushNotification: components["schemas"]["PushNotificationBase"], collapseId): Promise<void> {
+    if (pushNotification["redacted"]) {
+      apnsPayload["aps"]["alert"] = GroundControlToMajorTom.REDACTED_ALERT;
+      apnsPayload["data"] = {};
+    }
     return new Promise(function (resolve) {
-      // we pass some of the notification properties as data properties to FCM payload:
-      for (let dataKey of Object.keys(pushNotification)) {
-        if (["token", "os", "badge", "level"].includes(dataKey)) continue;
-        apnsPayload["data"][dataKey] = pushNotification[dataKey];
+      if (!pushNotification["redacted"]) {
+        // we pass some of the notification properties as data properties to FCM payload:
+        for (let dataKey of Object.keys(pushNotification)) {
+          if (["token", "os", "badge", "level", "redacted"].includes(dataKey)) continue;
+          apnsPayload["data"][dataKey] = pushNotification[dataKey];
+        }
       }
       const client = http2.connect("https://api.push.apple.com");
       client.on("error", (err) => console.error(err));
@@ -303,10 +310,17 @@ export class GroundControlToMajorTom {
   protected static async _pushToFcm(dataSource: DataSource, bearer: string, token: string, fcmPayload: object, pushNotification: components["schemas"]["PushNotificationBase"]): Promise<void> {
     fcmPayload["message"]["token"] = token;
 
-    // now, we pass some of the notification properties as data properties to FCM payload:
-    for (let dataKey of Object.keys(pushNotification)) {
-      if (["token", "os", "badge"].includes(dataKey)) continue;
-      fcmPayload["message"]["data"][dataKey] = String(pushNotification[dataKey]);
+    if (pushNotification["redacted"]) {
+      fcmPayload["message"]["notification"] = GroundControlToMajorTom.REDACTED_ALERT;
+      fcmPayload["message"]["data"] = {};
+    }
+
+    if (!pushNotification["redacted"]) {
+      // now, we pass some of the notification properties as data properties to FCM payload:
+      for (let dataKey of Object.keys(pushNotification)) {
+        if (["token", "os", "badge", "level", "redacted"].includes(dataKey)) continue;
+        fcmPayload["message"]["data"][dataKey] = String(pushNotification[dataKey]);
+      }
     }
 
     // @ts-ignore

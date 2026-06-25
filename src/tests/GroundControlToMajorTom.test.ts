@@ -612,6 +612,25 @@ describe("GroundControlToMajorTom", () => {
       );
     });
 
+    it("should redact text and strip data payload when pushNotification.redacted is set", async () => {
+      const mockResponse = { text: vi.fn().mockResolvedValue(JSON.stringify({ name: "projects/mock/messages/123" })) };
+      vi.mocked(global.fetch).mockResolvedValue(mockResponse as any);
+      vi.spyOn(GroundControlToMajorTom, "processFcmResponse").mockReturnValue(true);
+
+      const fcmPayload = {
+        message: { token: "", data: { badge: "1" }, notification: { title: "+1000 sats", body: "Received on bc1qx....0wlh" } },
+      };
+      const pushNotification: any = { type: 2, token: "test-token", os: "android", badge: 1, level: "transactions", address: "bc1qsecret", txid: "deadbeef", sat: 1000, redacted: true };
+
+      await (GroundControlToMajorTom as any)._pushToFcm(mockDataSource, "bearer-token", "test-token", fcmPayload, pushNotification);
+
+      const sentBody = vi.mocked(global.fetch).mock.calls[0][1].body as string;
+      expect(sentBody).toContain("You have a new notification");
+      expect(sentBody).not.toContain("bc1qsecret");
+      expect(sentBody).not.toContain("deadbeef");
+      expect(fcmPayload.message.data).toEqual({});
+    });
+
     it("should handle FCM network errors gracefully", async () => {
       vi.mocked(global.fetch).mockRejectedValue(new Error("Network error"));
 
@@ -633,6 +652,24 @@ describe("GroundControlToMajorTom", () => {
 
       // The method should reject when fetch fails
       await expect((GroundControlToMajorTom as any)._pushToFcm(mockDataSource, "bearer-token", "test-token", fcmPayload, pushNotification)).rejects.toThrow("Network error");
+    });
+  });
+
+  describe("_pushToApns", () => {
+    it("should redact alert and strip data payload when pushNotification.redacted is set", async () => {
+      const apnsPayload: any = {
+        aps: { badge: 1, alert: { title: "+1000 sats", body: "Received on bc1qx....0wlh" }, sound: "default" },
+        data: {},
+      };
+      const pushNotification: any = { type: 2, token: "test-token", os: "ios", badge: 1, level: "transactions", address: "bc1qsecret", txid: "deadbeef", sat: 1000, redacted: true };
+
+      await (GroundControlToMajorTom as any)._pushToApns(mockDataSource, "apns-p8", "test-token", apnsPayload, pushNotification, "deadbeef").catch(() => {});
+
+      expect(apnsPayload.aps.alert).toEqual({ title: "BlueWallet", body: "You have a new notification" });
+      expect(apnsPayload.data).toEqual({});
+      const serialized = JSON.stringify(apnsPayload);
+      expect(serialized).not.toContain("bc1qsecret");
+      expect(serialized).not.toContain("deadbeef");
     });
   });
 });
