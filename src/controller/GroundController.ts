@@ -260,16 +260,17 @@ export class GroundController {
       tokenConfig = new TokenConfiguration();
       tokenConfig.token = body.token;
       tokenConfig.os = body.os;
-    } else {
-      if (typeof body.level_all !== "undefined") tokenConfig.level_all = !!body.level_all;
-      if (typeof body.level_transactions !== "undefined") tokenConfig.level_transactions = !!body.level_transactions;
-      if (typeof body.level_price !== "undefined") tokenConfig.level_price = !!body.level_price;
-      if (typeof body.level_news !== "undefined") tokenConfig.level_news = !!body.level_news;
-      if (typeof body.level_tips !== "undefined") tokenConfig.level_tips = !!body.level_tips;
-      if (typeof body.lang !== "undefined") tokenConfig.lang = String(body.lang);
-      if (typeof body.app_version !== "undefined") tokenConfig.app_version = String(body.app_version);
-      tokenConfig.last_online = new Date();
     }
+
+    if (typeof body.level_all !== "undefined") tokenConfig.level_all = !!body.level_all;
+    if (typeof body.level_transactions !== "undefined") tokenConfig.level_transactions = !!body.level_transactions;
+    if (typeof body.level_price !== "undefined") tokenConfig.level_price = !!body.level_price;
+    if (typeof body.level_news !== "undefined") tokenConfig.level_news = !!body.level_news;
+    if (typeof body.level_tips !== "undefined") tokenConfig.level_tips = !!body.level_tips;
+    if (typeof body.redacted !== "undefined") tokenConfig.redacted = !!body.redacted;
+    if (typeof body.lang !== "undefined") tokenConfig.lang = String(body.lang);
+    if (typeof body.app_version !== "undefined") tokenConfig.app_version = String(body.app_version);
+    tokenConfig.last_online = new Date();
 
     try {
       await this.tokenConfigurationRepository.save(tokenConfig);
@@ -305,6 +306,7 @@ export class GroundController {
       level_price: tokenConfig.level_price,
       level_transactions: tokenConfig.level_transactions,
       level_tips: tokenConfig.level_tips,
+      redacted: tokenConfig.redacted,
       lang: tokenConfig.lang,
       app_version: tokenConfig.app_version,
     };
