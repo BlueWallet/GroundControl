@@ -101,6 +101,8 @@ dataSource
         continue;
       }
 
+      payload.redacted = !!tokenConfig.redacted;
+
       const timeoutId = setTimeout(() => {
         console.error("timeout pushing to token, comitting suicide");
         process.exit(2);
