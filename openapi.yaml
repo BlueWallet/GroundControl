@@ -193,6 +193,9 @@ components:
           type: "boolean"
         level_tips:
           type: "boolean"
+        redacted:
+          type: "boolean"
+          description: "when true, server sends generic push text and omits data payload"
         lang:
           type: "string"
         app_version:

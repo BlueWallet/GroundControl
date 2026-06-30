@@ -35,6 +35,7 @@ const auth = new GoogleAuth({
  * @see https://firebase.google.com/docs/cloud-messaging/http-server-ref
  */
 export class GroundControlToMajorTom {
+  protected static readonly REDACTED_ALERT = { title: "BlueWallet", body: "You have a new notification" };
   protected static _jwtToken: string = "";
   protected static _jwtTokenMicroTimestamp: number = 0;
 
@@ -160,7 +161,7 @@ export class GroundControlToMajorTom {
     };
 
     if (pushNotification.os === "android") return GroundControlToMajorTom._pushToFcm(dataSource, serverKey, pushNotification.token, fcmPayload, pushNotification);
-    if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(dataSource, apnsP8, pushNotification.token, apnsPayload, pushNotification, pushNotification.txid);
+    if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(dataSource, apnsP8, pushNotification.token, apnsPayload, pushNotification);
   }
 
   static async pushOnchainAddressWasPaid(dataSource: DataSource, serverKey: string, apnsP8: string, pushNotification: components["schemas"]["PushNotificationOnchainAddressGotPaid"]): Promise<void> {
@@ -224,24 +225,37 @@ export class GroundControlToMajorTom {
     if (pushNotification.os === "ios") return GroundControlToMajorTom._pushToApns(dataSource, apnsP8, pushNotification.token, apnsPayload, pushNotification, pushNotification.hash);
   }
 
-  protected static async _pushToApns(dataSource: DataSource, apnsP8: string, token: string, apnsPayload: object, pushNotification: components["schemas"]["PushNotificationBase"], collapseId): Promise<void> {
+  // collapse-id carries the sensitive preimage hash / txid
+  // never ship it on a redacted push
+  protected static _apnsHeaders(token: string, apnsP8: string, collapseId: string | undefined, redacted: boolean): Record<string, any> {
+    const headers: Record<string, any> = {
+      ":method": "POST",
+      "apns-topic": process.env.APNS_TOPIC,
+      "apns-expiration": Math.floor(+new Date() / 1000 + 3600 * 24),
+      ":scheme": "https",
+      ":path": "/3/device/" + token,
+      authorization: `bearer ${apnsP8}`,
+    };
+    if (!redacted && collapseId) headers["apns-collapse-id"] = collapseId;
+    return headers;
+  }
+
+  protected static async _pushToApns(dataSource: DataSource, apnsP8: string, token: string, apnsPayload: object, pushNotification: components["schemas"]["PushNotificationBase"], collapseId?: string): Promise<void> {
+    if (pushNotification["redacted"]) {
+      apnsPayload["aps"]["alert"] = GroundControlToMajorTom.REDACTED_ALERT;
+      apnsPayload["data"] = {};
+    }
     return new Promise(function (resolve) {
-      // we pass some of the notification properties as data properties to FCM payload:
-      for (let dataKey of Object.keys(pushNotification)) {
-        if (["token", "os", "badge", "level"].includes(dataKey)) continue;
-        apnsPayload["data"][dataKey] = pushNotification[dataKey];
+      if (!pushNotification["redacted"]) {
+        // we pass some of the notification properties as data properties to FCM payload:
+        for (let dataKey of Object.keys(pushNotification)) {
+          if (["token", "os", "badge", "level", "redacted"].includes(dataKey)) continue;
+          apnsPayload["data"][dataKey] = pushNotification[dataKey];
+        }
       }
       const client = http2.connect("https://api.push.apple.com");
       client.on("error", (err) => console.error(err));
-      const headers = {
-        ":method": "POST",
-        "apns-topic": process.env.APNS_TOPIC,
-        "apns-collapse-id": collapseId,
-        "apns-expiration": Math.floor(+new Date() / 1000 + 3600 * 24),
-        ":scheme": "https",
-        ":path": "/3/device/" + token,
-        authorization: `bearer ${apnsP8}`,
-      };
+      const headers = GroundControlToMajorTom._apnsHeaders(token, apnsP8, collapseId, !!pushNotification["redacted"]);
       const request = client.request(headers);
 
       let responseJson = {};
@@ -303,10 +317,17 @@ export class GroundControlToMajorTom {
   protected static async _pushToFcm(dataSource: DataSource, bearer: string, token: string, fcmPayload: object, pushNotification: components["schemas"]["PushNotificationBase"]): Promise<void> {
     fcmPayload["message"]["token"] = token;
 
-    // now, we pass some of the notification properties as data properties to FCM payload:
-    for (let dataKey of Object.keys(pushNotification)) {
-      if (["token", "os", "badge"].includes(dataKey)) continue;
-      fcmPayload["message"]["data"][dataKey] = String(pushNotification[dataKey]);
+    if (pushNotification["redacted"]) {
+      fcmPayload["message"]["notification"] = GroundControlToMajorTom.REDACTED_ALERT;
+      fcmPayload["message"]["data"] = {};
+    }
+
+    if (!pushNotification["redacted"]) {
+      // now, we pass some of the notification properties as data properties to FCM payload:
+      for (let dataKey of Object.keys(pushNotification)) {
+        if (["token", "os", "badge", "level", "redacted"].includes(dataKey)) continue;
+        fcmPayload["message"]["data"][dataKey] = String(pushNotification[dataKey]);
+      }
     }
 
     // @ts-ignore
