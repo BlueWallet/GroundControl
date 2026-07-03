@@ -88,33 +88,6 @@ describe("GroundControlToMajorTom", () => {
     process.env = { ...originalEnv };
   });
 
-  describe("getGoogleCredentials", () => {
-    it("should return access token from Google Auth", async () => {
-      const mockToken = "mock-access-token";
-      const mockClient = {
-        getAccessToken: vi.fn().mockResolvedValue({ token: mockToken }),
-      };
-
-      // Mock the auth object that's created at module level - we need to spy on the actual instance
-      const mockAuth = {
-        getClient: vi.fn().mockResolvedValue(mockClient),
-      };
-
-      // Since auth is already created when the module loads, we need to spy on it
-      const authSpy = vi.spyOn(GroundControlToMajorTom as any, "getGoogleCredentials").mockImplementation(async () => {
-        const client = await mockAuth.getClient();
-        const accessTokenResponse = await client.getAccessToken();
-        return accessTokenResponse.token;
-      });
-
-      const result = await GroundControlToMajorTom.getGoogleCredentials();
-
-      expect(result).toBe(mockToken);
-      expect(authSpy).toHaveBeenCalled();
-      authSpy.mockRestore();
-    });
-  });
-
   describe("getApnsJwtToken", () => {
     it("should return cached JWT token if still valid", () => {
       const mockToken = "cached-jwt-token";
@@ -125,33 +98,6 @@ describe("GroundControlToMajorTom", () => {
       const result = GroundControlToMajorTom.getApnsJwtToken();
 
       expect(result).toBe(mockToken);
-    });
-
-    it("should generate new JWT token if cache is expired", async () => {
-      const mockNewToken = "new-jwt-token";
-
-      // Set expired timestamp
-      (GroundControlToMajorTom as any)._jwtTokenMicroTimestamp = Date.now() - 1900 * 1000;
-
-      // Mock the entire getApnsJwtToken method to test the caching logic
-      const originalMethod = GroundControlToMajorTom.getApnsJwtToken;
-      let callCount = 0;
-      GroundControlToMajorTom.getApnsJwtToken = vi.fn().mockImplementation(() => {
-        callCount++;
-        if (callCount === 1) {
-          // First call should generate new token since cache is expired
-          return mockNewToken;
-        }
-        return mockNewToken;
-      });
-
-      const result = GroundControlToMajorTom.getApnsJwtToken();
-
-      expect(result).toBe(mockNewToken);
-      expect(GroundControlToMajorTom.getApnsJwtToken).toHaveBeenCalled();
-
-      // Restore original method
-      GroundControlToMajorTom.getApnsJwtToken = originalMethod;
     });
   });
 

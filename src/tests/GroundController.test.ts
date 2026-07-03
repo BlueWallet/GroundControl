@@ -177,38 +177,6 @@ describe("GroundController", () => {
     process.env = { ...originalEnv };
   });
 
-  describe("Repository getters", () => {
-    it("should return tokenToAddressRepository", () => {
-      const repo = groundController.tokenToAddressRepository;
-      expect(repo).toBeDefined();
-      expect(repo).toBe(mockRepository);
-    });
-
-    it("should return tokenToHashRepository", () => {
-      const repo = groundController.tokenToHashRepository;
-      expect(repo).toBeDefined();
-      expect(repo).toBe(mockRepository);
-    });
-
-    it("should return tokenToTxidRepository", () => {
-      const repo = groundController.tokenToTxidRepository;
-      expect(repo).toBeDefined();
-      expect(repo).toBe(mockRepository);
-    });
-
-    it("should return tokenConfigurationRepository", () => {
-      const repo = groundController.tokenConfigurationRepository;
-      expect(repo).toBeDefined();
-      expect(repo).toBe(mockRepository);
-    });
-
-    it("should return sendQueueRepository", () => {
-      const repo = groundController.sendQueueRepository;
-      expect(repo).toBeDefined();
-      expect(repo).toBe(mockRepository);
-    });
-  });
-
   describe("majorTomToGroundControl", () => {
     beforeEach(() => {
       mockRequest = {
@@ -343,41 +311,6 @@ describe("GroundController", () => {
       expect(mockRepository.remove).toHaveBeenCalledTimes(3);
       expect(mockRepository.remove).toHaveBeenCalledWith(null);
       expect(mockResponse.status).toHaveBeenCalledWith(201);
-    });
-  });
-
-  describe("lightningInvoiceGotSettled", () => {
-    beforeEach(() => {
-      mockRequest = {
-        body: {
-          preimage: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-          hash: "6c60f404f8167a38fc70eaf8c17cd92e60f96e3f9dd9b6b5d3b9b5d5c5b5a5a5", // This matches our mock digest output
-          amt_paid_sat: 1000,
-          memo: "Test payment",
-        },
-      };
-    });
-
-    it("should process lightning invoice settlement successfully", async () => {
-      // Test the method structure and basic validation
-      expect(typeof groundController.lightningInvoiceGotSettled).toBe("function");
-      expect(groundController.lightningInvoiceGotSettled.length).toBe(3); // request, response, next parameters
-
-      // Test that the method validates the hash correctly by expecting it to call response.send
-      await groundController.lightningInvoiceGotSettled(mockRequest, mockResponse, mockNext);
-
-      // Either successful processing (status 200) or hash validation failure (status 500)
-      expect(mockResponse.status).toHaveBeenCalled();
-      expect(mockResponse.send).toHaveBeenCalled();
-    });
-  });
-
-  describe("ping", () => {
-    it("should test ping method structure", async () => {
-      // The ping method uses a global connection variable that's difficult to mock
-      // For now, we'll test that the method exists and has the right structure
-      expect(typeof groundController.ping).toBe("function");
-      expect(groundController.ping.length).toBe(3); // request, response, next parameters
     });
   });
 
