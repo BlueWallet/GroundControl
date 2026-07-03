@@ -101,6 +101,18 @@ dataSource
         continue;
       }
 
+      if (!!tokenConfig.redacted) {
+        // user wants to hide contents from apple/google
+        const redactedPayload: components["schemas"]["PushNotificationMessage"] = {
+          type: 5,
+          text: "You have a new notification",
+          token: payload.token,
+          os: payload.os,
+          level: NOTIFICATION_LEVEL_TRANSACTIONS,
+        };
+        payload = redactedPayload;
+      }
+
       const timeoutId = setTimeout(() => {
         console.error("timeout pushing to token, comitting suicide");
         process.exit(2);

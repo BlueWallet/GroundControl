@@ -143,6 +143,8 @@ export type components = {
       level_news?: boolean;
       level_price?: boolean;
       level_tips?: boolean;
+      /** @description when true, server sends generic push text and omits data payload */
+      redacted?: boolean;
       lang?: string;
       app_version?: string;
     } & { [key: string]: unknown };
