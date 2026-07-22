@@ -126,7 +126,9 @@ dataSource
     const rateLimit = require("express-rate-limit");
     const limiter = rateLimit({
       windowMs: 15 * 60 * 1000,
-      max: 100,
+      // sized for carrier-grade NAT: thousands of mobile users can share one egress IP,
+      // and this limiter only became effective once registered before the routes
+      max: 2000,
     });
     app.use(limiter);
 
