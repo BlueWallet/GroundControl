@@ -65,13 +65,16 @@ dataSource
         continue;
       }
 
+      // validate before querying: findOneBy with undefined values throws, and the poison record
+      // would crash-loop the worker since it never gets removed from the queue
+      if (!payload?.os || !payload?.token) {
+        process.env.VERBOSE && console.warn("no os or token in payload:", payload);
+        await sendQueueRepository.remove(record);
+        continue;
+      }
+
       let tokenConfig = await tokenConfigurationRepository.findOneBy({ os: payload.os, token: payload.token });
       if (!tokenConfig) {
-        if (!payload.os || !payload.token) {
-          process.env.VERBOSE && console.warn("no os or token in payload:", payload);
-          await sendQueueRepository.remove(record);
-          continue;
-        }
         tokenConfig = new TokenConfiguration();
         tokenConfig.os = payload.os;
         tokenConfig.token = payload.token;
@@ -81,6 +84,7 @@ dataSource
           if (error?.code !== "ER_DUP_ENTRY") throw error;
           // lost a create race with the API or another worker; use the existing row
           tokenConfig = await tokenConfigurationRepository.findOneBy({ os: payload.os, token: payload.token });
+          if (!tokenConfig) throw error;
         }
       }
 
