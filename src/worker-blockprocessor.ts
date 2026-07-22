@@ -145,12 +145,11 @@ dataSource
       try {
         await processBlock(nextBlockToProcess, sendQueueRepository);
       } catch (error) {
-        console.warn("exception when processing block:", error, "continuing as usuall");
-        if (error.message.includes("socket hang up")) {
-          // issue fetching block from bitcoind
-          console.warn("retrying block number", nextBlockToProcess);
-          continue; // skip overwriting `LAST_PROCESSED_BLOCK` in `KeyValue` table
-        }
+        // dont advance LAST_PROCESSED_BLOCK: advancing would silently drop every notification
+        // in this block. transient errors (bitcoind hiccup, db down) resolve on retry
+        console.warn("exception when processing block:", error, "retrying block", nextBlockToProcess);
+        await new Promise((resolve) => setTimeout(resolve, 10_000, false));
+        continue;
       }
       const end = +new Date();
       console.log("took", (end - start) / 1000, "sec");

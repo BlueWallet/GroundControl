@@ -7,15 +7,17 @@ import { components } from "./openapi/api";
 import { LruCache } from "./lru-cache";
 require("dotenv").config();
 const url = require("url");
+
+if (!process.env.BITCOIN_RPC) {
+  console.error("not all env variables set");
+  process.exit();
+}
+
 let jayson = require("jayson/promise");
 let rpc = url.parse(process.env.BITCOIN_RPC);
 let client = jayson.client.http(rpc);
 
 const processedTxids = new LruCache(250000);
-if (!process.env.BITCOIN_RPC) {
-  console.error("not all env variables set");
-  process.exit();
-}
 
 process
   .on("unhandledRejection", (reason, p) => {
