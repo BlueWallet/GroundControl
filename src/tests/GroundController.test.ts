@@ -439,5 +439,48 @@ describe("GroundController", () => {
         app_version: "1.0.0",
       });
     });
+
+    it("should return existing configuration when concurrent request created it first (ER_DUP_ENTRY)", async () => {
+      const concurrentlyCreatedConfig = {
+        level_all: true,
+        level_transactions: false,
+        level_price: true,
+        level_news: false,
+        level_tips: true,
+        redacted: false,
+        lang: "es",
+        app_version: "2.0.0",
+      };
+      const duplicateError: any = new Error("Duplicate entry 'test-token:ios' for key 'IDX_40ed4dd221d0ff99647ddfa6ec'");
+      duplicateError.code = "ER_DUP_ENTRY";
+      duplicateError.errno = 1062;
+
+      mockRepository.findOneBy.mockResolvedValueOnce(null).mockResolvedValueOnce(concurrentlyCreatedConfig);
+      mockRepository.save.mockRejectedValueOnce(duplicateError);
+
+      const result = await groundController.getTokenConfiguration(mockRequest, mockResponse, mockNext);
+
+      expect(mockRepository.findOneBy).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({
+        level_all: true,
+        level_transactions: false,
+        level_price: true,
+        level_news: false,
+        level_tips: true,
+        redacted: false,
+        lang: "es",
+        app_version: "2.0.0",
+      });
+    });
+
+    it("should rethrow non-duplicate save errors", async () => {
+      const dbError: any = new Error("Connection lost");
+      dbError.code = "PROTOCOL_CONNECTION_LOST";
+
+      mockRepository.findOneBy.mockResolvedValue(null);
+      mockRepository.save.mockRejectedValueOnce(dbError);
+
+      await expect(groundController.getTokenConfiguration(mockRequest, mockResponse, mockNext)).rejects.toThrow("Connection lost");
+    });
   });
 });

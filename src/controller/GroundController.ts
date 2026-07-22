@@ -297,7 +297,13 @@ export class GroundController {
       tokenConfig = new TokenConfiguration();
       tokenConfig.token = body.token;
       tokenConfig.os = body.os;
-      await this.tokenConfigurationRepository.save(tokenConfig);
+      try {
+        await this.tokenConfigurationRepository.save(tokenConfig);
+      } catch (error) {
+        if (error?.code !== "ER_DUP_ENTRY") throw error;
+        // lost a create race: a concurrent request already inserted this (token, os); use that row
+        tokenConfig = await this.tokenConfigurationRepository.findOneBy({ token: body.token, os: body.os });
+      }
     }
 
     const config: paths["/getTokenConfiguration"]["post"]["responses"]["200"]["content"]["application/json"] = {

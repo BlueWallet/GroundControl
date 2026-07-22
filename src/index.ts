@@ -125,7 +125,15 @@ dataSource
       (app as any)[route.method](route.route, (req: Request, res: Response, next: Function) => {
         const result = new (route.controller as any)(c)[route.action](req, res, next);
         if (result instanceof Promise) {
-          result.then((result) => (result !== null && result !== undefined ? res.send(result) : undefined));
+          result
+            .then((result) => (result !== null && result !== undefined ? res.send(result) : undefined))
+            .catch((error) => {
+              // without this catch a rejected handler promise becomes an unhandled rejection and kills the process
+              console.error(`error handling ${route.route}:`, error);
+              if (!res.headersSent) {
+                res.status(500).send("");
+              }
+            });
         } else if (result !== null && result !== undefined) {
           res.json(result);
         }

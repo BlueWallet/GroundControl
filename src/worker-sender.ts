@@ -75,7 +75,13 @@ dataSource
         tokenConfig = new TokenConfiguration();
         tokenConfig.os = payload.os;
         tokenConfig.token = payload.token;
-        await tokenConfigurationRepository.save(tokenConfig);
+        try {
+          await tokenConfigurationRepository.save(tokenConfig);
+        } catch (error) {
+          if (error?.code !== "ER_DUP_ENTRY") throw error;
+          // lost a create race with the API or another worker; use the existing row
+          tokenConfig = await tokenConfigurationRepository.findOneBy({ os: payload.os, token: payload.token });
+        }
       }
 
       let unsubscribed = false;
