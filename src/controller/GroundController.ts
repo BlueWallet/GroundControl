@@ -116,7 +116,9 @@ export class GroundController {
           token: body.token,
           os: body.os,
         });
-      } catch (_) {}
+      } catch (error) {
+        if (error?.code !== "ER_DUP_ENTRY") throw error; // already subscribed
+      }
     }
 
     // todo: refactor into single batch save
@@ -129,7 +131,9 @@ export class GroundController {
           token: body.token,
           os: body.os,
         });
-      } catch (_) {}
+      } catch (error) {
+        if (error?.code !== "ER_DUP_ENTRY") throw error; // already subscribed
+      }
     }
 
     // todo: refactor into single batch save
@@ -142,7 +146,9 @@ export class GroundController {
           token: body.token,
           os: body.os,
         });
-      } catch (_) {}
+      } catch (error) {
+        if (error?.code !== "ER_DUP_ENTRY") throw error; // already subscribed
+      }
     }
     response.status(201).send("");
   }
@@ -167,24 +173,18 @@ export class GroundController {
     }
 
     for (const address of body.addresses) {
-      try {
-        const addressRecord = await this.tokenToAddressRepository.findOneBy({ os: body.os, token: body.token, address });
-        await this.tokenToAddressRepository.remove(addressRecord);
-      } catch (_) {}
+      const addressRecord = await this.tokenToAddressRepository.findOneBy({ os: body.os, token: body.token, address });
+      if (addressRecord) await this.tokenToAddressRepository.remove(addressRecord);
     }
 
     for (const hash of body.hashes) {
-      try {
-        const hashRecord = await this.tokenToHashRepository.findOneBy({ os: body.os, token: body.token, hash });
-        await this.tokenToHashRepository.remove(hashRecord);
-      } catch (_) {}
+      const hashRecord = await this.tokenToHashRepository.findOneBy({ os: body.os, token: body.token, hash });
+      if (hashRecord) await this.tokenToHashRepository.remove(hashRecord);
     }
 
     for (const txid of body.txids) {
-      try {
-        const txidRecord = await this.tokenToTxidRepository.findOneBy({ os: body.os, token: body.token, txid });
-        await this.tokenToTxidRepository.remove(txidRecord);
-      } catch (_) {}
+      const txidRecord = await this.tokenToTxidRepository.findOneBy({ os: body.os, token: body.token, txid });
+      if (txidRecord) await this.tokenToTxidRepository.remove(txidRecord);
     }
 
     response.status(201).send("");
@@ -260,23 +260,27 @@ export class GroundController {
       tokenConfig = new TokenConfiguration();
       tokenConfig.token = body.token;
       tokenConfig.os = body.os;
-    } else {
-      if (typeof body.level_all !== "undefined") tokenConfig.level_all = !!body.level_all;
-      if (typeof body.level_transactions !== "undefined") tokenConfig.level_transactions = !!body.level_transactions;
-      if (typeof body.level_price !== "undefined") tokenConfig.level_price = !!body.level_price;
-      if (typeof body.level_news !== "undefined") tokenConfig.level_news = !!body.level_news;
-      if (typeof body.level_tips !== "undefined") tokenConfig.level_tips = !!body.level_tips;
-      if (typeof body.lang !== "undefined") tokenConfig.lang = String(body.lang);
-      if (typeof body.app_version !== "undefined") tokenConfig.app_version = String(body.app_version);
-      if (typeof body.redacted !== "undefined") tokenConfig.redacted = !!body.redacted;
-      tokenConfig.last_online = new Date();
+      try {
+        await this.tokenConfigurationRepository.save(tokenConfig);
+      } catch (error) {
+        if (error?.code !== "ER_DUP_ENTRY") throw error;
+        // lost a create race: a concurrent request already inserted this (token, os); use that row
+        tokenConfig = await this.tokenConfigurationRepository.findOneBy({ token: body.token, os: body.os });
+        if (!tokenConfig) throw error;
+      }
     }
 
-    try {
-      await this.tokenConfigurationRepository.save(tokenConfig);
-    } catch (error) {
-      console.warn(error.message);
-    }
+    if (typeof body.level_all !== "undefined") tokenConfig.level_all = !!body.level_all;
+    if (typeof body.level_transactions !== "undefined") tokenConfig.level_transactions = !!body.level_transactions;
+    if (typeof body.level_price !== "undefined") tokenConfig.level_price = !!body.level_price;
+    if (typeof body.level_news !== "undefined") tokenConfig.level_news = !!body.level_news;
+    if (typeof body.level_tips !== "undefined") tokenConfig.level_tips = !!body.level_tips;
+    if (typeof body.lang !== "undefined") tokenConfig.lang = String(body.lang);
+    if (typeof body.app_version !== "undefined") tokenConfig.app_version = String(body.app_version);
+    if (typeof body.redacted !== "undefined") tokenConfig.redacted = !!body.redacted;
+    tokenConfig.last_online = new Date();
+
+    await this.tokenConfigurationRepository.save(tokenConfig);
     response.status(200).send("");
   }
 
@@ -303,6 +307,7 @@ export class GroundController {
         if (error?.code !== "ER_DUP_ENTRY") throw error;
         // lost a create race: a concurrent request already inserted this (token, os); use that row
         tokenConfig = await this.tokenConfigurationRepository.findOneBy({ token: body.token, os: body.os });
+        if (!tokenConfig) throw error;
       }
     }
 

@@ -261,6 +261,25 @@ describe("GroundController", () => {
       expect(mockRepository.save).not.toHaveBeenCalled();
       expect(mockResponse.status).toHaveBeenCalledWith(201);
     });
+
+    it("should treat duplicate subscriptions as success", async () => {
+      const duplicateError: any = new Error("Duplicate entry");
+      duplicateError.code = "ER_DUP_ENTRY";
+      mockRepository.save.mockRejectedValue(duplicateError);
+
+      await groundController.majorTomToGroundControl(mockRequest, mockResponse, mockNext);
+
+      expect(mockRepository.save).toHaveBeenCalledTimes(3);
+      expect(mockResponse.status).toHaveBeenCalledWith(201);
+    });
+
+    it("should propagate non-duplicate save errors", async () => {
+      const dbError: any = new Error("Connection lost");
+      dbError.code = "PROTOCOL_CONNECTION_LOST";
+      mockRepository.save.mockRejectedValueOnce(dbError);
+
+      await expect(groundController.majorTomToGroundControl(mockRequest, mockResponse, mockNext)).rejects.toThrow("Connection lost");
+    });
   });
 
   describe("unsubscribe", () => {
@@ -302,14 +321,13 @@ describe("GroundController", () => {
       expect(mockResponse.send).toHaveBeenCalledWith("token not provided");
     });
 
-    it("should handle records not found gracefully", async () => {
+    it("should skip removal when records are not found", async () => {
       mockRepository.findOneBy.mockResolvedValue(null);
 
       await groundController.unsubscribe(mockRequest, mockResponse, mockNext);
 
       expect(mockRepository.findOneBy).toHaveBeenCalledTimes(3);
-      expect(mockRepository.remove).toHaveBeenCalledTimes(3);
-      expect(mockRepository.remove).toHaveBeenCalledWith(null);
+      expect(mockRepository.remove).not.toHaveBeenCalled();
       expect(mockResponse.status).toHaveBeenCalledWith(201);
     });
   });
@@ -366,6 +384,50 @@ describe("GroundController", () => {
 
       expect(mockRepository.save).toHaveBeenCalled();
       expect(mockResponse.status).toHaveBeenCalledWith(200);
+    });
+
+    it("should apply settings when creating a new configuration", async () => {
+      mockRepository.findOneBy.mockResolvedValue(null);
+
+      await groundController.setTokenConfiguration(mockRequest, mockResponse, mockNext);
+
+      const lastSaved = mockRepository.save.mock.calls[mockRepository.save.mock.calls.length - 1][0];
+      expect(lastSaved.level_all).toBe(false);
+      expect(lastSaved.level_price).toBe(false);
+      expect(lastSaved.lang).toBe("es");
+      expect(lastSaved.app_version).toBe("2.0.0");
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+    });
+
+    it("should apply settings to concurrently created configuration (ER_DUP_ENTRY)", async () => {
+      const concurrentlyCreatedConfig: any = {
+        token: "test-token",
+        os: "ios",
+        level_all: true,
+        lang: "en",
+      };
+      const duplicateError: any = new Error("Duplicate entry");
+      duplicateError.code = "ER_DUP_ENTRY";
+
+      mockRepository.findOneBy.mockResolvedValueOnce(null).mockResolvedValueOnce(concurrentlyCreatedConfig);
+      mockRepository.save.mockRejectedValueOnce(duplicateError).mockResolvedValue({});
+
+      await groundController.setTokenConfiguration(mockRequest, mockResponse, mockNext);
+
+      expect(concurrentlyCreatedConfig.level_all).toBe(false);
+      expect(concurrentlyCreatedConfig.lang).toBe("es");
+      expect(mockRepository.save).toHaveBeenLastCalledWith(concurrentlyCreatedConfig);
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+    });
+
+    it("should propagate non-duplicate save errors", async () => {
+      const dbError: any = new Error("Connection lost");
+      dbError.code = "PROTOCOL_CONNECTION_LOST";
+
+      mockRepository.findOneBy.mockResolvedValue(null);
+      mockRepository.save.mockRejectedValueOnce(dbError);
+
+      await expect(groundController.setTokenConfiguration(mockRequest, mockResponse, mockNext)).rejects.toThrow("Connection lost");
     });
   });
 
@@ -481,6 +543,16 @@ describe("GroundController", () => {
       mockRepository.save.mockRejectedValueOnce(dbError);
 
       await expect(groundController.getTokenConfiguration(mockRequest, mockResponse, mockNext)).rejects.toThrow("Connection lost");
+    });
+
+    it("should rethrow duplicate error if re-fetch finds nothing", async () => {
+      const duplicateError: any = new Error("Duplicate entry");
+      duplicateError.code = "ER_DUP_ENTRY";
+
+      mockRepository.findOneBy.mockResolvedValue(null);
+      mockRepository.save.mockRejectedValueOnce(duplicateError);
+
+      await expect(groundController.getTokenConfiguration(mockRequest, mockResponse, mockNext)).rejects.toThrow("Duplicate entry");
     });
   });
 });
