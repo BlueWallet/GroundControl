@@ -120,6 +120,16 @@ dataSource
     app.use(helmet.hidePoweredBy());
     app.use(helmet.hsts());
 
+    // rate limiter must be registered before the routes, otherwise it never runs:
+    // express dispatches in registration order and route handlers dont call next()
+    app.set("trust proxy", 1);
+    const rateLimit = require("express-rate-limit");
+    const limiter = rateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: 100,
+    });
+    app.use(limiter);
+
     // register express routes from defined application routes
     Routes.forEach((route) => {
       (app as any)[route.method](route.route, (req: Request, res: Response, next: Function) => {
@@ -139,14 +149,6 @@ dataSource
         }
       });
     });
-
-    app.set("trust proxy", 1);
-    const rateLimit = require("express-rate-limit");
-    const limiter = rateLimit({
-      windowMs: 15 * 60 * 1000,
-      max: 100,
-    });
-    app.use(limiter);
 
     app.listen(process.env.PORT || 3001);
 
