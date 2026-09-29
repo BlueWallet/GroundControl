@@ -5,6 +5,8 @@ import { TokenConfiguration } from "./entity/TokenConfiguration";
 import { NOTIFICATION_LEVEL_NEWS, NOTIFICATION_LEVEL_PRICE, NOTIFICATION_LEVEL_TIPS, NOTIFICATION_LEVEL_TRANSACTIONS } from "./openapi/constants";
 import dataSource from "./data-source";
 import { components } from "./openapi/api";
+import { isDataTooLongError, PUSH_IDENTITY_MAX_LENGTH, pushIdentityFitsStorage } from "./push-identity";
+import { MalformedNotificationError, notificationPayloadIsSendable } from "./notification-payload";
 require("dotenv").config();
 if (!process.env.GOOGLE_KEY_FILE || !process.env.APNS_P8 || !process.env.APNS_TOPIC || !process.env.APPLE_TEAM_ID || !process.env.APNS_P8_KID || !process.env.GOOGLE_PROJECT_ID) {
   console.error("not all env variables set");
@@ -65,10 +67,13 @@ dataSource
         continue;
       }
 
-      // validate before querying: findOneBy with undefined values throws, and the poison record
-      // would crash-loop the worker since it never gets removed from the queue
-      if (!payload?.os || !payload?.token) {
-        process.env.VERBOSE && console.warn("no os or token in payload:", payload);
+      // validate before querying: a missing identity throws in findOneBy, and a token longer
+      // than token_configuration.token (varchar) raises ER_DATA_TOO_LONG. Either way the
+      // poison record stays in the queue and the worker crash-loops unless we drop it here.
+      if (!pushIdentityFitsStorage(payload?.os, payload?.token)) {
+        const tokenLength = typeof payload?.token === "string" ? payload.token.length : 0;
+        const osLength = typeof payload?.os === "string" ? payload.os.length : 0;
+        console.warn(`dropping send_queue id=${record.id}: os/token missing or longer than ${PUSH_IDENTITY_MAX_LENGTH} (os length=${osLength}, token length=${tokenLength})`);
         await sendQueueRepository.remove(record);
         continue;
       }
@@ -81,6 +86,11 @@ dataSource
         try {
           await tokenConfigurationRepository.save(tokenConfig);
         } catch (error) {
+          if (isDataTooLongError(error)) {
+            console.warn(`dropping send_queue id=${record.id}: value exceeds token_configuration column length`);
+            await sendQueueRepository.remove(record);
+            continue;
+          }
           if (error?.code !== "ER_DUP_ENTRY") throw error;
           // lost a create race with the API or another worker; use the existing row
           tokenConfig = await tokenConfigurationRepository.findOneBy({ os: payload.os, token: payload.token });
@@ -123,46 +133,62 @@ dataSource
         payload = redactedPayload;
       }
 
+      if (!notificationPayloadIsSendable(payload)) {
+        console.warn(`dropping send_queue id=${record.id}: type ${payload?.type} notification is missing a required field`);
+        await sendQueueRepository.remove(record);
+        continue;
+      }
+
       const timeoutId = setTimeout(() => {
         console.error("timeout pushing to token, comitting suicide");
         process.exit(2);
       }, 21000);
-      switch (payload.type) {
-        case 2:
-          payload = <components["schemas"]["PushNotificationOnchainAddressGotPaid"]>payload;
-          process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
-          await GroundControlToMajorTom.pushOnchainAddressWasPaid(connection, await GroundControlToMajorTom.getGoogleCredentials(), GroundControlToMajorTom.getApnsJwtToken(), payload);
+      try {
+        switch (payload.type) {
+          case 2:
+            payload = <components["schemas"]["PushNotificationOnchainAddressGotPaid"]>payload;
+            process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
+            await GroundControlToMajorTom.pushOnchainAddressWasPaid(connection, await GroundControlToMajorTom.getGoogleCredentials(), GroundControlToMajorTom.getApnsJwtToken(), payload);
+            await sendQueueRepository.remove(record);
+            break;
+          case 3:
+            payload = <components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"]>payload;
+            process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
+            await GroundControlToMajorTom.pushOnchainAddressGotUnconfirmedTransaction(connection, await GroundControlToMajorTom.getGoogleCredentials(), GroundControlToMajorTom.getApnsJwtToken(), payload);
+            await sendQueueRepository.remove(record);
+            break;
+          case 1:
+            payload = <components["schemas"]["PushNotificationLightningInvoicePaid"]>payload;
+            process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
+            await GroundControlToMajorTom.pushLightningInvoicePaid(connection, await GroundControlToMajorTom.getGoogleCredentials(), GroundControlToMajorTom.getApnsJwtToken(), payload);
+            await sendQueueRepository.remove(record);
+            break;
+          case 4:
+            payload = <components["schemas"]["PushNotificationTxidGotConfirmed"]>payload;
+            process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
+            await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(connection, await GroundControlToMajorTom.getGoogleCredentials(), GroundControlToMajorTom.getApnsJwtToken(), payload);
+            await sendQueueRepository.remove(record);
+            break;
+          case 5:
+            payload = <components["schemas"]["PushNotificationMessage"]>payload;
+            process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
+            await GroundControlToMajorTom.pushMessage(connection, await GroundControlToMajorTom.getGoogleCredentials(), GroundControlToMajorTom.getApnsJwtToken(), payload);
+            await sendQueueRepository.remove(record);
+            break;
+          default:
+            process.env.VERBOSE && console.warn("malformed payload:", payload);
+            await sendQueueRepository.remove(record);
+        }
+      } catch (error) {
+        if (error instanceof MalformedNotificationError) {
+          console.warn(`dropping send_queue id=${record.id}: ${error.message}`);
           await sendQueueRepository.remove(record);
-          break;
-        case 3:
-          payload = <components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"]>payload;
-          process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
-          await GroundControlToMajorTom.pushOnchainAddressGotUnconfirmedTransaction(connection, await GroundControlToMajorTom.getGoogleCredentials(), GroundControlToMajorTom.getApnsJwtToken(), payload);
-          await sendQueueRepository.remove(record);
-          break;
-        case 1:
-          payload = <components["schemas"]["PushNotificationLightningInvoicePaid"]>payload;
-          process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
-          await GroundControlToMajorTom.pushLightningInvoicePaid(connection, await GroundControlToMajorTom.getGoogleCredentials(), GroundControlToMajorTom.getApnsJwtToken(), payload);
-          await sendQueueRepository.remove(record);
-          break;
-        case 4:
-          payload = <components["schemas"]["PushNotificationTxidGotConfirmed"]>payload;
-          process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
-          await GroundControlToMajorTom.pushOnchainTxidGotConfirmed(connection, await GroundControlToMajorTom.getGoogleCredentials(), GroundControlToMajorTom.getApnsJwtToken(), payload);
-          await sendQueueRepository.remove(record);
-          break;
-        case 5:
-          payload = <components["schemas"]["PushNotificationMessage"]>payload;
-          process.env.VERBOSE && console.log("pushing to token", payload.token, payload.os);
-          await GroundControlToMajorTom.pushMessage(connection, await GroundControlToMajorTom.getGoogleCredentials(), GroundControlToMajorTom.getApnsJwtToken(), payload);
-          await sendQueueRepository.remove(record);
-          break;
-        default:
-          process.env.VERBOSE && console.warn("malformed payload:", payload);
-          await sendQueueRepository.remove(record);
+          continue;
+        }
+        throw error;
+      } finally {
+        clearTimeout(timeoutId);
       }
-      clearTimeout(timeoutId);
     }
   })
   .catch((error) => {

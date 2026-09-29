@@ -318,6 +318,14 @@ describe("GroundControlToMajorTom", () => {
         mockPushNotification
       );
     });
+
+    it("should refuse a paid notification whose address is missing", async () => {
+      const { MalformedNotificationError } = await import("../notification-payload");
+      const mockFcmPush = vi.spyOn(GroundControlToMajorTom as any, "_pushToFcm").mockResolvedValue(undefined);
+
+      await expect(GroundControlToMajorTom.pushOnchainAddressWasPaid(mockDataSource, "server-key", "apns-p8", { ...mockPushNotification, address: undefined })).rejects.toBeInstanceOf(MalformedNotificationError);
+      expect(mockFcmPush).not.toHaveBeenCalled();
+    });
   });
 
   describe("pushLightningInvoicePaid", () => {
@@ -391,6 +399,12 @@ describe("GroundControlToMajorTom", () => {
       expect(mockQueryBuilder.delete).toHaveBeenCalledTimes(3);
       expect(mockQueryBuilder.where).toHaveBeenCalledWith("token = :token", { token: mockToken });
       expect(mockQueryBuilder.execute).toHaveBeenCalledTimes(3);
+    });
+
+    it("should not reject when deleting a dead token fails", async () => {
+      mockQueryBuilder.execute.mockRejectedValue(new Error("db down"));
+
+      await expect(GroundControlToMajorTom.killDeadToken(mockDataSource, "dead-token")).resolves.toBeUndefined();
     });
   });
 

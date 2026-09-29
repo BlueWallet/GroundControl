@@ -32,6 +32,12 @@ describe("StringUtils", () => {
       const result = StringUtils.shortenAddress(emptyAddress);
       expect(result).toBe("");
     });
+
+    it("should not throw when the address is missing", () => {
+      expect(StringUtils.shortenAddress((undefined as unknown) as string)).toBe("");
+      expect(StringUtils.shortenAddress((null as unknown) as string)).toBe("");
+      expect(StringUtils.shortenTxid((undefined as unknown) as string)).toBe("");
+    });
   });
 
   describe("shortenTxid", () => {

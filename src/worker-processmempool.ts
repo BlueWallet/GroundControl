@@ -5,6 +5,7 @@ import { SendQueue } from "./entity/SendQueue";
 import dataSource from "./data-source";
 import { components } from "./openapi/api";
 import { LruCache } from "./lru-cache";
+import { scriptPubKeyAddresses } from "./script-pub-key";
 require("dotenv").config();
 const url = require("url");
 
@@ -34,6 +35,10 @@ let sendQueueRepository: Repository<SendQueue>;
 async function processMempool() {
   process.env.VERBOSE && console.log("cached txids=", processedTxids.size);
   const responseGetrawmempool = await client.request("getrawmempool", []);
+  if (!Array.isArray(responseGetrawmempool?.result)) {
+    console.warn("getrawmempool returned no tx list");
+    return;
+  }
   process.env.VERBOSE && console.log(responseGetrawmempool.result.length, "txs in mempool");
 
   let addresses: string[] = [];
@@ -47,27 +52,33 @@ async function processMempool() {
     if (!txid) continue;
     if (!processedTxids.has(txid)) rpcBatch.push(client.request("getrawtransaction", [txid, true], undefined, false));
     if (rpcBatch.length >= batchSize || countTxidsProcessed === responseGetrawmempool.result.length) {
+      if (rpcBatch.length === 0) continue;
       const startBatch = +new Date();
       // got enough txids lets batch fetch them from bitcoind rpc
       const responses = await client.request(rpcBatch);
+      if (!Array.isArray(responses)) {
+        console.warn("getrawtransaction batch returned no results");
+        allPotentialPushPayloadsArray = [];
+        addresses = [];
+        rpcBatch = [];
+        continue;
+      }
       for (const response of responses) {
-        if (response.result && response.result.vout) {
+        if (response?.result && Array.isArray(response.result.vout)) {
           for (const output of response.result.vout) {
-            if (output.scriptPubKey && (output.scriptPubKey.addresses || output.scriptPubKey.address)) {
-              for (const address of output.scriptPubKey?.addresses ?? (output.scriptPubKey?.address ? [output.scriptPubKey?.address] : [])) {
-                addresses.push(address);
-                processedTxids.add(response.result.txid);
-                const payload: components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"] = {
-                  address,
-                  txid: response.result.txid,
-                  sat: Math.floor(output.value * 100000000),
-                  type: 3,
-                  level: "transactions",
-                  token: "",
-                  os: "ios",
-                };
-                allPotentialPushPayloadsArray.push(payload);
-              }
+            for (const address of scriptPubKeyAddresses(output?.scriptPubKey)) {
+              addresses.push(address);
+              processedTxids.add(response.result.txid);
+              const payload: components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"] = {
+                address,
+                txid: response.result.txid,
+                sat: Math.floor(output.value * 100000000),
+                type: 3,
+                level: "transactions",
+                token: "",
+                os: "ios",
+              };
+              allPotentialPushPayloadsArray.push(payload);
             }
           }
         }
