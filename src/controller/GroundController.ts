@@ -10,6 +10,8 @@ import { KeyValue } from "../entity/KeyValue";
 import dataSource from "../data-source";
 import { paths, components } from "../openapi/api";
 import { ADDRESS_IGNORE_LIST } from "../address-ignore-list";
+import { PUSH_IDENTITY_MAX_LENGTH, fitsVarcharColumn, isDataTooLongError, PUSH_IDENTITY_REJECT_MESSAGE, pushIdentityFitsStorage } from "../push-identity";
+import { NOTIFICATION_PAYLOAD_REJECT_MESSAGE, notificationPayloadIsSendable } from "../notification-payload";
 require("dotenv").config();
 const pck = require("../../package.json");
 if (!process.env.JAWSDB_MARIA_URL || !process.env.GOOGLE_KEY_FILE || !process.env.APNS_P8 || !process.env.APNS_TOPIC || !process.env.APPLE_TEAM_ID || !process.env.APNS_P8_KID || !process.env.GOOGLE_PROJECT_ID) {
@@ -101,10 +103,11 @@ export class GroundController {
       response.status(500).send("token not provided");
       return;
     }
+    if (this.rejectIfPushIdentityDoesNotFit(response, body.os, body.token)) return;
 
     // todo: refactor into single batch save
     for (const address of body.addresses) {
-      if (ADDRESS_IGNORE_LIST.includes(address)) {
+      if (!fitsVarcharColumn(address) || ADDRESS_IGNORE_LIST.includes(address)) {
         continue;
       }
 
@@ -117,12 +120,13 @@ export class GroundController {
           os: body.os,
         });
       } catch (error) {
-        if (error?.code !== "ER_DUP_ENTRY") throw error; // already subscribed
+        if (error?.code !== "ER_DUP_ENTRY" && !isDataTooLongError(error)) throw error; // already subscribed
       }
     }
 
     // todo: refactor into single batch save
     for (const hash of body.hashes) {
+      if (!fitsVarcharColumn(hash)) continue;
       // todo: validate hash
       console.log(body.token, "->", hash);
       try {
@@ -132,12 +136,13 @@ export class GroundController {
           os: body.os,
         });
       } catch (error) {
-        if (error?.code !== "ER_DUP_ENTRY") throw error; // already subscribed
+        if (error?.code !== "ER_DUP_ENTRY" && !isDataTooLongError(error)) throw error; // already subscribed
       }
     }
 
     // todo: refactor into single batch save
     for (const txid of body.txids) {
+      if (!fitsVarcharColumn(txid)) continue;
       // todo: validate txid
       console.log(body.token, "->", txid);
       try {
@@ -147,7 +152,7 @@ export class GroundController {
           os: body.os,
         });
       } catch (error) {
-        if (error?.code !== "ER_DUP_ENTRY") throw error; // already subscribed
+        if (error?.code !== "ER_DUP_ENTRY" && !isDataTooLongError(error)) throw error; // already subscribed
       }
     }
     response.status(201).send("");
@@ -245,7 +250,7 @@ export class GroundController {
       description: pck.description,
       version: pck.version,
       uptime: Math.floor(process.uptime()),
-      last_processed_block: +keyVal.value,
+      last_processed_block: keyVal ? +keyVal.value : 0,
       send_queue_size,
       sent_24h,
     };
@@ -255,6 +260,8 @@ export class GroundController {
 
   async setTokenConfiguration(request: Request, response: Response, next: NextFunction) {
     const body: paths["/setTokenConfiguration"]["post"]["requestBody"]["content"]["application/json"] = request.body;
+    if (this.rejectIfPushIdentityDoesNotFit(response, body?.os, body?.token)) return;
+    if (this.rejectIfOptionalColumnTooLong(response, body?.lang) || this.rejectIfOptionalColumnTooLong(response, body?.app_version)) return;
     let tokenConfig = await this.tokenConfigurationRepository.findOneBy({ token: body.token, os: body.os });
     if (!tokenConfig) {
       tokenConfig = new TokenConfiguration();
@@ -286,6 +293,11 @@ export class GroundController {
 
   async enqueue(request: Request, response: Response, next: NextFunction) {
     const body: paths["/enqueue"]["post"]["requestBody"]["content"]["application/json"] = request.body;
+    if (this.rejectIfPushIdentityDoesNotFit(response, body?.os, body?.token)) return;
+    if (!notificationPayloadIsSendable(body)) {
+      response.status(400).send(NOTIFICATION_PAYLOAD_REJECT_MESSAGE);
+      return;
+    }
 
     process.env.VERBOSE && console.log("enqueueing", body);
     await this.sendQueueRepository.save({
@@ -296,6 +308,7 @@ export class GroundController {
 
   async getTokenConfiguration(request: Request, response: Response, next: NextFunction) {
     const body: paths["/getTokenConfiguration"]["post"]["requestBody"]["content"]["application/json"] = request.body;
+    if (this.rejectIfPushIdentityDoesNotFit(response, body?.os, body?.token)) return;
     let tokenConfig = await this.tokenConfigurationRepository.findOneBy({ token: body.token, os: body.os });
     if (!tokenConfig) {
       tokenConfig = new TokenConfiguration();
@@ -323,5 +336,18 @@ export class GroundController {
     };
 
     return config;
+  }
+
+  private rejectIfPushIdentityDoesNotFit(response: Response, os: unknown, token: unknown): boolean {
+    if (pushIdentityFitsStorage(os, token)) return false;
+    response.status(400).send(PUSH_IDENTITY_REJECT_MESSAGE);
+    return true;
+  }
+
+  private rejectIfOptionalColumnTooLong(response: Response, value: unknown): boolean {
+    if (typeof value === "undefined") return false;
+    if (String(value).length <= PUSH_IDENTITY_MAX_LENGTH) return false;
+    response.status(400).send("lang or app_version too long");
+    return true;
   }
 }

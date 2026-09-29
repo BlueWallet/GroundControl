@@ -231,6 +231,53 @@ describe("GroundController", () => {
       expect(mockResponse.send).toHaveBeenCalledWith("token not provided");
     });
 
+    it("should reject a token that does not fit the token column", async () => {
+      mockRequest.body.token = "A".repeat(40000);
+
+      await groundController.majorTomToGroundControl(mockRequest, mockResponse, mockNext);
+
+      expect(mockRepository.save).not.toHaveBeenCalled();
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.send).toHaveBeenCalledWith("token or os missing or too long");
+    });
+
+    it("should skip an address that does not fit the address column", async () => {
+      mockRequest.body.addresses = ["A".repeat(40000)];
+      mockRequest.body.hashes = ["hash123"];
+      mockRequest.body.txids = [];
+
+      await groundController.majorTomToGroundControl(mockRequest, mockResponse, mockNext);
+
+      expect(mockRepository.save).toHaveBeenCalledTimes(1);
+      expect(mockRepository.save).toHaveBeenCalledWith({
+        hash: "hash123",
+        token: "test-token",
+        os: "ios",
+      });
+      expect(mockResponse.status).toHaveBeenCalledWith(201);
+    });
+
+    it("should skip a non-string address", async () => {
+      mockRequest.body.addresses = [{ nested: true }];
+      mockRequest.body.hashes = [];
+      mockRequest.body.txids = [];
+
+      await groundController.majorTomToGroundControl(mockRequest, mockResponse, mockNext);
+
+      expect(mockRepository.save).not.toHaveBeenCalled();
+      expect(mockResponse.status).toHaveBeenCalledWith(201);
+    });
+
+    it("should skip a subscription MariaDB rejects as too long", async () => {
+      const tooLong: any = new Error("Data too long for column 'address'");
+      tooLong.code = "ER_DATA_TOO_LONG";
+      mockRepository.save.mockRejectedValueOnce(tooLong).mockResolvedValue({});
+
+      await groundController.majorTomToGroundControl(mockRequest, mockResponse, mockNext);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(201);
+    });
+
     it("should skip ignored addresses", async () => {
       mockRequest.body.addresses = ["1NXNHZr6Pbzi3VStcgaxwEhspTWNXQ3Q4G"]; // This is in the ignore list
 
@@ -420,6 +467,26 @@ describe("GroundController", () => {
       expect(mockResponse.status).toHaveBeenCalledWith(200);
     });
 
+    it("should reject a lang value that does not fit the column", async () => {
+      mockRequest.body.lang = "A".repeat(40000);
+
+      await groundController.setTokenConfiguration(mockRequest, mockResponse, mockNext);
+
+      expect(mockRepository.save).not.toHaveBeenCalled();
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.send).toHaveBeenCalledWith("lang or app_version too long");
+    });
+
+    it("should reject a token that does not fit the token column", async () => {
+      mockRequest.body.token = "A".repeat(40000);
+
+      await groundController.setTokenConfiguration(mockRequest, mockResponse, mockNext);
+
+      expect(mockRepository.save).not.toHaveBeenCalled();
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.send).toHaveBeenCalledWith("token or os missing or too long");
+    });
+
     it("should propagate non-duplicate save errors", async () => {
       const dbError: any = new Error("Connection lost");
       dbError.code = "PROTOCOL_CONNECTION_LOST";
@@ -436,6 +503,7 @@ describe("GroundController", () => {
       mockRequest = {
         body: {
           type: 1,
+          os: "ios",
           token: "test-token",
           message: "Test notification",
         },
@@ -448,6 +516,39 @@ describe("GroundController", () => {
       });
       expect(mockResponse.status).toHaveBeenCalledWith(200);
     });
+
+    it("should reject a token that does not fit token_configuration.token", async () => {
+      mockRequest = {
+        body: {
+          type: 2,
+          os: "ios",
+          token: "A".repeat(40000),
+        },
+      };
+
+      await groundController.enqueue(mockRequest, mockResponse, mockNext);
+
+      expect(mockRepository.save).not.toHaveBeenCalled();
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.send).toHaveBeenCalledWith("token or os missing or too long");
+    });
+
+    it("should reject a paid-address notification that has no address", async () => {
+      mockRequest = {
+        body: {
+          type: 2,
+          os: "ios",
+          token: "test-token",
+          txid: "abc",
+        },
+      };
+
+      await groundController.enqueue(mockRequest, mockResponse, mockNext);
+
+      expect(mockRepository.save).not.toHaveBeenCalled();
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.send).toHaveBeenCalledWith("notification missing required field");
+    });
   });
 
   describe("getTokenConfiguration", () => {
@@ -458,6 +559,17 @@ describe("GroundController", () => {
           os: "ios",
         },
       };
+    });
+
+    it("should reject a token that does not fit the token column", async () => {
+      mockRequest.body.token = "A".repeat(40000);
+
+      const result = await groundController.getTokenConfiguration(mockRequest, mockResponse, mockNext);
+
+      expect(result).toBeUndefined();
+      expect(mockRepository.save).not.toHaveBeenCalled();
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.send).toHaveBeenCalledWith("token or os missing or too long");
     });
 
     it("should return existing token configuration", async () => {
@@ -553,6 +665,21 @@ describe("GroundController", () => {
       mockRepository.save.mockRejectedValueOnce(duplicateError);
 
       await expect(groundController.getTokenConfiguration(mockRequest, mockResponse, mockNext)).rejects.toThrow("Duplicate entry");
+    });
+  });
+
+  describe("ping", () => {
+    it("should report block height 0 when no block has been processed", async () => {
+      mockConnection.getRepository.mockReturnValueOnce({ findOneBy: vi.fn().mockResolvedValue(null) }).mockReturnValueOnce({ count: vi.fn().mockResolvedValue(0) });
+      mockConnection.createQueryBuilder.mockReturnValueOnce({
+        where: vi.fn().mockReturnThis(),
+        getCount: vi.fn().mockResolvedValue(0),
+      });
+
+      const result = await groundController.ping({} as Request, mockResponse as Response, mockNext);
+
+      expect(result.last_processed_block).toBe(0);
+      expect(result.send_queue_size).toBe(0);
     });
   });
 });

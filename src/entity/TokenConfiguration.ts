@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, Index } from "typeorm";
+import { PUSH_IDENTITY_MAX_LENGTH } from "../push-identity";
 
 @Entity()
 @Index(["token", "os"], { unique: true })
@@ -6,10 +7,10 @@ export class TokenConfiguration {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ length: PUSH_IDENTITY_MAX_LENGTH })
   token: string;
 
-  @Column()
+  @Column({ length: PUSH_IDENTITY_MAX_LENGTH })
   os: string;
 
   @Column({ default: true })

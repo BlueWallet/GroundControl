@@ -6,6 +6,7 @@ import { TokenToHash } from "../entity/TokenToHash";
 import { TokenToTxid } from "../entity/TokenToTxid";
 import { components } from "../openapi/api";
 import { StringUtils } from "../utils/stringUtils";
+import { assertNotificationPayloadIsSendable } from "../notification-payload";
 const jwt = require("jsonwebtoken");
 const http2 = require("http2");
 require("dotenv").config();
@@ -76,6 +77,7 @@ export class GroundControlToMajorTom {
     apnsP8: string,
     pushNotification: components["schemas"]["PushNotificationOnchainAddressGotUnconfirmedTransaction"]
   ): Promise<void> {
+    assertNotificationPayloadIsSendable(pushNotification);
     const fcmPayload = {
       message: {
         token: "",
@@ -107,6 +109,7 @@ export class GroundControlToMajorTom {
   }
 
   static async pushOnchainTxidGotConfirmed(dataSource: DataSource, serverKey: string, apnsP8: string, pushNotification: components["schemas"]["PushNotificationTxidGotConfirmed"]): Promise<void> {
+    assertNotificationPayloadIsSendable(pushNotification);
     const fcmPayload = {
       message: {
         data: {
@@ -164,6 +167,7 @@ export class GroundControlToMajorTom {
   }
 
   static async pushOnchainAddressWasPaid(dataSource: DataSource, serverKey: string, apnsP8: string, pushNotification: components["schemas"]["PushNotificationOnchainAddressGotPaid"]): Promise<void> {
+    assertNotificationPayloadIsSendable(pushNotification);
     const fcmPayload = {
       message: {
         token: "",
@@ -342,9 +346,15 @@ export class GroundControlToMajorTom {
 
   static async killDeadToken(dataSource: DataSource, token: string) {
     console.log("deleting dead token", token);
-    await dataSource.getRepository(TokenToAddress).createQueryBuilder().delete().where("token = :token", { token }).execute();
-    await dataSource.getRepository(TokenToTxid).createQueryBuilder().delete().where("token = :token", { token }).execute();
-    await dataSource.getRepository(TokenToHash).createQueryBuilder().delete().where("token = :token", { token }).execute();
+    try {
+      await dataSource.getRepository(TokenToAddress).createQueryBuilder().delete().where("token = :token", { token }).execute();
+      await dataSource.getRepository(TokenToTxid).createQueryBuilder().delete().where("token = :token", { token }).execute();
+      await dataSource.getRepository(TokenToHash).createQueryBuilder().delete().where("token = :token", { token }).execute();
+    } catch (error) {
+      // callers in the APNS/FCM response path do not await this. a rejection here
+      // becomes an unhandledRejection and the sender process exits.
+      console.error("failed to delete dead token", token, error);
+    }
   }
 
   static processFcmResponse(dataSource: DataSource, responseText: string, token: string): boolean {
