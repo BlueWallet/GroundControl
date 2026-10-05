@@ -242,8 +242,10 @@ export class GroundController {
     const keyVal = await keyValueRepository.findOneBy({ key: LAST_PROCESSED_BLOCK });
     const send_queue_size = await sendQueueRepository.count();
 
-    const ts = new Date(+new Date() - 1000 * 3600 * 24).toISOString();
-    const sent_24h = await this._connection.createQueryBuilder(PushLog, "PushLog").where("PushLog.created >= :ts", { ts }).getCount();
+    const sent_24h = await this._connection
+      .createQueryBuilder(PushLog, "PushLog")
+      .where("PushLog.created >= NOW() - INTERVAL 24 HOUR")
+      .getCount();
 
     const serverInfo: paths["/ping"]["get"]["responses"]["200"]["content"]["application/json"] = {
       name: pck.name,
