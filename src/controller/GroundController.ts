@@ -210,9 +210,11 @@ export class GroundController {
       return;
     }
 
+    const hash = String(body.hash);
+
     const tokenToHashAll = await this.tokenToHashRepository.find({
       where: {
-        hash: body.hash,
+        hash,
       },
     });
     for (const tokenToHash of tokenToHashAll) {
@@ -224,7 +226,7 @@ export class GroundController {
         level: "transactions",
         os: tokenToHash.os === "android" ? "android" : "ios", //hacky
         token: tokenToHash.token,
-        hash: body.hash,
+        hash,
         memo: body.memo,
       };
 
