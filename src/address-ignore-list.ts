@@ -174,4 +174,6 @@ export const ADDRESS_IGNORE_LIST = [
   "bc1qvdnjzfs4s5h8m4tqt2p7ru84rsdd59k0ppus3q",
   "37NeW2JyyD8XX589WRemPiNabA2Y5xiBs6",
   "bc1qcq2nu6ed6hd64phnkc0lxdklmtuexal2y0qk9u",
+  "bc1qlt5nm3kflne7rht4alsnzdzad878ld5rcu4na0",
+  "bc1qpralxa3ke2vk8yflyjq5z3eefzrqz35snxaazcvq5n8tpug8u8lq6jjwss",
 ];
