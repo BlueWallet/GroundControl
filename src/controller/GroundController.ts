@@ -246,7 +246,7 @@ export class GroundController {
 
     const sent_24h = await this._connection
       .createQueryBuilder(PushLog, "PushLog")
-      .where("PushLog.created >= NOW() - INTERVAL 24 HOUR")
+      .where("PushLog.created >= NOW() - INTERVAL 24 HOUR AND PushLog.success = :success", { success: true })
       .getCount();
 
     const serverInfo: paths["/ping"]["get"]["responses"]["200"]["content"]["application/json"] = {
